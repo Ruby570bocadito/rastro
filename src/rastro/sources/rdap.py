@@ -19,9 +19,10 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from rastro.sources import USER_AGENT
+
 BOOTSTRAP = "https://data.iana.org/rdap/dns.json"
 BOOTSTRAP_MAX_AGE = 7 * 24 * 3600
-USER_AGENT = "rastro-osint/0.0.1 (phishing research)"
 PEOPLE = {"registrant", "administrative", "technical", "billing"}
 
 

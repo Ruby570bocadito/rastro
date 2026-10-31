@@ -19,9 +19,9 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from rastro.domains import registrable
+from rastro.sources import USER_AGENT
 
 BASE = "https://crt.sh/"
-USER_AGENT = "rastro-osint/0.0.1 (phishing research)"
 
 
 HOSTNAME = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")

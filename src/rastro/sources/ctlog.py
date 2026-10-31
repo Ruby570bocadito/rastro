@@ -16,9 +16,8 @@ import urllib.request
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
-from rastro.sources import der
+from rastro.sources import USER_AGENT, der
 
-USER_AGENT = "rastro-osint/0.0.1 (phishing research)"
 TILE = 256
 LOG_LIST = "https://www.gstatic.com/ct/log_list/v3/log_list.json"
 DEFAULT_LOG = "https://mon.sycamore.ct.letsencrypt.org/2027h1"

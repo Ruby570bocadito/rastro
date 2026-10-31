@@ -15,9 +15,9 @@ import urllib.request
 from pathlib import Path
 
 from rastro.domains import registrable
+from rastro.sources import USER_AGENT
 
 RESOLVER = "https://cloudflare-dns.com/dns-query"
-USER_AGENT = "rastro-osint/0.0.1 (phishing research)"
 TYPES = {"A": 1, "NS": 2}
 
 

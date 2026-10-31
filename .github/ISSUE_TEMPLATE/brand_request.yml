@@ -1,0 +1,21 @@
+name: Brand or official domain
+description: Ask Rastro to recognise a brand, or to stop alerting on one of its official domains
+labels: [brands]
+body:
+  - type: input
+    id: brand
+    attributes:
+      label: Brand
+      placeholder: Correos
+    validations:
+      required: true
+  - type: textarea
+    id: domains
+    attributes:
+      label: Official domains
+      description: Domains the brand itself uses, with a public source that shows they are official.
+  - type: textarea
+    id: lookalikes
+    attributes:
+      label: How its lookalikes are usually built
+      description: Describe the shape, for example "brand-envio-1234.top". Please do not paste live phishing domains.

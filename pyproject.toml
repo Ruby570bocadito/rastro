@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rastro-osint"
-version = "0.0.1"
+dynamic = ["version"]
 description = "Paste a phishing link. Watch the whole campaign unfold."
 readme = "README.md"
 license = "Apache-2.0"
@@ -35,8 +35,15 @@ dev = ["pytest>=8"]
 [project.scripts]
 rastro = "rastro.__main__:main"
 
+[tool.hatch.version]
+path = "src/rastro/__init__.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/rastro"]
+
+[tool.hatch.build.targets.sdist]
+# README images stay on GitHub; the package does not need them
+exclude = ["docs"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
