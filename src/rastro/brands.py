@@ -6,66 +6,46 @@ import re
 import unicodedata
 from collections.abc import Iterator
 from contextlib import contextmanager
+from importlib import resources
+from pathlib import Path
 
 from rastro.domains import platform
 
-# Spanish brands first. Short names must match a whole token, longer ones anywhere in the name.
-BRANDS = [
-    "correos", "dgt", "agenciatributaria", "aeat", "bbva", "santander", "caixabank", "bankinter", "sabadell",
-    "unicaja", "ibercaja", "kutxabank", "bizum", "endesa", "iberdrola", "naturgy", "movistar", "vodafone",
-    "usps", "dhl", "fedex", "ups", "evri", "royalmail", "auspost", "canadapost", "postnl", "laposte", "poste",
-    "paypal", "netflix", "amazon", "apple", "icloud", "microsoft", "office365", "outlook", "facebook", "instagram",
-    "whatsapp", "telegram", "binance", "coinbase", "metamask", "ledger", "trezor", "chase", "wellsfargo",
-    "bankofamerica", "docusign", "adobe", "dropbox", "steam", "roblox", "att", "verizon", "tmobile", "ezpass",
-    "sunpass", "fastrak", "toll",
-]
-SHORT = {b for b in BRANDS if len(b) <= 4}
-# How each brand is written when Rastro names it; the rest are just capitalised.
-DISPLAY = {
-    "agenciatributaria": "Agencia Tributaria", "aeat": "AEAT", "bbva": "BBVA", "dgt": "DGT", "caixabank": "CaixaBank",
-    "usps": "USPS", "dhl": "DHL", "fedex": "FedEx", "ups": "UPS", "royalmail": "Royal Mail",
-    "auspost": "Australia Post", "canadapost": "Canada Post", "postnl": "PostNL", "laposte": "La Poste",
-    "poste": "Poste Italiane",
-    "paypal": "PayPal", "icloud": "iCloud", "office365": "Office 365", "whatsapp": "WhatsApp", "metamask": "MetaMask",
-    "wellsfargo": "Wells Fargo", "bankofamerica": "Bank of America", "docusign": "DocuSign", "att": "AT&T",
-    "tmobile": "T-Mobile", "ezpass": "E-ZPass", "sunpass": "SunPass", "fastrak": "FasTrak",
-}
+KEY = re.compile(r"^[a-z0-9]+$")
 
-# Registrable domains the brands themselves use. A starter list; `rastro watch --allow FILE` adds more.
-OFFICIAL = {
-    "correos": ["correos.es", "correos.com", "correosexpress.com", "correosexpress.es"],
-    "dgt": ["dgt.es"],
-    "agenciatributaria": ["agenciatributaria.es", "agenciatributaria.gob.es"],
-    "bbva": ["bbva.es", "bbva.com", "bbva.mx"],
-    "santander": ["santander.com", "bancosantander.es", "santander.co.uk", "santander.com.br"],
-    "caixabank": ["caixabank.es", "caixabank.com"],
-    "usps": ["usps.com"],
-    "dhl": ["dhl.com", "dhl.de", "dhl.es", "dhl.fr", "dhl.it", "dhl.co.uk", "dhl.nl", "dhlparcel.nl", "dhlparcel.es"],
-    "fedex": ["fedex.com"],
-    "ups": ["ups.com"],
-    "royalmail": ["royalmail.com"],
-    "paypal": ["paypal.com", "paypal.me", "paypalobjects.com"],
-    "netflix": ["netflix.com", "nflxvideo.net"],
-    "amazon": ["amazon.com", "amazon.es", "amazon.co.uk", "amazon.de", "amazon.fr", "amazon.it", "amazon.co.jp",
-               "amazon.ca", "amazon.com.mx", "amazon.com.br", "amazon.in", "amazon.com.au", "amazonaws.com",
-               "primevideo.com"],
-    "apple": ["apple.com", "icloud.com", "me.com", "mac.com"],
-    "microsoft": ["microsoft.com", "microsoftonline.com", "live.com", "outlook.com", "office.com", "office365.com",
-                  "azure.com", "windows.net", "bing.com", "msn.com", "sharepoint.com", "onmicrosoft.com"],
-    "facebook": ["facebook.com", "fb.com", "fbcdn.net", "meta.com", "messenger.com"],
-    "instagram": ["instagram.com", "cdninstagram.com"],
-    "whatsapp": ["whatsapp.com", "whatsapp.net", "wa.me"],
-    "telegram": ["telegram.org", "t.me", "telegram.me"],
-    "binance": ["binance.com"],
-    "coinbase": ["coinbase.com"],
-    "metamask": ["metamask.io"],
-    "ledger": ["ledger.com"],
-    "chase": ["chase.com", "chaseonline.com", "jpmorganchase.com"],
-    "steam": ["steampowered.com", "steamcommunity.com", "steamstatic.com"],
-    "docusign": ["docusign.com", "docusign.net"],
-    "adobe": ["adobe.com"],
-    "dropbox": ["dropbox.com"],
-}
+
+def parse(text: str) -> list[tuple[str, str | None, list[str]]]:
+    """(key, how it is written, official domains) for each line of a brands file: `key | Name | a.com b.com`."""
+    out = []
+    for n, raw in enumerate(text.splitlines(), 1):
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        key, name, official = ([f.strip() for f in line.split("|")] + ["", ""])[:3]
+        key = key.lower()
+        if not KEY.match(key):
+            raise ValueError(f"line {n}: {key!r} is not a brand key (lowercase letters and digits only)")
+        out.append((key, name or None, official.lower().split()))
+    return out
+
+
+# Spanish brands first, as assets/brands.txt lists them; `rastro --brands FILE` adds more.
+BRANDS: list[str] = []
+DISPLAY: dict[str, str] = {}       # how each brand is written when Rastro names it; the rest are just capitalised
+OFFICIAL: dict[str, list[str]] = {}   # registrable domains the brands themselves use; `rastro watch --allow` adds more
+for _key, _name, _official in parse(resources.files("rastro").joinpath("assets", "brands.txt")
+                                    .read_text(encoding="utf-8")):
+    BRANDS.append(_key)
+    if _name:
+        DISPLAY[_key] = _name
+    if _official:
+        OFFICIAL[_key] = _official
+
+
+def short(brand: str) -> bool:
+    """Short names must match a whole token, longer ones anywhere in the name."""
+    return len(brand) <= 4
+
 
 # TLDs that keep showing up in smishing campaigns. A heuristic, not a verdict.
 ABUSED_TLDS = {
@@ -82,12 +62,15 @@ def display(brand: str) -> str:
 
 
 @contextmanager
-def extra(names: dict[str, str]) -> Iterator[None]:
-    """Recognise more brands for a while ({key: how it is written}), e.g. the made-up ones of `rastro demo`."""
+def extra(names: dict[str, str | None], official: dict[str, list[str]] | None = None) -> Iterator[None]:
+    """Recognise more brands for a while ({key: how it is written}, and their official domains), e.g. the made-up
+    ones of `rastro demo` or those of `rastro --brands FILE`."""
     added = [k for k in names if k not in BRANDS]
-    shown = {k: v for k, v in names.items() if k not in DISPLAY}
+    shown = {k: v for k, v in names.items() if v and k not in DISPLAY}
+    owned = {k: v for k, v in (official or {}).items() if v and k not in OFFICIAL}
     BRANDS.extend(added)
     DISPLAY.update(shown)
+    OFFICIAL.update(owned)
     try:
         yield
     finally:
@@ -95,6 +78,14 @@ def extra(names: dict[str, str]) -> Iterator[None]:
             BRANDS.remove(k)
         for k in shown:
             DISPLAY.pop(k, None)
+        for k in owned:
+            OFFICIAL.pop(k, None)
+
+
+def from_file(path: str) -> tuple[dict[str, str | None], dict[str, list[str]]]:
+    """The arguments of `extra` for a brands file."""
+    rows = parse(Path(path).read_text(encoding="utf-8"))
+    return {k: name for k, name, _ in rows}, {k: official for k, _, official in rows if official}
 
 
 # Letters from other scripts that look Latin (Cyrillic, Greek), as homograph lookalikes use them.
@@ -122,7 +113,7 @@ def _label(domain: str) -> str:
 def _find(label: str) -> str | None:
     tokens = set(re.split(r"[^a-z0-9]+", label))
     for b in BRANDS:
-        if (b in tokens) if b in SHORT else (b in label):
+        if (b in tokens) if short(b) else (b in label):
             return b
     return None
 

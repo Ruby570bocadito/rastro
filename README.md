@@ -135,6 +135,8 @@ Rastro follows the live domains of an investigation (`--track`), every domain th
 | `rastro pattern FILE` | learns a campaign's naming pattern and says how many names it could match |
 | `rastro rhythm FILE` | estimates a crew's time zone from UTC times, with the weekend, daylight-saving and holiday clues |
 
+Rastro knows about 60 brands, listed in [brands.txt](https://github.com/Ruby570bocadito/rastro/blob/main/src/rastro/assets/brands.txt). `rastro --brands FILE <command>` adds your own, one per line as `key | Name | official domains`.
+
 ## Validated on real data
 
 Each piece was tested on real campaigns before it went into the product. The details, and what failed, are in [experiments](https://github.com/Ruby570bocadito/rastro/blob/main/experiments/README.md).

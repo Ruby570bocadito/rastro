@@ -1,0 +1,69 @@
+# Brands that phishing imitates: one per line, in the order Rastro tries them (the first match wins).
+#
+#   key | how it is written | official registrable domains, separated by spaces
+#
+# The key is how the brand appears in a domain name: lowercase letters and digits. Keys of four letters or
+# fewer must be a whole word of the name (dhl matches my-dhl-parcel, not dhlexpress); longer ones match
+# anywhere. The other two fields are optional. `rastro --brands FILE` adds a file like this one.
+
+correos |  | correos.es correos.com correosexpress.com correosexpress.es
+dgt | DGT | dgt.es
+agenciatributaria | Agencia Tributaria | agenciatributaria.es agenciatributaria.gob.es
+aeat | AEAT
+bbva | BBVA | bbva.es bbva.com bbva.mx
+santander |  | santander.com bancosantander.es santander.co.uk santander.com.br
+caixabank | CaixaBank | caixabank.es caixabank.com
+bankinter
+sabadell
+unicaja
+ibercaja
+kutxabank
+bizum
+endesa
+iberdrola
+naturgy
+movistar
+vodafone
+usps | USPS | usps.com
+dhl | DHL | dhl.com dhl.de dhl.es dhl.fr dhl.it dhl.co.uk dhl.nl dhlparcel.nl dhlparcel.es
+fedex | FedEx | fedex.com
+ups | UPS | ups.com
+evri
+royalmail | Royal Mail | royalmail.com
+auspost | Australia Post
+canadapost | Canada Post
+postnl | PostNL
+laposte | La Poste
+poste | Poste Italiane
+paypal | PayPal | paypal.com paypal.me paypalobjects.com
+netflix |  | netflix.com nflxvideo.net
+amazon |  | amazon.com amazon.es amazon.co.uk amazon.de amazon.fr amazon.it amazon.co.jp amazon.ca amazon.com.mx amazon.com.br amazon.in amazon.com.au amazonaws.com primevideo.com
+apple |  | apple.com icloud.com me.com mac.com
+icloud | iCloud
+microsoft |  | microsoft.com microsoftonline.com live.com outlook.com office.com office365.com azure.com windows.net bing.com msn.com sharepoint.com onmicrosoft.com
+office365 | Office 365
+outlook
+facebook |  | facebook.com fb.com fbcdn.net meta.com messenger.com
+instagram |  | instagram.com cdninstagram.com
+whatsapp | WhatsApp | whatsapp.com whatsapp.net wa.me
+telegram |  | telegram.org t.me telegram.me
+binance |  | binance.com
+coinbase |  | coinbase.com
+metamask | MetaMask | metamask.io
+ledger |  | ledger.com
+trezor
+chase |  | chase.com chaseonline.com jpmorganchase.com
+wellsfargo | Wells Fargo
+bankofamerica | Bank of America
+docusign | DocuSign | docusign.com docusign.net
+adobe |  | adobe.com
+dropbox |  | dropbox.com
+steam |  | steampowered.com steamcommunity.com steamstatic.com
+roblox
+att | AT&T
+verizon
+tmobile | T-Mobile
+ezpass | E-ZPass
+sunpass | SunPass
+fastrak | FasTrak
+toll

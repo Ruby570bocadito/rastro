@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The brands live in a data file, `src/rastro/assets/brands.txt` (`key | Name | official domains`), and `rastro --brands FILE` adds your own to any command.
+- The network clients give up at once on answers that will not change (a 404, a 400) instead of retrying them, and wait as long as a server's Retry-After asks, up to five minutes.
+- Cached DNS answers expire after a day; a stale one is used only when the resolver does not answer.
+- Tests for the crt.sh, CT log, DNS and RDAP clients against scripted servers.
 - Rastro installs from GitHub, not PyPI: `pipx install git+https://github.com/Ruby570bocadito/rastro`. Each tag publishes a GitHub release with the wheel and the source archive.
 
 ## 0.1.1 · 2026-10-31

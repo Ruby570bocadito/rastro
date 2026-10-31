@@ -388,6 +388,9 @@ def main(argv: list[str] | None = None) -> int:
     except (AttributeError, ValueError):
         pass
     ap = argparse.ArgumentParser(prog="rastro", description="Paste a phishing link. Watch the whole campaign unfold.")
+    ap.add_argument("--brands", metavar="FILE",
+                    help="more brands to recognise, one per line as `key | Name | official.com` (see the built-in "
+                         "list in rastro/assets/brands.txt)")
     sub = ap.add_subparsers(dest="command", required=True)
     inv = sub.add_parser("investigate", help="from one phishing link to its campaign, crew clock, next domain and "
                                              "abuse report drafts, as an HTML case file")
@@ -508,7 +511,15 @@ def main(argv: list[str] | None = None) -> int:
     bu.add_argument("--max-breadth", type=float, default=12.0)
     bu.set_defaults(run=cmd_bursts)
     args = ap.parse_args(argv)
-    return args.run(args)
+    if not args.brands:
+        return args.run(args)
+    try:
+        names, official = brands.from_file(args.brands)
+    except (OSError, ValueError) as err:
+        print(f"--brands {args.brands}: {err}")
+        return 2
+    with brands.extra(names, official):
+        return args.run(args)
 
 
 if __name__ == "__main__":

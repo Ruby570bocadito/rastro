@@ -16,7 +16,7 @@ import urllib.request
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
-from rastro.sources import NETWORK_ERRORS, USER_AGENT, der
+from rastro.sources import NETWORK_ERRORS, USER_AGENT, der, retryable, wait
 
 TILE = 256
 LOG_LIST = "https://www.gstatic.com/ct/log_list/v3/log_list.json"
@@ -41,7 +41,9 @@ def _get(url: str, timeout: float = 60, retries: int = 4) -> bytes:
                 return resp.read()
         except NETWORK_ERRORS as err:
             last_error = err
-            time.sleep(delay)
+            if not retryable(err):
+                break
+            time.sleep(wait(err, delay))
             delay *= 2
     raise RuntimeError(f"{url} did not answer: {last_error}")
 
