@@ -23,7 +23,7 @@ Husmo, un hurón detective, explica cada deducción y cuánta seguridad tiene. R
 
 ## Pruébalo en 30 segundos
 
-Python 3.11 o superior, sin dependencias.
+**[Abre el expediente de la demo](https://ruby570bocadito.github.io/rastro/es/)** en tu navegador, sin instalar nada ([in English](https://ruby570bocadito.github.io/rastro/)). Para ejecutarlo tú necesitas Python 3.11 o superior, sin dependencias.
 
 ```bash
 pipx install git+https://github.com/Ruby570bocadito/rastro

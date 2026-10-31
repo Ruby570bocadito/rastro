@@ -23,7 +23,7 @@ Husmo, a detective ferret, explains every deduction and how sure it is. Rastro n
 
 ## Try it in 30 seconds
 
-Python 3.11 or newer, no dependencies.
+**[Open the demo case file](https://ruby570bocadito.github.io/rastro/)** in your browser, nothing to install ([en español](https://ruby570bocadito.github.io/rastro/es/)). To run it yourself you need Python 3.11 or newer, and no dependencies.
 
 ```bash
 pipx install git+https://github.com/Ruby570bocadito/rastro

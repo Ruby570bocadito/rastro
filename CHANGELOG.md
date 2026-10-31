@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The demo case file is published on GitHub Pages, in English and Spanish, by a new `pages` workflow; the README links to it.
 - The brands live in a data file, `src/rastro/assets/brands.txt` (`key | Name | official domains`), and `rastro --brands FILE` adds your own to any command.
 - The network clients give up at once on answers that will not change (a 404, a 400) instead of retrying them, and wait as long as a server's Retry-After asks, up to five minutes.
 - Cached DNS answers expire after a day; a stale one is used only when the resolver does not answer.
