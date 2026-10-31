@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 · 2026-10-31
 
 - Links on free hosting platforms (pages.dev, web.app, github.io, vercel.app and others) are investigated as the site they are, not as the platform: each subdomain is its own registrable name, RDAP is not asked about it, and its abuse report draft goes to the platform. Siblings that no longer resolve stay out, with their reason.
 - Brands written to look like the real thing are recognised: punycode homographs (Cyrillic or Greek letters), a lone digit for a letter (paypa1, app1e, 5team) and letter pairs (arnazon, vvhatsapp). A number is never read as letters.
