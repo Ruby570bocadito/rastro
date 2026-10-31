@@ -66,3 +66,8 @@ def test_a_dropped_connection_is_retried(monkeypatch):
     monkeypatch.setattr(rdap.time, "sleep", lambda seconds: None)
     assert rdap._get("https://rdap.example/domain/x.top", timeout=1, retries=3) == {"ldhName": "x.top"}
     assert len(calls) == 3
+
+
+def test_platform_subdomains_never_ask_a_registry(tmp_path):
+    from rastro.sources import rdap
+    assert rdap.check("correos-es.pages.dev", tmp_path, offline=True) == ("platform", None)

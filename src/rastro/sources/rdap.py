@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from rastro.domains import platform
 from rastro.sources import NETWORK_ERRORS, USER_AGENT
 
 BOOTSTRAP = "https://data.iana.org/rdap/dns.json"
@@ -156,7 +157,10 @@ def parse(payload: dict, domain: str, server: str) -> Registration:
 def check(domain: str, cache_dir: Path, offline: bool = False, fresh: bool = False,
           pause: float = 0.2) -> tuple[str, Registration | None]:
     """What the registry says about a domain: ("found", registration), or "not-found", "no-server" (its TLD has
-    no RDAP server) or "no-answer" with None. `fresh` skips the cache, as the tracker needs today's answer."""
+    no RDAP server), "platform" (a hosting platform's subdomain, which no registry knows) or "no-answer" with None.
+    `fresh` skips the cache, as the tracker needs today's answer."""
+    if platform(domain):
+        return "platform", None          # the registry would answer for the platform's own domain instead
     cache_dir = Path(cache_dir)
     path = cache_dir / f"rdap_{domain}.json"
     base = servers_for(cache_dir, offline).get(domain.rsplit(".", 1)[-1])
