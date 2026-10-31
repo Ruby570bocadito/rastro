@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src {{SCRIPT_HASHES}}; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>{{TITLE}}</title>
+<style>
+:root {
+  --bg: #e7ddc7; --paper: #fbf7ee; --cork: #ccb083; --ink: #1f2430; --muted: #5b616e; --line: #d1c5aa;
+  --string: #c4302a; --marker: #f1c21b; --pin: #2a55c4; --ok: #2c8a56; --note: #fff0a6; --on-note: #2b2616;
+  --on-marker: #1f2430; --on-string: #ffffff; --glint: #ffffff; --dot: #b9ad93; --night: rgba(31, 36, 48, .08);
+  --fur: #8b5d3b; --fur-dark: #5a3a25; --fur-light: #f3e6cc; --mask: #4a3022; --eye-dark: #140d0a;
+  --ear-in: #e7a9a1; --nose-pink: #c4747a; --whisker: rgba(70, 45, 30, .55); --mouth: #3b1a14;
+  --hat-a: #8d6c47; --hat-b: #66492f; --lens: rgba(160, 205, 255, .38);
+  --shadow: 0 1px 0 rgba(70, 50, 20, .08), 0 10px 26px -14px rgba(70, 50, 20, .45);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", "Helvetica Neue", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12161c; --paper: #1b2029; --cork: #232b36; --ink: #ece6d8; --muted: #9ba3b1; --line: #2e3745;
+    --string: #ff5e52; --marker: #ffd23f; --pin: #84a8ff; --ok: #4fca8c; --note: #3a3418; --on-note: #f5ecc9;
+    --dot: #3a4453; --night: rgba(255, 255, 255, .06);
+    --shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 12px 30px -14px rgba(0, 0, 0, .85);
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background-color: var(--bg); background-image: var(--grain); color: var(--ink);
+  font: 400 15px/1.55 var(--font-body); -webkit-font-smoothing: antialiased;
+}
+.page {
+  max-width: 1240px; margin: 0 auto; display: grid; gap: 18px; padding-block: 18px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+:focus-visible { outline: 3px solid var(--pin); outline-offset: 2px; }
+code, .mono { font-family: var(--font-mono); }
+button { font: inherit; }
+
+.masthead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { width: 40px; height: 40px; flex: none; }
+.logo .paw { fill: var(--string); }
+.wordmark { font: 800 32px/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; }
+.tag { font: 500 12px/1.3 var(--font-mono); color: var(--muted); letter-spacing: .04em; }
+.stamp-file {
+  font: 700 14px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--string);
+  border: 2px solid var(--string); padding: 6px 10px; transform: rotate(-2deg); border-radius: 3px;
+}
+
+.hero { display: grid; gap: 10px; }
+.eyebrow { margin: 0; font: 500 12px/1.3 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); letter-spacing: .01em; overflow-wrap: anywhere; }
+.lede { margin: 0; max-width: 72ch; color: var(--muted); font-size: 16px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: 500 13px/1.2 var(--font-mono); padding: 6px 11px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--paper); color: var(--ink); white-space: nowrap;
+}
+.chip b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.chip-hot { border-color: var(--string); color: var(--string); }
+
+.board { display: grid; gap: 18px; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+.row2 { display: grid; gap: 18px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.panel {
+  min-width: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 16px;
+  box-shadow: var(--shadow); display: grid; gap: 12px; align-content: start;
+}
+.panel-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 8px 12px; }
+.panel-head h2 { margin: 0; display: grid; gap: 2px; }
+.stepno { font: 500 11px/1.2 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.ptitle { font: 700 24px/1.05 var(--font-display); letter-spacing: .04em; text-transform: uppercase; }
+.sub { margin: 0; color: var(--muted); font-size: 13.5px; }
+
+.graph-panel { grid-template-rows: auto auto minmax(420px, 1fr) auto; }
+.cork {
+  position: relative; min-height: 420px; background-color: var(--cork); background-image: var(--grain);
+  border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line), inset 0 8px 20px -12px rgba(0, 0, 0, .4); overflow: hidden;
+}
+#graph { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.e { stroke-linecap: round; fill: none; }
+.e-strong { stroke: var(--string); stroke-width: 2.2; opacity: .8; }
+.e-weak { stroke: var(--ink); stroke-width: 1.1; opacity: .28; stroke-dasharray: 3 4; }
+.e-spoke { stroke: var(--pin); stroke-width: 1; opacity: .22; }
+.nd { cursor: default; }
+.nd circle.pin { stroke-width: 1.2; }
+.nd-crew circle.pin { fill: var(--pin); stroke: color-mix(in srgb, var(--pin) 60%, black); }
+.nd-campaign circle.pin { fill: var(--string); stroke: color-mix(in srgb, var(--string) 60%, black); }
+.nd-other circle.pin { fill: var(--dot); stroke: var(--muted); }
+.nd-dead circle.pin { fill: var(--paper); stroke-width: 1.6; }
+.nd-crew.nd-dead circle.pin { stroke: var(--pin); }
+.nd-campaign.nd-dead circle.pin { stroke: var(--string); }
+.nd-seed circle.pin { fill: var(--marker); stroke: var(--string); stroke-width: 2.4; }
+.nd:focus-visible circle.pin, .nd:hover circle.pin { stroke: var(--ink); stroke-width: 2.4; }
+.seed-ring { fill: none; stroke: var(--string); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: ring 1.9s ease-out infinite; }
+@keyframes ring { from { transform: scale(.5); opacity: .8; } to { transform: scale(1.8); opacity: 0; } }
+.hub rect { fill: var(--paper); stroke: var(--pin); stroke-width: 1.4; }
+.hub text { font: 600 11px var(--font-mono); fill: var(--pin); }
+.lab rect { fill: var(--paper); stroke: var(--line); }
+.lab text { font: 500 10.5px var(--font-mono); fill: var(--ink); }
+.lab-seed text { font-weight: 700; fill: var(--string); }
+/* entrance motion only while <html> has .motion: without it (print, screenshots, reduced motion) all is visible */
+.pop { transform-box: fill-box; transform-origin: center; }
+.motion .pop { animation: pop .42s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.motion .fade { animation: fade .5s ease both; }
+@keyframes fade { from { opacity: 0; } }
+.tip {
+  position: absolute; z-index: 2; pointer-events: none; max-width: 280px; background: var(--paper); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 4px; box-shadow: var(--shadow); padding: 8px 10px; font-size: 12.5px; line-height: 1.4;
+}
+.tip b { font-family: var(--font-mono); overflow-wrap: anywhere; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--muted); }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend svg { width: 26px; height: 14px; flex: none; }
+
+.det-wrap { display: flex; align-items: center; gap: 14px; }
+#ferret { width: 112px; height: 112px; flex: none; overflow: visible; }
+.det-name { font: 800 28px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
+.det-role { font: 500 12px/1.3 var(--font-mono); color: var(--muted); }
+.head { animation: bob 3.4s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-2px); } }
+.lid { fill: var(--mask); transform: translateY(-14px); animation: blink 5.2s infinite; }
+@keyframes blink { 0%, 95%, 100% { transform: translateY(-14px); } 97% { transform: translateY(0); } }
+.fur { fill: var(--fur); } .fur-light { fill: var(--fur-light); } .fur-hi { fill: var(--glint); opacity: .18; }
+.ear-in { fill: var(--ear-in); } .mask { fill: var(--mask); } .eye-dark { fill: var(--eye-dark); }
+.nose-pink { fill: var(--nose-pink); } .glint { fill: var(--glint); } .paw { fill: var(--fur-dark); }
+.whisker { fill: none; stroke: var(--whisker); stroke-width: 1.1; stroke-linecap: round; }
+.hat-a { fill: var(--hat-a); } .hat-line { stroke: var(--hat-b); stroke-width: 1.4; opacity: .7; }
+.hat-brim, .hat-knot { fill: var(--hat-b); }
+.m-line { fill: none; stroke: var(--mouth); stroke-width: 2.6; stroke-linecap: round; }
+.lens-handle { stroke: var(--fur-dark); stroke-width: 5; stroke-linecap: round; }
+.lens-glass { fill: var(--lens); stroke: var(--hat-b); stroke-width: 4; }
+.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; counter-reset: ev; }
+.log li {
+  counter-increment: ev; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start;
+  font-size: 14px; line-height: 1.5; overflow-wrap: anywhere;
+}
+.log li::before {
+  content: counter(ev); display: grid; place-items: center; height: 21px; padding-top: 2px; background: var(--marker);
+  color: var(--on-marker); font: 700 13px/1 var(--font-display); clip-path: polygon(16% 0, 84% 0, 100% 100%, 0 100%);
+}
+.motion .log li { animation: rise .45s ease both; }
+.log li.k-caution::before { background: var(--line); color: var(--ink); }
+.log li.k-action::before { background: var(--string); color: var(--on-string); }
+.log li.k-caution { color: var(--muted); }
+@keyframes rise { from { opacity: 0; transform: translateY(5px); } }
+
+#map { display: block; width: 100%; }
+.strip { display: block; width: 100%; height: 46px; }
+.strip .bar { fill: var(--dot); }
+.strip .bar-band { fill: var(--string); opacity: .55; }
+.strip .bar-top { fill: var(--string); }
+.strip text { font: 500 9.5px var(--font-mono); fill: var(--muted); }
+.strip .truth { fill: var(--pin); }
+.strip .truth-t { fill: var(--pin); font-weight: 700; }
+.verdict {
+  justify-self: start; font: 700 15px/1 var(--font-display); letter-spacing: .1em; text-transform: uppercase;
+  padding: 7px 11px; border: 2px solid var(--muted); color: var(--muted); border-radius: 3px; transform: rotate(-1.5deg);
+}
+.verdict-yes { border-color: var(--string); color: var(--string); }
+.map-foot { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 16px; align-items: center; }
+#clock { width: 170px; height: 170px; }
+.ck-face { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+.ck-night { fill: var(--night); }
+.ck-bar { stroke: var(--string); stroke-width: 5; stroke-linecap: round; }
+.ck-tick { stroke: var(--muted); stroke-width: 1; }
+.ck-lab { font: 500 10px var(--font-mono); fill: var(--muted); }
+.ck-mid { font: 600 10px var(--font-mono); fill: var(--ink); letter-spacing: .08em; }
+.facts { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px 16px; }
+.facts div { display: grid; gap: 2px; }
+.facts dt { font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0; font: 700 19px/1.15 var(--font-display); letter-spacing: .02em; }
+.cap { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+#timeline { display: block; width: 100%; height: auto; }
+.tl-axis { stroke: var(--line); stroke-width: 1; }
+.tl-tick text { font: 500 10px var(--font-mono); fill: var(--muted); }
+.tl-tick line { stroke: var(--line); }
+.tl-dot { stroke: var(--paper); stroke-width: 1; }
+.tl-crew { fill: var(--pin); } .tl-campaign { fill: var(--string); } .tl-seed { fill: var(--marker); stroke: var(--string); stroke-width: 2; }
+
+.patterns { display: grid; gap: 12px; }
+.pat { display: grid; gap: 6px; padding: 12px; border: 1px dashed var(--line); border-radius: 4px; background: var(--bg); }
+.pat-kind { font: 500 11px/1.2 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.pat code { font-size: 16px; font-weight: 600; color: var(--string); overflow-wrap: anywhere; }
+.pat-meta { font-size: 13px; color: var(--muted); }
+.cmd { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+.cmd code {
+  flex: 1 1 300px; min-width: 0; font-size: 12.5px; padding: 9px 10px; background: var(--paper); border: 1px solid var(--line);
+  border-radius: 4px; overflow-wrap: anywhere;
+}
+.btn {
+  border-radius: 4px; cursor: pointer; font: 600 13px/1 var(--font-body); padding: 9px 13px; background: var(--paper);
+  color: var(--ink); border: 1.5px solid var(--line);
+}
+.btn:hover { border-color: var(--ink); }
+.btn.done { border-color: var(--ok); color: var(--ok); }
+
+.reports { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+.rep { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); align-content: start; }
+.rep h3 { margin: 0; font: 700 19px/1.15 var(--font-display); letter-spacing: .03em; overflow-wrap: anywhere; }
+.rep dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; font-size: 13px; }
+.rep dt { color: var(--muted); }
+.rep dd { margin: 0; font-family: var(--font-mono); overflow-wrap: anywhere; }
+.rep pre {
+  margin: 0; max-height: 300px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 12.5px/1.5 var(--font-mono);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 10px;
+}
+.rep .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.warn { margin: 0; padding: 10px 12px; background: var(--note); color: var(--on-note); border-radius: 3px; font-size: 13.5px; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.mono { overflow-wrap: anywhere; }
+tr.is-seed td:first-child { font-weight: 700; color: var(--string); }
+details > summary { cursor: pointer; font-weight: 600; }
+.notes { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+.foot { color: var(--muted); font-size: 12.5px; text-align: center; }
+
+@media (max-width: 900px) {
+  .board, .row2 { grid-template-columns: minmax(0, 1fr); }
+  .graph-panel { grid-template-rows: none; }
+  .cork { aspect-ratio: 7 / 9; min-height: 0; }
+}
+@media (max-width: 520px) {
+  .map-foot { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .ptitle { font-size: 21px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media print {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  body { background: #fff; }
+  .btn { display: none; }
+  .panel { break-inside: avoid; box-shadow: none; }
+  .rep pre { max-height: none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+        <ellipse class="paw" cx="20" cy="26" rx="8.5" ry="7.5"/>
+        <ellipse class="paw" cx="9" cy="16" rx="3.6" ry="4.6" transform="rotate(-20 9 16)"/>
+        <ellipse class="paw" cx="16" cy="10" rx="3.6" ry="4.8" transform="rotate(-6 16 10)"/>
+        <ellipse class="paw" cx="24" cy="10" rx="3.6" ry="4.8" transform="rotate(6 24 10)"/>
+        <ellipse class="paw" cx="31" cy="16" rx="3.6" ry="4.6" transform="rotate(20 31 16)"/>
+      </svg>
+      <div>
+        <div class="wordmark">Rastro</div>
+        <div class="tag" id="tag"></div>
+      </div>
+    </div>
+    <div class="stamp-file" id="stamp"></div>
+  </header>
+
+  <section class="hero" aria-labelledby="seed">
+    <p class="eyebrow" id="eyebrow"></p>
+    <h1 id="seed"></h1>
+    <p class="lede" id="lede"></p>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="board">
+    <article class="panel graph-panel" aria-labelledby="h-graph">
+      <header class="panel-head">
+        <h2 id="h-graph"><span class="stepno" data-t="step1"></span><span class="ptitle" data-t="graph"></span></h2>
+      </header>
+      <p class="sub" data-t="graphSub"></p>
+      <div class="cork" id="cork"><svg id="graph" viewBox="0 0 800 560" role="img"></svg><div class="tip" id="tip" hidden></div></div>
+      <ul class="legend" id="legend"></ul>
+    </article>
+
+    <article class="panel" aria-labelledby="h-det">
+      <div class="det-wrap">
+        <svg id="ferret" viewBox="0 0 160 160" aria-hidden="true">
+          <defs>
+            <clipPath id="clipEyeL"><ellipse cx="63" cy="88" rx="6.2" ry="6.8"/></clipPath>
+            <clipPath id="clipEyeR"><ellipse cx="97" cy="88" rx="6.2" ry="6.8"/></clipPath>
+            <pattern id="tweed" width="7" height="7" patternUnits="userSpaceOnUse">
+              <rect width="7" height="7" class="hat-a"/>
+              <path d="M0 3.5h7M3.5 0v7" class="hat-line"/>
+            </pattern>
+          </defs>
+          <path class="fur" d="M47 160 C46 137 60 123 80 123 C100 123 114 137 113 160 Z"/>
+          <ellipse class="fur-light" cx="80" cy="148" rx="17" ry="15"/>
+          <g class="head">
+            <circle class="fur" cx="41" cy="74" r="11.5"/>
+            <circle class="ear-in" cx="41" cy="75" r="6.5"/>
+            <circle class="fur" cx="119" cy="74" r="11.5"/>
+            <circle class="ear-in" cx="119" cy="75" r="6.5"/>
+            <path class="fur" d="M80 52 C108 52 121 70 120 90 C119 110 102 124 80 124 C58 124 41 110 40 90 C39 70 52 52 80 52 Z"/>
+            <ellipse class="fur-hi" cx="64" cy="70" rx="14" ry="7"/>
+            <path class="fur-light" d="M76 58 Q80 56 84 58 L86 93 Q80 97 74 93 Z"/>
+            <ellipse class="mask" cx="62" cy="89" rx="16" ry="10.5" transform="rotate(12 62 89)"/>
+            <ellipse class="mask" cx="98" cy="89" rx="16" ry="10.5" transform="rotate(-12 98 89)"/>
+            <path class="fur-light" d="M52 105 C56 97 70 97 80 102 C90 97 104 97 108 105 C110 117 96 124 80 124 C64 124 50 117 52 105 Z"/>
+            <g clip-path="url(#clipEyeL)">
+              <ellipse class="eye-dark" cx="63" cy="88" rx="6.2" ry="6.8"/>
+              <circle class="glint" cx="65" cy="85.8" r="2"/>
+              <circle class="glint" cx="61.2" cy="90.6" r=".9"/>
+              <rect class="lid" x="56" y="81" width="14" height="14"/>
+            </g>
+            <g clip-path="url(#clipEyeR)">
+              <ellipse class="eye-dark" cx="97" cy="88" rx="6.2" ry="6.8"/>
+              <circle class="glint" cx="99" cy="85.8" r="2"/>
+              <circle class="glint" cx="95.2" cy="90.6" r=".9"/>
+              <rect class="lid" x="90" y="81" width="14" height="14"/>
+            </g>
+            <path class="nose-pink" d="M74 102 Q80 98.5 86 102 Q84 107.5 80 109 Q76 107.5 74 102 Z"/>
+            <ellipse class="glint" cx="77.8" cy="101.6" rx="2" ry="1"/>
+            <path class="whisker" d="M60 109 L31 104 M60 112 L30 113 M61 115 L33 122 M100 109 L129 104 M100 112 L130 113 M99 115 L127 122"/>
+            <path d="M40 64 C42 28 118 28 120 64 Z" fill="url(#tweed)"/>
+            <path class="hat-brim" d="M30 64 Q80 78 130 64 Q80 55 30 64 Z"/>
+            <circle class="hat-knot" cx="80" cy="34" r="4"/>
+            <path class="m-line" d="M74 114 Q77 117.5 80 114.5 Q83 117.5 86 114"/>
+          </g>
+          <line class="lens-handle" x1="133" y1="141" x2="146" y2="155"/>
+          <circle class="lens-glass" cx="125" cy="132" r="12.5"/>
+          <ellipse class="paw" cx="137" cy="146" rx="7" ry="5.5" transform="rotate(-35 137 146)"/>
+        </svg>
+        <div>
+          <div class="det-name" id="h-det">Husmo</div>
+          <div class="det-role" data-t="role"></div>
+        </div>
+      </div>
+      <ol class="log" id="log"></ol>
+    </article>
+  </section>
+
+  <section class="row2">
+    <article class="panel" aria-labelledby="h-map">
+      <header class="panel-head">
+        <h2 id="h-map"><span class="stepno" data-t="step2"></span><span class="ptitle" data-t="map"></span></h2>
+        <span class="verdict" id="verdict"></span>
+      </header>
+      <canvas id="map" role="img"></canvas>
+      <svg class="strip" id="strip" viewBox="0 0 800 46" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <p class="cap" data-t="mapCap"></p>
+      <div class="map-foot">
+        <svg id="clock" viewBox="0 0 220 220" role="img"></svg>
+        <dl class="facts" id="facts"></dl>
+      </div>
+    </article>
+
+    <article class="panel" aria-labelledby="h-time">
+      <header class="panel-head">
+        <h2 id="h-time"><span class="stepno" data-t="step3"></span><span class="ptitle" data-t="time"></span></h2>
+      </header>
+      <p class="sub" data-t="timeSub"></p>
+      <svg id="timeline" viewBox="0 0 600 320" role="img"></svg>
+      <ul class="legend" id="tl-legend"></ul>
+    </article>
+  </section>
+
+  <article class="panel" aria-labelledby="h-next">
+    <header class="panel-head">
+      <h2 id="h-next"><span class="stepno" data-t="step4"></span><span class="ptitle" data-t="next"></span></h2>
+    </header>
+    <p class="sub" data-t="nextSub"></p>
+    <div class="patterns" id="patterns"></div>
+  </article>
+
+  <article class="panel" aria-labelledby="h-rep">
+    <header class="panel-head">
+      <h2 id="h-rep"><span class="stepno" data-t="step5"></span><span class="ptitle" data-t="reports"></span></h2>
+    </header>
+    <p class="warn" data-t="draftsOnly"></p>
+    <div class="reports" id="reports"></div>
+    <details id="left-wrap">
+      <summary id="left-sum"></summary>
+      <div class="table-wrap"><table id="left"></table></div>
+    </details>
+  </article>
+
+  <article class="panel" aria-labelledby="h-ev">
+    <header class="panel-head">
+      <h2 id="h-ev"><span class="stepno" data-t="step6"></span><span class="ptitle" data-t="evidence"></span></h2>
+    </header>
+    <details>
+      <summary id="ev-sum"></summary>
+      <div class="table-wrap"><table id="evidence"></table></div>
+    </details>
+  </article>
+
+  <article class="panel" aria-labelledby="h-how">
+    <header class="panel-head">
+      <h2 id="h-how"><span class="ptitle" data-t="how"></span></h2>
+    </header>
+    <ul class="notes" id="notes"></ul>
+  </article>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script type="application/json" id="case">/*CASE*/</script>
+<script type="application/json" id="land">/*LAND*/</script>
+<script>
+"use strict";
+(function () {
+  const root = document.documentElement;
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    root.classList.add("motion");
+    setTimeout(() => root.classList.remove("motion"), 4500);
+  }
+  const D = JSON.parse(document.getElementById("case").textContent);
+  const LAND = JSON.parse(document.getElementById("land").textContent);
+  const ES = D.lang === "es";
+  const T = ES ? {
+    tag: "Expediente generado el ", stamp: "Expediente", eyebrow: "Investigación de phishing",
+    demoStamp: "Demo", eyebrowDemo: "Investigación de phishing · demostración con datos inventados",
+    demoTruth: (tzName) => `La banda simulada trabaja en ${tzName}, de lunes a viernes: compara el mapa con la verdad (la marca «real» bajo las barras).`, truth: "real",
+    demoNote: "Todo en este expediente es inventado: las marcas PaqExpres y BancoNorte no existen, los dominios acaban en .test (reservado: nadie puede registrarlo), las direcciones son de los rangos reservados para documentación y los registradores son de ejemplo. La banda está simulada con el mismo modelo de jornada que usa el mapa.",
+    pasted: "Enlace investigado: ", pathOut: " (sin la ruta, que puede identificar a quien lo recibió)",
+    imitates: "Imita a ", noBrand: "No imita a ninguna marca conocida",
+    crew: "en su banda", campaign: "en su campaña", live: (n) => n === 1 ? "sigue activo" : "siguen activos", checked: "dominios revisados",
+    step1: "Paso 1", graph: "La campaña", graphSub: "Cada dominio unido a la semilla y por qué. Pasa el ratón o el foco por un punto para ver sus datos.",
+    role: "hurón detective de guardia",
+    step2: "Paso 2", map: "Dónde trabaja la banda",
+    mapCap: "Cada punto es tierra; cuanto más rojo, más probable que el huso horario nominal de la banda pase por ahí. Los husos son franjas de 15°, no países.",
+    yes: "Ritmo humano", no: "No concluyente", none: "Sin datos",
+    events: "Actos con hora", sessions: "Sesiones", likely: "Lo más probable", band: "Franja", test: "Test de ritmo",
+    weekend: "Fin de semana", dst: "Horario de verano",
+    clockMid: "UTC", clockLabel: "Inicio de cada sesión de trabajo en UTC; sombreado, la noche de la banda",
+    step3: "Paso 3", time: "Cuándo actuó", timeSub: "Primer acto de cada dominio atribuido: su registro o su primer certificado.",
+    step4: "Paso 4", next: "Su próximo dominio", nextSub: "Un patrón estrecho caza el siguiente dominio en cuanto pide su certificado, sin falsas alarmas.",
+    kind_crew: "Plantilla de la banda", kind_campaign: "Patrón de la campaña", kind_guess: "Apuesta desde la semilla",
+    names: (b) => `unos 10^${b} nombres posibles`, learned: (n) => `aprendido de ${n} dominios`, guessOnly: "solo una apuesta: no hay hermanos todavía",
+    watchIt: "Vigílalo en directo:", copy: "Copiar", copied: "Copiado",
+    step5: "Paso 5", reports: "Avisa al registrador",
+    draftsOnly: "Solo son borradores. Léelos, completa la línea entre corchetes y envíalos tú: Rastro nunca envía nada.",
+    noReports: "Nada que avisar: ningún dominio atribuido sigue registrado con un registrador que Rastro pueda consultar.",
+    to: "Para", subject: "Asunto", phone: "Teléfono", ianaId: "ID de IANA", copyAddr: "Copiar dirección", copySubj: "Copiar asunto", copyBody: "Copiar texto",
+    leftOut: (n) => `Fuera de los avisos (${n})`,
+    reasons: { unregistered: "no está registrado ahora, o su registro no tiene RDAP", suspended: "ya está suspendido",
+      defensive: "lo tiene un registrador de protección de marcas: probablemente defensivo",
+      reregistered: "se registró de nuevo después de su etapa de phishing, quizá por otra persona", reported: "en un aviso" },
+    step6: "Paso 6", evidence: "Pruebas", evSum: (n) => `Los ${n} dominios revisados`,
+    cols: ["Dominio", "Primer acto (UTC)", "Registrado (UTC)", "Registrador", "Encontrado en", "Estado"],
+    src: { seed: "semilla", list: "lista pública", store: "vigilante", certificate: "certificado" },
+    how: "Cómo se ha hecho", sources: "Fuentes: ",
+    srcNames: { crtsh: "crt.sh (transparencia de certificados)", rdap: "RDAP (registros de dominios)", dns: "DNS público sobre HTTPS",
+      list: "la lista pública Phishing.Database", store: "la base del vigilante" },
+    never: ["No se ha conectado a los dominios: ha preguntado a los registros de certificados, a los registros de dominios y a un DNS público.",
+      "No ha buscado a las personas de detrás: se queda en husos horarios e infraestructura.",
+      "No ha enviado nada: los avisos son borradores."],
+    legend: { seed: "semilla", campaign: "campaña", crew: "misma plantilla", other: "parecido, no atribuido", dead: "caducado o desconocido", strong: "pista fuerte", weak: "pista débil", template: "plantilla" },
+    hidden: (n) => `${n} dominios más no caben en el dibujo; están en las pruebas.`,
+    weekendV: { "sat-sun": "sáb–dom", "fri-sat": "vie–sáb", sun: "dom", none: "trabaja 7 días", inconclusive: "no concluyente" },
+    dstV: { eu: "europeo", us: "EE. UU.", south: "austral", none: "no cambia", inconclusive: "no concluyente" },
+    tip: { first: "Primer acto", reg: "Registrado", registrar: "Registrador", found: "Encontrado en", status: "Estado" },
+    foot: (v) => `Rastro ${v} · código abierto (Apache-2.0) · contorno de tierra: Natural Earth · este informe no hace ninguna petición de red`,
+    mapLabel: "Mapa del mundo con la probabilidad de cada huso horario",
+    tlLabel: "Línea de tiempo de los dominios atribuidos", graphLabel: "Grafo de la campaña",
+  } : {
+    tag: "Case file generated on ", stamp: "Case file", eyebrow: "Phishing investigation",
+    demoStamp: "Demo", eyebrowDemo: "Phishing investigation · demo with made-up data",
+    demoTruth: (tzName) => `The simulated crew works at ${tzName}, Monday to Friday: check the map against the truth (the "truth" mark under the bars).`, truth: "truth",
+    demoNote: "Everything in this case file is made up: the brands PaqExpres and BancoNorte do not exist, the domains end in .test (reserved: nobody can register it), the addresses come from the ranges reserved for documentation and the registrars are examples. The crew is simulated with the same working-day model the map uses.",
+    pasted: "Investigated link: ", pathOut: " (path left out: it can identify whoever received it)",
+    imitates: "Imitates ", noBrand: "Imitates no known brand",
+    crew: "in its crew", campaign: "in its campaign", live: () => "still live", checked: "domains checked",
+    step1: "Step 1", graph: "The campaign", graphSub: "Every domain tied to the seed, and why. Hover or focus a dot to see its data.",
+    role: "detective ferret on duty",
+    step2: "Step 2", map: "Where the crew works",
+    mapCap: "Each dot is land; the redder it is, the likelier the crew's nominal time zone runs through it. Zones are 15° bands, not countries.",
+    yes: "Human rhythm", no: "Inconclusive", none: "No data",
+    events: "Timed actions", sessions: "Sessions", likely: "Most probable", band: "Band", test: "Rhythm test",
+    weekend: "Weekend", dst: "Summer time",
+    clockMid: "UTC", clockLabel: "Start of each work session in UTC; shaded, the crew's night",
+    step3: "Step 3", time: "When it struck", timeSub: "First act of each attributed domain: its registration or its first certificate.",
+    step4: "Step 4", next: "Its next domain", nextSub: "A narrow pattern catches the next domain the moment it asks for a certificate, without false alarms.",
+    kind_crew: "Crew template", kind_campaign: "Campaign pattern", kind_guess: "Guess from the seed",
+    names: (b) => `about 10^${b} possible names`, learned: (n) => `learned from ${n} domains`, guessOnly: "only a guess: no siblings yet",
+    watchIt: "Watch it live:", copy: "Copy", copied: "Copied",
+    step5: "Step 5", reports: "Warn the registrar",
+    draftsOnly: "Drafts only. Read them, fill in the line in brackets and send them yourself: Rastro never sends anything.",
+    noReports: "Nothing to report: no attributed domain is still registered with a registrar Rastro can look up.",
+    to: "To", subject: "Subject", phone: "Phone", ianaId: "IANA ID", copyAddr: "Copy address", copySubj: "Copy subject", copyBody: "Copy text",
+    leftOut: (n) => `Left out of the reports (${n})`,
+    reasons: { unregistered: "not registered now, or its registry has no RDAP", suspended: "already suspended",
+      defensive: "held by a brand-protection registrar: probably defensive",
+      reregistered: "registered again after its phishing days, maybe by somebody else", reported: "in a report" },
+    step6: "Step 6", evidence: "Evidence", evSum: (n) => `All ${n} domains checked`,
+    cols: ["Domain", "First act (UTC)", "Registered (UTC)", "Registrar", "Found in", "Status"],
+    src: { seed: "seed", list: "public list", store: "watcher", certificate: "certificate" },
+    how: "How this was made", sources: "Sources: ",
+    srcNames: { crtsh: "crt.sh (Certificate Transparency)", rdap: "RDAP (domain registries)", dns: "public DNS over HTTPS",
+      list: "the public Phishing.Database list", store: "the watcher's store" },
+    never: ["Rastro never connected to the domains: it asked certificate logs, domain registries and a public DNS resolver.",
+      "It did not look for the people behind them: it stops at time zones and infrastructure.",
+      "It sent nothing: the reports are drafts."],
+    legend: { seed: "seed", campaign: "campaign", crew: "same template", other: "lookalike, not attributed", dead: "expired or unknown", strong: "strong clue", weak: "weak clue", template: "template" },
+    hidden: (n) => `${n} more domains do not fit in the drawing; they are in the evidence.`,
+    weekendV: { "sat-sun": "Sat–Sun", "fri-sat": "Fri–Sat", sun: "Sun", none: "works 7 days", inconclusive: "inconclusive" },
+    dstV: { eu: "European", us: "US", south: "southern", none: "none", inconclusive: "inconclusive" },
+    tip: { first: "First act", reg: "Registered", registrar: "Registrar", found: "Found in", status: "Status" },
+    foot: (v) => `Rastro ${v} · open source (Apache-2.0) · land outline: Natural Earth · this report makes no network requests`,
+    mapLabel: "World map with the probability of each time zone",
+    tlLabel: "Timeline of the attributed domains", graphLabel: "Campaign graph",
+  };
+  const SVG = "http://www.w3.org/2000/svg";
+  const $ = (id) => document.getElementById(id);
+  function el(tag, attrs, text) {
+    const node = document.createElement(tag);
+    for (const k in attrs || {}) node.setAttribute(k, attrs[k]);
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function sv(tag, attrs, text) {
+    const node = document.createElementNS(SVG, tag);
+    for (const k in attrs || {}) node.setAttribute(k, attrs[k]);
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  const day = (iso) => iso ? iso.slice(0, 10) : "—";
+  const minute = (iso) => iso ? iso.slice(0, 16).replace("T", " ") : "—";
+  const tz = (o) => o === 0 ? "UTC" : "UTC" + (o > 0 ? "+" : "−") + Math.abs(o);
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  function copyButton(label, text) {
+    const b = el("button", { type: "button", class: "btn" }, label);
+    b.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(text); }
+      catch (e) {
+        const area = el("textarea"); area.value = text; document.body.appendChild(area); area.select();
+        try { document.execCommand("copy"); } finally { area.remove(); }
+      }
+      b.textContent = T.copied; b.classList.add("done");
+      setTimeout(() => { b.textContent = label; b.classList.remove("done"); }, 1600);
+    });
+    return b;
+  }
+
+  document.querySelectorAll("[data-t]").forEach((n) => { n.textContent = T[n.dataset.t]; });
+  $("tag").textContent = T.tag + minute(D.generated) + " UTC";
+  $("stamp").textContent = D.demo ? T.demoStamp : T.stamp;
+  $("eyebrow").textContent = D.demo ? T.eyebrowDemo : T.eyebrow;
+  $("seed").textContent = D.seed;
+  $("lede").textContent = (D.brand ? T.imitates + D.brand_name : T.noBrand) + ". "
+    + T.pasted + D.host + T.pathOut + ".";
+  const chips = $("chips");
+  const chip = (n, label, hot) => { const c = el("span", { class: "chip" + (hot ? " chip-hot" : "") }); c.append(el("b", {}, String(n)), " " + label); chips.append(c); };
+  chip(D.counts.crew, T.crew); chip(D.counts.campaign, T.campaign); chip(D.counts.reported, T.live(D.counts.reported), D.counts.reported > 0);
+  chip(D.counts.checked, T.checked);
+  if (D.clock && D.clock.found) { const c = el("span", { class: "chip chip-hot" }, tz(D.clock.offset)); chips.append(c); }
+
+  const log = $("log");
+  D.narration.forEach((line, i) => {
+    const li = el("li", { class: "k-" + line.kind }, line.text);
+    li.style.animationDelay = (0.25 + i * 0.22) + "s";
+    log.append(li);
+  });
+
+  /* ---------- graph ---------- */
+  (function graph() {
+    const svg = $("graph"); svg.setAttribute("aria-label", T.graphLabel);
+    const tip = $("tip"), cork = $("cork");
+    const portrait = cork.clientWidth > 0 && cork.clientWidth < 620;
+    const W = portrait ? 560 : 800, H = portrait ? 720 : 560, G = D.graph;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    const nodes = G.nodes.map((n) => Object.assign({}, n));
+    const byId = new Map(nodes.map((n) => [n.id, n]));
+    const links = [];
+    G.edges.forEach((e) => { const s = byId.get(e.a), t = byId.get(e.b); if (s && t) links.push({ s, t, w: e.w, strong: e.w >= 1, len: e.w >= 1 ? 34 : 60, k: e.w >= 1 ? 0.08 : 0.03 }); });
+    let hub = null;
+    if (D.template) {
+      hub = { id: "#template", hub: true };
+      nodes.push(hub);
+      nodes.forEach((n) => { if (n.crew) links.push({ s: hub, t: n, spoke: true, len: 200, k: 0.01 }); });
+    }
+    let seed = 7;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    nodes.forEach((n) => { n.x = W / 2 + (rnd() - 0.5) * W * 0.8; n.y = H / 2 + (rnd() - 0.5) * H * 0.8; n.vx = 0; n.vy = 0; });
+    if (hub) { hub.x = W / 2; hub.y = H / 2; }
+    const iters = 320, charge = 5200 / Math.max(1, Math.sqrt(nodes.length));
+    for (let it = 0; it < iters; it++) {
+      const a = 1 - it / iters;
+      for (let i = 0; i < nodes.length; i++) {
+        const p = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const q = nodes[j]; let dx = q.x - p.x, dy = q.y - p.y; const d2 = dx * dx + dy * dy + 1;
+          if (d2 > 90000) continue;
+          const f = charge * a / d2, d = Math.sqrt(d2); dx /= d; dy /= d;
+          p.vx -= dx * f; p.vy -= dy * f; q.vx += dx * f; q.vy += dy * f;
+        }
+      }
+      links.forEach((l) => {
+        const dx = l.t.x - l.s.x, dy = l.t.y - l.s.y, d = Math.sqrt(dx * dx + dy * dy) || 1, f = l.k * (d - l.len) / d * a;
+        l.s.vx += dx * f; l.s.vy += dy * f; l.t.vx -= dx * f; l.t.vy -= dy * f;
+      });
+      nodes.forEach((n) => {
+        n.vx += (W / 2 - n.x) * 0.003 * a; n.vy += (H / 2 - n.y) * 0.005 * a;
+        if (n.hub) { n.vx *= 0.15; n.vy *= 0.15; }
+        n.x = Math.min(W - 24, Math.max(24, n.x + n.vx)); n.y = Math.min(H - 20, Math.max(20, n.y + n.vy));
+        n.vx *= 0.55; n.vy *= 0.55;
+      });
+    }
+    const order = nodes.filter((n) => !n.hub).sort((p, q) => (p.seed ? -1 : q.seed ? 1 : (p.first || "9") < (q.first || "9") ? -1 : 1));
+    const delay = new Map(order.map((n, i) => [n, 0.15 + (i / Math.max(1, order.length)) * 2.2]));
+    if (hub) delay.set(hub, 0.1);
+    const gE = sv("g"), gN = sv("g"), gL = sv("g");
+    svg.append(gE, gN, gL);
+    links.forEach((l) => {
+      const cls = l.spoke ? "e e-spoke" : l.strong ? "e e-strong" : "e e-weak";
+      const mx = (l.s.x + l.t.x) / 2, my = (l.s.y + l.t.y) / 2 + (l.spoke ? 0 : 10);
+      const path = sv("path", { d: `M${l.s.x.toFixed(1)} ${l.s.y.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${l.t.x.toFixed(1)} ${l.t.y.toFixed(1)}`, class: cls + " fade" });
+      path.style.animationDelay = Math.max(delay.get(l.s) || 0, delay.get(l.t) || 0) + "s";
+      gE.append(path);
+    });
+    function show(n) {
+      tip.replaceChildren(el("b", {}, n.id));
+      const rows = [[T.tip.first, minute(n.first)], [T.tip.reg, minute(n.registered)], [T.tip.registrar, n.registrar || "—"],
+        [T.tip.found, (n.sources || []).map((s) => T.src[s] || s).join(", ")], [T.tip.status, n.status ? (T.reasons[n.status] || n.status) : "—"]];
+      rows.forEach(([k, v]) => { const d = el("div"); d.append(el("span", { class: "mono" }, k + ": "), v); tip.append(d); });
+      tip.hidden = false;
+      const box = cork.getBoundingClientRect(), sx = box.width / W, sy = box.height / H;
+      let x = n.x * sx + 14, y = n.y * sy + 14;
+      if (x + 280 > box.width) x = Math.max(4, n.x * sx - 290);
+      if (y + tip.offsetHeight > box.height) y = Math.max(4, n.y * sy - tip.offsetHeight - 10);
+      tip.style.left = x + "px"; tip.style.top = y + "px";
+    }
+    const hide = () => { tip.hidden = true; };
+    const boxes = [];
+    if (hub) {
+      const g = sv("g", { class: "hub", transform: `translate(${hub.x.toFixed(1)} ${hub.y.toFixed(1)})` });
+      const inner = sv("g", { class: "pop" });
+      const label = D.template.length > 60 ? D.template.slice(0, 58) + "…" : D.template;
+      const w = Math.max(60, label.length * 6.7 + 16);
+      inner.append(sv("rect", { x: -w / 2, y: -12, width: w, height: 24, rx: 4 }), sv("text", { x: 0, y: 4, "text-anchor": "middle" }, label));
+      inner.style.animationDelay = "0.1s";
+      g.append(inner);
+      gL.append(g);
+      boxes.push({ x: hub.x - w / 2, y: hub.y - 12, w, h: 24 });
+    }
+    order.forEach((n) => {
+      const kind = n.seed ? "nd-seed" : n.campaign ? "nd-campaign" : n.crew ? "nd-crew" : "nd-other";
+      const g = sv("g", { class: `nd ${kind}${n.alive ? "" : " nd-dead"}`, tabindex: "0", "aria-label": n.id, transform: `translate(${n.x.toFixed(1)} ${n.y.toFixed(1)})` });
+      const inner = sv("g", { class: "pop" }); inner.style.animationDelay = delay.get(n) + "s";
+      if (n.seed) inner.append(sv("circle", { r: 13, class: "seed-ring" }));
+      inner.append(sv("circle", { r: n.seed ? 9 : n.campaign ? 6.5 : 5, class: "pin" }));
+      g.append(inner);
+      g.addEventListener("pointerenter", () => show(n)); g.addEventListener("pointerleave", hide);
+      g.addEventListener("focus", () => show(n)); g.addEventListener("blur", hide);
+      gN.append(g);
+      const labelled = n.seed || (n.campaign && (!n.crew || G.nodes.filter((m) => m.campaign).length <= 5));
+      if (labelled) {
+        const w = n.id.length * 6.3 + 12, x = Math.min(W - w - 4, Math.max(4, n.x - w / 2)), y0 = n.y + (n.seed ? 16 : 10);
+        let y = y0;
+        for (const dy of [0, 20, -46, 40, -66, 60, -86, 80]) {
+          const yy = Math.min(H - 20, Math.max(3, y0 + dy));
+          if (!boxes.some((b) => x < b.x + b.w && b.x < x + w && yy < b.y + b.h && b.y < yy + 17)) { y = yy; break; }
+        }
+        boxes.push({ x, y, w, h: 17 });
+        const lab = sv("g", { class: "lab fade" + (n.seed ? " lab-seed" : "") });
+        if (Math.abs(y - y0) > 1) lab.append(sv("line", { x1: n.x, y1: n.y, x2: Math.min(Math.max(n.x, x), x + w), y2: y < n.y ? y + 17 : y, class: "e e-weak" }));
+        lab.append(sv("rect", { x: x, y: y, width: w, height: 17, rx: 3 }), sv("text", { x: x + 6, y: y + 12.5 }, n.id));
+        lab.style.animationDelay = delay.get(n) + 0.2 + "s";
+        gL.append(lab);
+      }
+    });
+    const legend = $("legend");
+    const item = (svgChild, label) => { const li = el("li"); const s = sv("svg", { viewBox: "0 0 26 14", "aria-hidden": "true" }); s.append(svgChild); li.append(s, label); legend.append(li); };
+    const dot = (cls, extra) => { const g = sv("g", { class: "nd " + cls + (extra || "") }); g.append(sv("circle", { cx: 13, cy: 7, r: 5, class: "pin" })); return g; };
+    item(dot("nd-seed"), T.legend.seed); item(dot("nd-campaign"), T.legend.campaign); item(dot("nd-crew"), T.legend.crew);
+    item(dot("nd-other"), T.legend.other); item(dot("nd-crew", " nd-dead"), T.legend.dead);
+    item(sv("path", { d: "M1 9 Q13 3 25 9", class: "e e-strong" }), T.legend.strong);
+    item(sv("path", { d: "M1 9 Q13 3 25 9", class: "e e-weak" }), T.legend.weak);
+    if (G.hidden) legend.append(el("li", {}, T.hidden(G.hidden)));
+  })();
+
+  /* ---------- map ---------- */
+  (function map() {
+    const C = D.clock, canvas = $("map"), verdict = $("verdict");
+    canvas.setAttribute("aria-label", T.mapLabel);
+    const found = C && C.found;
+    verdict.textContent = !C ? T.none : found ? T.yes : T.no;
+    if (found) verdict.classList.add("verdict-yes");
+    const post = {}; let top = 0;
+    if (found) for (const k in C.posterior) { post[k] = C.posterior[k]; top = Math.max(top, post[k]); }
+    const bits = atob(LAND.b64);
+    const hex = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h); const v = m ? parseInt(m[1], 16) : 0x888888; return [v >> 16 & 255, v >> 8 & 255, v & 255]; };
+    function draw(progress) {
+      const dpr = window.devicePixelRatio || 1, W = canvas.clientWidth || 600, H = Math.round(W * LAND.rows / LAND.cols);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); canvas.style.height = H + "px";
+      const ctx = canvas.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      const cw = W / LAND.cols, ch = H / LAND.rows, r = Math.min(cw, ch) * 0.42;
+      const base = hex(css("--dot")), hot = hex(css("--string"));
+      if (found) {
+        for (let o = -11; o <= 12; o++) {
+          if (!C.band.includes(o)) continue;
+          const x0 = ((o - 0.5) * 15 + 180) / 360 * W, x1 = ((o + 0.5) * 15 + 180) / 360 * W;
+          ctx.fillStyle = css("--night"); ctx.fillRect(x0, 0, x1 - x0, H);
+        }
+      }
+      for (let row = 0; row < LAND.rows; row++) for (let col = 0; col < LAND.cols; col++) {
+        const i = row * LAND.cols + col;
+        if (!((bits.charCodeAt(i >> 3) >> (7 - (i & 7))) & 1)) continue;
+        const lon = LAND.lon0 + (col + 0.5) * LAND.step;
+        let o = Math.round(lon / 15); if (o < -11) o += 24; if (o > 12) o -= 24;
+        const p = found && top ? Math.pow((post[o] || 0) / top, 0.6) * progress : 0;
+        const c = base.map((v, k) => Math.round(v + (hot[k] - v) * p));
+        ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+        ctx.beginPath(); ctx.arc((col + 0.5) * cw, (row + 0.5) * ch, r * (0.85 + 0.5 * p), 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (found && !reduce) {
+      const t0 = performance.now();
+      const step = (t) => { const k = Math.min(1, (t - t0) / 1800); draw(1 - Math.pow(1 - k, 3)); if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    } else draw(1);
+    let pending = 0;
+    window.addEventListener("resize", () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(() => draw(1)); });
+
+    const strip = $("strip");
+    for (let o = -11; o <= 12; o++) {
+      const x = ((o - 0.5) * 15 + 180) / 360 * 800, w = 15 / 360 * 800 - 2;
+      const p = found ? (post[o] || 0) / (top || 1) : 0;
+      const h = Math.max(2, p * 30);
+      const cls = found && o === C.offset ? "bar bar-top" : found && C.band.includes(o) ? "bar bar-band" : "bar";
+      strip.append(sv("rect", { x: x + 1, y: 32 - h, width: w, height: h, class: cls }));
+      if ((o + 12) % 3 === 0) strip.append(sv("text", { x: x + w / 2 + 1, y: 44, "text-anchor": "middle" }, o === 0 ? "UTC" : (o > 0 ? "+" : "−") + Math.abs(o)));
+    }
+    if (D.demo && D.demo.offset != null) {
+      const cx = (D.demo.offset * 15 + 180) / 360 * 800;
+      strip.append(sv("path", { d: `M${cx - 5} 2 L${cx + 5} 2 L${cx} 8 Z`, class: "truth" }));
+      strip.append(sv("text", { x: cx + 8, y: 9, class: "truth-t" }, T.truth));
+    }
+
+    const clock = $("clock"); clock.setAttribute("aria-label", T.clockLabel);
+    const cx = 110, cy = 110, R0 = 30, R1 = 86;
+    clock.append(sv("circle", { cx, cy, r: R1 + 4, class: "ck-face" }));
+    const angle = (h) => (h / 24) * Math.PI * 2 - Math.PI / 2;
+    const at = (h, r) => [cx + Math.cos(angle(h)) * r, cy + Math.sin(angle(h)) * r];
+    if (found) {
+      const start = ((0 - C.offset) % 24 + 24) % 24, end = start + 7;
+      const [x0, y0] = at(start, R1 + 4), [x1, y1] = at(end, R1 + 4);
+      clock.append(sv("path", { d: `M${cx} ${cy} L${x0} ${y0} A${R1 + 4} ${R1 + 4} 0 0 1 ${x1} ${y1} Z`, class: "ck-night" }));
+    }
+    const counts = new Array(24).fill(0);
+    (C ? C.hours : []).forEach((h) => { counts[Math.floor(h) % 24]++; });
+    const most = Math.max(1, ...counts);
+    for (let h = 0; h < 24; h++) {
+      const [x0, y0] = at(h + 0.5, R0), [x1, y1] = at(h + 0.5, R0 + 4 + (R1 - R0 - 4) * counts[h] / most);
+      if (counts[h]) clock.append(sv("line", { x1: x0, y1: y0, x2: x1, y2: y1, class: "ck-bar" }));
+      if (h % 6 === 0) {
+        const [tx, ty] = at(h, R1 + 15);
+        const [a0, b0] = at(h, R1 - 2), [a1, b1] = at(h, R1 + 4);
+        clock.append(sv("line", { x1: a0, y1: b0, x2: a1, y2: b1, class: "ck-tick" }));
+        clock.append(sv("text", { x: tx, y: ty + 3, "text-anchor": "middle", class: "ck-lab" }, String(h).padStart(2, "0")));
+      }
+    }
+    clock.append(sv("text", { x: cx, y: cy + 4, "text-anchor": "middle", class: "ck-mid" }, T.clockMid));
+
+    const facts = $("facts");
+    const fact = (k, v) => { const d = el("div"); d.append(el("dt", {}, k), el("dd", {}, v)); facts.append(d); };
+    if (C) {
+      fact(T.events, String(C.events)); fact(T.sessions, String(C.sessions));
+      fact(T.likely, found ? tz(C.offset) : "—");
+      fact(T.band, found ? `${tz(C.band[0])} … ${tz(C.band[C.band.length - 1])} (${Math.round(C.mass * 100)} %)` : "—");
+      fact(T.test, C.p == null ? "—" : "p " + (C.p < 0.0001 ? "< 0.0001" : "= " + C.p.toFixed(4)));
+      fact(T.weekend, T.weekendV[C.weekend] || C.weekend); fact(T.dst, T.dstV[C.dst] || C.dst);
+    } else fact(T.events, "0");
+  })();
+
+  /* ---------- timeline ---------- */
+  (function timeline() {
+    const svg = $("timeline"); svg.setAttribute("aria-label", T.tlLabel);
+    const W = 600, H = 320, L = 18, R = 18, top = 22, bottom = 286;
+    const pts = D.graph.nodes.filter((n) => n.attributed && n.first).map((n) => ({ n, t: Date.parse(n.first) }));
+    if (!pts.length) { svg.append(sv("text", { x: W / 2, y: H / 2, "text-anchor": "middle", class: "ck-lab" }, "—")); return; }
+    let t0 = Math.min(...pts.map((p) => p.t)), t1 = Math.max(...pts.map((p) => p.t));
+    const pad = Math.max((t1 - t0) * 0.04, 12 * 3600e3); t0 -= pad; t1 += pad;
+    const x = (t) => L + (t - t0) / (t1 - t0) * (W - L - R);
+    svg.append(sv("line", { x1: L, y1: bottom, x2: W - R, y2: bottom, class: "tl-axis" }));
+    const span = t1 - t0, yearMs = 365.25 * 864e5;
+    const first = new Date(t0), ticks = [];
+    if (span > 2 * yearMs) for (let y = first.getUTCFullYear() + 1; Date.UTC(y, 0, 1) < t1; y++) ticks.push([Date.UTC(y, 0, 1), String(y)]);
+    else if (span > 60 * 864e5) for (let d = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 1)); d.getTime() < t1; d.setUTCMonth(d.getUTCMonth() + (span > yearMs ? 3 : 1))) ticks.push([d.getTime(), d.toISOString().slice(0, 7)]);
+    else for (let d = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth(), first.getUTCDate() + 1)); d.getTime() < t1; d.setUTCDate(d.getUTCDate() + Math.max(1, Math.ceil(span / 864e5 / 8)))) ticks.push([d.getTime(), d.toISOString().slice(5, 10)]);
+    ticks.forEach(([t, label]) => {
+      const g = sv("g", { class: "tl-tick" });
+      g.append(sv("line", { x1: x(t), y1: top - 6, x2: x(t), y2: bottom + 4 }), sv("text", { x: x(t), y: bottom + 18, "text-anchor": "middle" }, label));
+      svg.append(g);
+    });
+    const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
+    pts.sort((a, b) => (a.n.seed ? 1 : 0) - (b.n.seed ? 1 : 0));
+    pts.forEach(({ n, t }, i) => {
+      const y = n.seed ? (top + bottom) / 2 : top + 8 + hash(n.id) * (bottom - top - 16);
+      const c = sv("circle", { cx: x(t), cy: y, r: n.seed ? 8 : 4.5, class: "tl-dot pop " + (n.seed ? "tl-seed" : n.campaign ? "tl-campaign" : "tl-crew") });
+      c.style.animationDelay = (0.3 + i * 0.012) + "s";
+      c.append(sv("title", {}, `${n.id} · ${minute(n.first)} UTC`));
+      svg.append(c);
+    });
+    const legend = $("tl-legend");
+    [["tl-seed", T.legend.seed], ["tl-campaign", T.legend.campaign], ["tl-crew", T.legend.crew]].forEach(([cls, label]) => {
+      const li = el("li"); const s = sv("svg", { viewBox: "0 0 26 14", "aria-hidden": "true" });
+      s.append(sv("circle", { cx: 13, cy: 7, r: 5, class: "tl-dot " + cls })); li.append(s, label); legend.append(li);
+    });
+  })();
+
+  /* ---------- next domain ---------- */
+  (function patterns() {
+    const box = $("patterns");
+    if (!D.patterns.length) { box.append(el("p", { class: "sub" }, "—")); return; }
+    D.patterns.forEach((p) => {
+      const card = el("div", { class: "pat" });
+      card.append(el("span", { class: "pat-kind" }, T["kind_" + p.kind] || p.kind), el("code", {}, p.regex));
+      const meta = [p.breadth != null ? T.names(p.breadth.toFixed(1)) : null, p.kind === "guess" ? T.guessOnly : p.support ? T.learned(p.support) : null].filter(Boolean).join(" · ");
+      card.append(el("span", { class: "pat-meta" }, meta));
+      const cmd = `rastro watch --regex '${p.regex}' --follow --minutes 1440 --db data/ct.sqlite --alerts alerts.jsonl`;
+      const row = el("div", { class: "cmd" }); row.append(el("code", {}, cmd), copyButton(T.copy, cmd));
+      card.append(el("span", { class: "pat-meta" }, T.watchIt), row);
+      box.append(card);
+    });
+  })();
+
+  /* ---------- reports ---------- */
+  (function reports() {
+    const box = $("reports");
+    if (!D.reports.length) box.append(el("p", { class: "sub" }, T.noReports));
+    D.reports.forEach((r) => {
+      const card = el("section", { class: "rep" });
+      card.append(el("h3", {}, r.registrar));
+      const dl = el("dl");
+      const row = (k, v) => { if (v) dl.append(el("dt", {}, k), el("dd", {}, v)); };
+      row(T.to, r.email || "—"); row(T.phone, r.phone); row(T.ianaId, r.registrar_id); row(T.subject, r.subject);
+      card.append(dl, el("pre", {}, r.body));
+      const btns = el("div", { class: "btns" });
+      if (r.email) btns.append(copyButton(T.copyAddr, r.email));
+      btns.append(copyButton(T.copySubj, r.subject), copyButton(T.copyBody, r.body));
+      card.append(btns);
+      box.append(card);
+    });
+    const left = D.left_out;
+    if (!left.length) { $("left-wrap").hidden = true; return; }
+    $("left-sum").textContent = T.leftOut(left.length);
+    const table = $("left");
+    left.forEach((x) => { const tr = el("tr"); tr.append(el("td", { class: "mono" }, x.domain), el("td", {}, T.reasons[x.why] || x.why)); table.append(tr); });
+  })();
+
+  /* ---------- evidence ---------- */
+  (function evidence() {
+    const nodes = D.domains;
+    $("ev-sum").textContent = T.evSum(D.counts.checked + 1);
+    const table = $("evidence"), head = el("tr");
+    T.cols.forEach((c) => head.append(el("th", { scope: "col" }, c)));
+    const thead = el("thead"); thead.append(head); table.append(thead);
+    const body = el("tbody");
+    nodes.forEach((n) => {
+      const tr = el("tr", n.seed ? { class: "is-seed" } : {});
+      [n.id, minute(n.first), minute(n.registered), n.registrar || "—", (n.sources || []).map((s) => T.src[s] || s).join(", "),
+        n.status ? (T.reasons[n.status] || n.status) : "—"].forEach((v, i) => tr.append(el("td", i === 0 ? { class: "mono" } : {}, v)));
+      body.append(tr);
+    });
+    table.append(body);
+  })();
+
+  /* ---------- method ---------- */
+  (function method() {
+    const ul = $("notes");
+    if (D.demo) ul.append(el("li", {}, T.demoNote), el("li", {}, T.demoTruth(tz(D.demo.offset))));
+    ul.append(el("li", {}, T.sources + (D.sources.map((s) => T.srcNames[s] || s).join(", ") || "—") + "."));
+    D.notes.forEach((n) => ul.append(el("li", {}, n)));
+    T.never.forEach((n) => ul.append(el("li", {}, n)));
+    $("foot").textContent = T.foot(D.version);
+  })();
+})();
+</script>
+</body>
+</html>

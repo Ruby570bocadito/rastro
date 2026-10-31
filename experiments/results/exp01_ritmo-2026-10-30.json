@@ -1,0 +1,23 @@
+[
+  {
+    "brand": "correos",
+    "certificates": 1455,
+    "timed_certificates": 14,
+    "domains": 6,
+    "verdict": "too few suspicious domains (< 20)"
+  },
+  {
+    "brand": "tributaria",
+    "certificates": 85,
+    "timed_certificates": 0,
+    "domains": 0,
+    "verdict": "too few suspicious domains (< 20)"
+  },
+  {
+    "brand": "dhl",
+    "certificates": 2132,
+    "timed_certificates": 747,
+    "domains": 0,
+    "verdict": "too few suspicious domains (< 20)"
+  }
+]

@@ -1,0 +1,262 @@
+{
+  "power": [
+    {
+      "sessions": 25,
+      "offset \u00b11 h": 0.82,
+      "DST regime": 0.27,
+      "weekend": 0.65
+    },
+    {
+      "sessions": 50,
+      "offset \u00b11 h": 0.96,
+      "DST regime": 0.38,
+      "weekend": 0.87
+    },
+    {
+      "sessions": 100,
+      "offset \u00b11 h": 0.99,
+      "DST regime": 0.42,
+      "weekend": 0.96
+    },
+    {
+      "sessions": 200,
+      "offset \u00b11 h": 1.0,
+      "DST regime": 0.61,
+      "weekend": 0.99
+    },
+    {
+      "sessions": 400,
+      "offset \u00b11 h": 1.0,
+      "DST regime": 0.72,
+      "weekend": 1.0
+    }
+  ],
+  "families": [
+    {
+      "family": "coinbase",
+      "sessions": 88,
+      "p_value": 4.999750012499375e-05,
+      "offset": -8,
+      "band": [
+        -9,
+        -8,
+        -7,
+        -6
+      ],
+      "dst": "inconclusive",
+      "dst_probs": {
+        "none": 0.27,
+        "eu": 0.17,
+        "us": 0.34,
+        "south": 0.22
+      },
+      "weekend": "none",
+      "weekend_probs": {
+        "sat-sun": 0.0,
+        "fri-sat": 0.02,
+        "sun": 0.05,
+        "none": 0.93
+      },
+      "holidays": [
+        [
+          "Chinese New Year",
+          2,
+          1.5,
+          "not enough data"
+        ],
+        [
+          "Christmas and New Year",
+          2,
+          1.9,
+          "not enough data"
+        ],
+        [
+          "Eid al-Fitr",
+          0,
+          0.6,
+          "not enough data"
+        ],
+        [
+          "Orthodox Christmas",
+          0,
+          0.6,
+          "not enough data"
+        ]
+      ]
+    },
+    {
+      "family": "whatsapp",
+      "sessions": 19,
+      "p_value": 0.0006499675016249188,
+      "offset": 1,
+      "band": [
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      "dst": "inconclusive",
+      "dst_probs": {
+        "none": 0.24,
+        "eu": 0.19,
+        "us": 0.26,
+        "south": 0.31
+      },
+      "weekend": "inconclusive",
+      "weekend_probs": {
+        "sat-sun": 0.01,
+        "fri-sat": 0.96,
+        "sun": 0.0,
+        "none": 0.02
+      },
+      "holidays": [
+        [
+          "Chinese New Year",
+          0,
+          0.3,
+          "not enough data"
+        ],
+        [
+          "Christmas and New Year",
+          0,
+          0.4,
+          "not enough data"
+        ],
+        [
+          "Eid al-Fitr",
+          0,
+          0.1,
+          "not enough data"
+        ],
+        [
+          "Orthodox Christmas",
+          0,
+          0.1,
+          "not enough data"
+        ]
+      ]
+    },
+    {
+      "family": "amazon",
+      "sessions": 51,
+      "p_value": 0.0010499475026248687,
+      "offset": 2,
+      "band": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "dst": "inconclusive",
+      "dst_probs": {
+        "none": 0.24,
+        "eu": 0.32,
+        "us": 0.29,
+        "south": 0.15
+      },
+      "weekend": "none",
+      "weekend_probs": {
+        "sat-sun": 0.0,
+        "fri-sat": 0.04,
+        "sun": 0.0,
+        "none": 0.95
+      },
+      "holidays": [
+        [
+          "Chinese New Year",
+          1,
+          1.1,
+          "not enough data"
+        ],
+        [
+          "Christmas and New Year",
+          0,
+          1.4,
+          "not enough data"
+        ],
+        [
+          "Eid al-Fitr",
+          0,
+          0.4,
+          "not enough data"
+        ],
+        [
+          "Orthodox Christmas",
+          0,
+          0.5,
+          "not enough data"
+        ]
+      ]
+    },
+    {
+      "family": "dhl",
+      "sessions": 27,
+      "p_value": 0.4314784260786961,
+      "offset": 4,
+      "band": [
+        -6,
+        -5,
+        -4,
+        -3,
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        -11
+      ],
+      "dst": "inconclusive",
+      "dst_probs": {
+        "none": 0.25,
+        "eu": 0.25,
+        "us": 0.25,
+        "south": 0.25
+      },
+      "weekend": "inconclusive",
+      "weekend_probs": {
+        "sat-sun": 0.4,
+        "fri-sat": 0.05,
+        "sun": 0.51,
+        "none": 0.04
+      },
+      "holidays": [
+        [
+          "Chinese New Year",
+          0,
+          0.5,
+          "not enough data"
+        ],
+        [
+          "Christmas and New Year",
+          0,
+          0.7,
+          "not enough data"
+        ],
+        [
+          "Eid al-Fitr",
+          2,
+          0.2,
+          "not enough data"
+        ],
+        [
+          "Orthodox Christmas",
+          0,
+          0.2,
+          "not enough data"
+        ]
+      ]
+    }
+  ]
+}

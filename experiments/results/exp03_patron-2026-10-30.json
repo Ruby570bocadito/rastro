@@ -1,0 +1,402 @@
+[
+  {
+    "brand": "amazon",
+    "layout": "a.a",
+    "size": 528,
+    "pattern": "[a-z]{0,7}amazon[a-z]{0,11}\\.(club|live|monster|shop|top|xyz)",
+    "breadth_log10": 26.28,
+    "recall": 0.361,
+    "spill_over": 0,
+    "example": "aamazonf.buzz"
+  },
+  {
+    "brand": "apple",
+    "layout": "a.a",
+    "size": 443,
+    "pattern": "[a-z]{0,5}apple[a-z]{4,11}\\.(cc|com|live|top|us)",
+    "breadth_log10": 23.37,
+    "recall": 0.58,
+    "spill_over": 0,
+    "example": "accountappleid.com"
+  },
+  {
+    "brand": "apple",
+    "layout": "a-a.a",
+    "size": 306,
+    "pattern": "(?=.*apple)[a-z]{3,11}\\-[a-z]{2,7}\\.(com|info|live|services|store)",
+    "breadth_log10": 26.2,
+    "recall": 0.345,
+    "spill_over": 0,
+    "example": "aconnect-apple.com"
+  },
+  {
+    "brand": "facebook",
+    "layout": "a-a9.a",
+    "size": 245,
+    "pattern": "facebook\\-(form|fr|issues|metaplasform|problems)\\d{1,3}\\.(gq|ml|tk)",
+    "breadth_log10": 4.22,
+    "recall": 0.621,
+    "spill_over": 0,
+    "example": "amankan-facebook65.cf"
+  },
+  {
+    "brand": "amazon",
+    "layout": "a-a.a",
+    "size": 232,
+    "pattern": "(aft|amazon)\\-[a-z]{1,9}\\.(fr|ga|icu|live|shop|tk|top|xyz)",
+    "breadth_log10": 13.96,
+    "recall": 0.446,
+    "spill_over": 1,
+    "example": "a-amazon.vip"
+  },
+  {
+    "brand": "steam",
+    "layout": "a.a",
+    "size": 206,
+    "pattern": "[a-z]{0,9}steam[a-z]{0,15}\\.(com|net|ru|shop|world)",
+    "breadth_log10": 34.69,
+    "recall": 0.755,
+    "spill_over": 0,
+    "example": "accountsteampowered.com"
+  },
+  {
+    "brand": "facebook",
+    "layout": "a-a-a-a-a-a9.a",
+    "size": 170,
+    "pattern": "(?=.*\\-checkpoint)facebook\\-(business|checkpoint)\\-(help|policy)\\-(center|violation)\\-(fanpage|social)\\-(checkpoint|network)\\d{1,3}\\.ml",
+    "breadth_log10": 4.55,
+    "recall": 0.994,
+    "spill_over": 0,
+    "example": "facebook-business-help-center-fanpage-checkpoint1.ml"
+  },
+  {
+    "brand": "facebook",
+    "layout": "a-a-a9.a",
+    "size": 167,
+    "pattern": "facebook\\-(paymant|verifyissue)\\-(meta|updates)\\d{3,24}\\.tk",
+    "breadth_log10": 24.65,
+    "recall": 0.713,
+    "spill_over": 0,
+    "example": "facebook-paymant-updates100000009458755236498526.tk"
+  },
+  {
+    "brand": "metamask",
+    "layout": "a.a",
+    "size": 147,
+    "pattern": "[a-z]{0,14}metamask[a-z]{0,12}\\.(com|lt|navy|ro|run|top)",
+    "breadth_log10": 37.6,
+    "recall": 0.307,
+    "spill_over": 0,
+    "example": "authenticationmetamask.com"
+  },
+  {
+    "brand": "icloud",
+    "layout": "a-a.a",
+    "size": 140,
+    "pattern": "(icloud|icloudsign|iphone)\\-[a-z]{2,8}\\.(co|com|info|me|net|online|support)",
+    "breadth_log10": 12.66,
+    "recall": 0.254,
+    "spill_over": 9,
+    "example": "a-icloud.site"
+  },
+  {
+    "brand": "instagram",
+    "layout": "a.a",
+    "size": 132,
+    "pattern": "instagram[a-z]{3,19}\\.(com|dev|ga|ml|org|site|tk)",
+    "breadth_log10": 27.75,
+    "recall": 0.508,
+    "spill_over": 0,
+    "example": "appealinstagram.ga"
+  },
+  {
+    "brand": "whatsapp",
+    "layout": "a-a.a",
+    "size": 123,
+    "pattern": "(?=.*whatsapp)[a-z]{2,8}\\-[a-z]{2,10}\\.(cc|com|gq|site|xyz)",
+    "breadth_log10": 26.2,
+    "recall": 0.788,
+    "spill_over": 0,
+    "example": "acl-wswhatsapp.cc"
+  },
+  {
+    "brand": "facebook",
+    "layout": "a.a",
+    "size": 122,
+    "pattern": "[a-z]{0,16}facebook[a-z]{0,22}\\.(cf|co|com|ga|gq|info|net)",
+    "breadth_log10": 54.65,
+    "recall": 0.545,
+    "spill_over": 0,
+    "example": "adsfacebooks.com"
+  },
+  {
+    "brand": "paypal",
+    "layout": "a-a.a",
+    "size": 109,
+    "pattern": "(au|aus|paypal)\\-[a-z]{5,12}\\.(com|net|org|pro|shop|site)",
+    "breadth_log10": 18.25,
+    "recall": 0.354,
+    "spill_over": 21,
+    "example": "acessar-conectarcontapaypal.ml"
+  },
+  {
+    "brand": "facebook",
+    "layout": "a-a.a",
+    "size": 103,
+    "pattern": "(?=.*facebook)[a-z]{2,18}\\-[a-z]{3,18}\\.(co|com|de|gq|tk|vn)",
+    "breadth_log10": 51.75,
+    "recall": 0.355,
+    "spill_over": 0,
+    "example": "a-facebook.com"
+  },
+  {
+    "brand": "metamask",
+    "layout": "a-a.a",
+    "size": 97,
+    "pattern": "(?=.*metamask)[a-z]{2,12}\\-[a-z]{4,8}\\.(app|co|com|net|online|org)",
+    "breadth_log10": 29.11,
+    "recall": 0.345,
+    "spill_over": 1,
+    "example": "account-metamask.io"
+  },
+  {
+    "brand": "coinbase",
+    "layout": "9-a.a",
+    "size": 94,
+    "pattern": "\\d{5,8}\\-coinbase\\.com",
+    "breadth_log10": 8.05,
+    "recall": 0.964,
+    "spill_over": 0,
+    "example": "000717-coinbase.com"
+  },
+  {
+    "brand": "telegram",
+    "layout": "a-a.a",
+    "size": 94,
+    "pattern": "(a|auth|d|m|telegram)\\-[a-z]{1,9}\\.(biz|me|net|org|pro|ru|site|vip)",
+    "breadth_log10": 14.35,
+    "recall": 0.298,
+    "spill_over": 27,
+    "example": "a-telegram.cc"
+  },
+  {
+    "brand": "apple",
+    "layout": "a-a-a.a",
+    "size": 87,
+    "pattern": "(apple|applecareconnect|appleid|depconnect|https)\\-[a-z]{3,8}\\-[a-z]{3,8}\\.(cloud|com)",
+    "breadth_log10": 23.67,
+    "recall": 0.26,
+    "spill_over": 0,
+    "example": "apple-acpp-portal.com"
+  },
+  {
+    "brand": "netflix",
+    "layout": "a-a.a",
+    "size": 87,
+    "pattern": "(aviso|netflix)\\-[a-z]{3,14}\\.(com|org|xyz)",
+    "breadth_log10": 20.6,
+    "recall": 0.571,
+    "spill_over": 2,
+    "example": "account-netflix.fyi"
+  },
+  {
+    "brand": "ledger",
+    "layout": "a.a",
+    "size": 86,
+    "pattern": "[a-z]{0,4}ledger[a-z]{0,12}\\.(claims|com|help|live|us|vip)",
+    "breadth_log10": 23.45,
+    "recall": 0.539,
+    "spill_over": 0,
+    "example": "assestsgloballedger.com"
+  },
+  {
+    "brand": "instagram",
+    "layout": "a-a.a",
+    "size": 83,
+    "pattern": "(copyrightcenter|copyrightk|instagram|instagramsupporter|m)\\-[a-z]{2,15}\\.(com|de|ga|live|org|ru|tk)",
+    "breadth_log10": 22.79,
+    "recall": 0.192,
+    "spill_over": 22,
+    "example": "about-copyrightsinstagram.cf"
+  },
+  {
+    "brand": "facebook",
+    "layout": "a9.a",
+    "size": 79,
+    "pattern": "(facebook|facebookreport)\\d{2,5}\\.(cf|ml|tk)",
+    "breadth_log10": 5.82,
+    "recall": 0.87,
+    "spill_over": 0,
+    "example": "facebook10005.ml"
+  },
+  {
+    "brand": "apple",
+    "layout": "a-a-a-a.a",
+    "size": 77,
+    "pattern": "(apple|mono)\\-[a-z]{3,8}\\-[a-z]{4,7}\\-(apple|online|portal|support)\\.com",
+    "breadth_log10": 22.16,
+    "recall": 0.463,
+    "spill_over": 0,
+    "example": "aasp-apple-partner-portal.com"
+  },
+  {
+    "brand": "whatsapp",
+    "layout": "a-a-a.a",
+    "size": 75,
+    "pattern": "(?=.*\\-whatsapp)(app|lnstagram)\\-[a-z]{3,8}\\-(whatsapp|whatsappcc)\\.(com|ml)",
+    "breadth_log10": 12.24,
+    "recall": 0.908,
+    "spill_over": 0,
+    "example": "app-aem-whatsappcc.com"
+  },
+  {
+    "brand": "ledger",
+    "layout": "a-a.a",
+    "size": 71,
+    "pattern": "(info|ledger|recovery|validate)\\-[a-z]{2,15}\\.(com|live|net|org)",
+    "breadth_log10": 22.45,
+    "recall": 0.361,
+    "spill_over": 45,
+    "example": "access-ledger.live"
+  },
+  {
+    "brand": "paypal",
+    "layout": "a-a-a.a",
+    "size": 69,
+    "pattern": "(?=.*paypal\\-)(account|paypal)\\-[a-z]{4,9}\\-[a-z]{2,8}\\.(cf|com|net|org)",
+    "breadth_log10": 24.99,
+    "recall": 0.695,
+    "spill_over": 0,
+    "example": "account-paypal-abnormal.com"
+  },
+  {
+    "brand": "amazon",
+    "layout": "a9.a",
+    "size": 63,
+    "pattern": "(amazon|amazoncom|amazonl|amazontfyg)\\d{1,3}\\.(cc|com|net|vip)",
+    "breadth_log10": 4.25,
+    "recall": 0.34,
+    "spill_over": 0,
+    "example": "amazon001.net"
+  },
+  {
+    "brand": "whatsapp",
+    "layout": "a.a",
+    "size": 62,
+    "pattern": "[a-z]{0,8}whatsapp[a-z]{0,7}\\.(com|live|ml|site|tk|vip)",
+    "breadth_log10": 22.04,
+    "recall": 0.404,
+    "spill_over": 0,
+    "example": "canliwhatsapp.info"
+  },
+  {
+    "brand": "coinbase",
+    "layout": "a-a.a",
+    "size": 61,
+    "pattern": "(?=.*coinbase)[a-z]{4,15}\\-[a-z]{2,13}\\.(biz|com)",
+    "breadth_log10": 39.95,
+    "recall": 0.608,
+    "spill_over": 0,
+    "example": "account-coinbaseupdate.com"
+  },
+  {
+    "brand": "chase",
+    "layout": "a.a",
+    "size": 58,
+    "pattern": "[a-z]{0,14}chase[a-z]{0,15}\\.(cf|com|info|ml|studio)",
+    "breadth_log10": 41.77,
+    "recall": 0.583,
+    "spill_over": 0,
+    "example": "accountactivationchasegvfuser.com"
+  },
+  {
+    "brand": "usps",
+    "layout": "a-a.a",
+    "size": 58,
+    "pattern": "(amazon|info|redeliverys|usps)\\-[a-z]{3,8}\\.(com|shop|top|xyz)",
+    "breadth_log10": 12.54,
+    "recall": 0.667,
+    "spill_over": 88,
+    "example": "address-usps.com"
+  },
+  {
+    "brand": "icloud",
+    "layout": "a.a",
+    "size": 53,
+    "pattern": "[a-z]{0,12}icloud[a-z]{0,10}\\.(app|cn|com|info|pl|pro)",
+    "breadth_log10": 31.94,
+    "recall": 0.465,
+    "spill_over": 1,
+    "example": "alerticloud.us"
+  },
+  {
+    "brand": "netflix",
+    "layout": "a.a",
+    "size": 49,
+    "pattern": "[a-z]{0,18}netflix[a-z]{0,17}\\.(co|com|kr|me)",
+    "breadth_log10": 50.16,
+    "recall": 0.513,
+    "spill_over": 0,
+    "example": "cancelnetflix.today"
+  },
+  {
+    "brand": "amazon",
+    "layout": "a-a-a.a",
+    "size": 48,
+    "pattern": "(amazon|identity|relay)\\-[a-z]{2,13}\\-[a-z]{2,6}\\.(com|icu|shop|top|xyz)",
+    "breadth_log10": 28.09,
+    "recall": 0.447,
+    "spill_over": 0,
+    "example": "amazon-accounts-center.com"
+  },
+  {
+    "brand": "paypal",
+    "layout": "a.a",
+    "size": 47,
+    "pattern": "[a-z]{0,9}paypal[a-z]{0,15}\\.(cf|co|com|ml|net|tk)",
+    "breadth_log10": 34.77,
+    "recall": 0.595,
+    "spill_over": 0,
+    "example": "casinomitpaypal.net"
+  },
+  {
+    "brand": "microsoft",
+    "layout": "a.a",
+    "size": 41,
+    "pattern": "[a-z]{0,7}microsoft[a-z]{0,15}\\.(co|com|de|ml|net|ru)",
+    "breadth_log10": 31.94,
+    "recall": 0.677,
+    "spill_over": 0,
+    "example": "loginmicrosoftonline.uk"
+  },
+  {
+    "brand": "icloud",
+    "layout": "a-a-a.a",
+    "size": 39,
+    "pattern": "(?=.*icloud\\-)(icloud|id|iforgo|info)\\-[a-z]{2,8}\\-[a-z]{2,7}\\.(com|info|net|support|us|ws)",
+    "breadth_log10": 22.64,
+    "recall": 0.448,
+    "spill_over": 0,
+    "example": "buscar-icloud-mx.us"
+  },
+  {
+    "brand": "steam",
+    "layout": "a-a.a",
+    "size": 37,
+    "pattern": "(?=.*steam)[a-z]{2,13}\\-[a-z]{4,16}\\.(cfd|com|live|ru|top)",
+    "breadth_log10": 41.77,
+    "recall": 0.704,
+    "spill_over": 1,
+    "example": "add-steam.com"
+  },
+  {
+    "brand": "whatsapp",
+    "layout": "a-a9.a",
+    "size": 36,
+    "pattern": "(?=.*whatsapp)[a-z]{3,14}\\-[a-z]{1,8}\\d{1,4}\\.(cf|com|gq|ml|tk|xyz)",
+    "breadth_log10": 35.99,
+    "recall": 0.577,
+    "spill_over": 0,
+    "example": "api-whatsapp5.tk"
+  }
+]

@@ -1,0 +1,622 @@
+[
+  {
+    "campaign": 1,
+    "size": 68,
+    "families": {
+      "whatsapp": 68
+    },
+    "clues": {
+      "burst": 2278,
+      "template": 2278,
+      "session": 255
+    },
+    "sessions": 12,
+    "from": "2025-10-05",
+    "to": "2025-10-08",
+    "patterns": [
+      "app\\-[a-z]{3}\\-whatsappcc\\.com"
+    ]
+  },
+  {
+    "campaign": 2,
+    "size": 14,
+    "families": {
+      "coinbase": 14
+    },
+    "clues": {
+      "burst": 91,
+      "template": 91,
+      "session": 1
+    },
+    "sessions": 13,
+    "from": "2024-10-22",
+    "to": "2024-11-03",
+    "patterns": [
+      "\\d{5,7}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 3,
+    "size": 6,
+    "families": {
+      "coinbase": 6
+    },
+    "clues": {
+      "burst": 15,
+      "template": 15
+    },
+    "sessions": 6,
+    "from": "2024-11-23",
+    "to": "2024-11-30",
+    "patterns": [
+      "\\d{5,7}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 4,
+    "size": 5,
+    "families": {
+      "coinbase": 5
+    },
+    "clues": {
+      "burst": 10,
+      "template": 10,
+      "session": 1
+    },
+    "sessions": 4,
+    "from": "2025-03-10",
+    "to": "2025-03-15",
+    "patterns": [
+      "\\d{6,7}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 5,
+    "size": 5,
+    "families": {
+      "coinbase": 5
+    },
+    "clues": {
+      "burst": 10,
+      "template": 10
+    },
+    "sessions": 5,
+    "from": "2025-06-12",
+    "to": "2025-06-17",
+    "patterns": [
+      "\\d{5,6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 6,
+    "size": 5,
+    "families": {
+      "amazon": 5
+    },
+    "clues": {
+      "session": 10,
+      "burst": 10,
+      "template": 10
+    },
+    "sessions": 1,
+    "from": "2024-12-22",
+    "to": "2024-12-22",
+    "patterns": [
+      "amazonl\\d{1}\\.vip"
+    ]
+  },
+  {
+    "campaign": 7,
+    "size": 4,
+    "families": {
+      "coinbase": 4
+    },
+    "clues": {
+      "burst": 6,
+      "template": 6,
+      "session": 1
+    },
+    "sessions": 3,
+    "from": "2025-05-13",
+    "to": "2025-05-15",
+    "patterns": [
+      "\\d{5,7}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 8,
+    "size": 4,
+    "families": {
+      "coinbase": 4
+    },
+    "clues": {
+      "burst": 6,
+      "template": 6
+    },
+    "sessions": 4,
+    "from": "2025-06-03",
+    "to": "2025-06-09",
+    "patterns": [
+      "\\d{5,6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 9,
+    "size": 4,
+    "families": {
+      "coinbase": 4
+    },
+    "clues": {
+      "burst": 6,
+      "template": 6
+    },
+    "sessions": 4,
+    "from": "2024-11-13",
+    "to": "2024-11-19",
+    "patterns": [
+      "\\d{6,7}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 10,
+    "size": 4,
+    "families": {
+      "amazon": 4
+    },
+    "clues": {
+      "session": 1,
+      "burst": 1,
+      "template": 4,
+      "nameserver": 3
+    },
+    "sessions": 3,
+    "from": "2018-10-15",
+    "to": "2021-05-16",
+    "patterns": [
+      "amazon\\d{2}\\.com"
+    ]
+  },
+  {
+    "campaign": 11,
+    "size": 3,
+    "families": {
+      "coinbase": 3
+    },
+    "clues": {
+      "burst": 3,
+      "template": 3
+    },
+    "sessions": 3,
+    "from": "2024-12-23",
+    "to": "2024-12-25",
+    "patterns": [
+      "\\d{6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 12,
+    "size": 3,
+    "families": {
+      "amazon": 3
+    },
+    "clues": {
+      "session": 3,
+      "burst": 3,
+      "template": 3
+    },
+    "sessions": 1,
+    "from": "2019-05-12",
+    "to": "2019-05-12",
+    "patterns": [
+      "(?=.*amazonk0)amazonk\\d{1,2}\\.com"
+    ]
+  },
+  {
+    "campaign": 13,
+    "size": 2,
+    "families": {
+      "coinbase": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2025-08-26",
+    "to": "2025-08-29",
+    "patterns": [
+      "\\d{5,6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 14,
+    "size": 2,
+    "families": {
+      "coinbase": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2025-02-01",
+    "to": "2025-02-02",
+    "patterns": [
+      "\\d{6,7}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 15,
+    "size": 2,
+    "families": {
+      "coinbase": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2024-02-05",
+    "to": "2024-02-08",
+    "patterns": [
+      "\\d{8}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 16,
+    "size": 2,
+    "families": {
+      "coinbase": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2025-09-23",
+    "to": "2025-09-24",
+    "patterns": [
+      "\\d{6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 17,
+    "size": 2,
+    "families": {
+      "coinbase": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2024-09-16",
+    "to": "2024-09-16",
+    "patterns": [
+      "\\d{6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 18,
+    "size": 2,
+    "families": {
+      "coinbase": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2024-10-03",
+    "to": "2024-10-05",
+    "patterns": [
+      "\\d{6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 19,
+    "size": 2,
+    "families": {
+      "coinbase": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2025-05-27",
+    "to": "2025-05-27",
+    "patterns": [
+      "\\d{6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 20,
+    "size": 2,
+    "families": {
+      "coinbase": 2
+    },
+    "clues": {
+      "session": 1,
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 1,
+    "from": "2025-02-27",
+    "to": "2025-02-27",
+    "patterns": [
+      "(?=.*1\\-coinbase)\\d{6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 21,
+    "size": 2,
+    "families": {
+      "coinbase": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2025-01-17",
+    "to": "2025-01-19",
+    "patterns": [
+      "\\d{5,6}\\-coinbase\\.com"
+    ]
+  },
+  {
+    "campaign": 22,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2021-05-23",
+    "to": "2021-05-25",
+    "patterns": []
+  },
+  {
+    "campaign": 23,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2020-10-28",
+    "to": "2020-10-30",
+    "patterns": [
+      "(?=.*amazon102)amazon\\d{4}\\.top"
+    ]
+  },
+  {
+    "campaign": 24,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "session": 1,
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 1,
+    "from": "2024-02-01",
+    "to": "2024-02-01",
+    "patterns": [
+      "amazon\\d{2,3}\\.cc"
+    ]
+  },
+  {
+    "campaign": 25,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "session": 1,
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 1,
+    "from": "2022-11-03",
+    "to": "2022-11-03",
+    "patterns": [
+      "amazon\\d{3}\\.(cc|com)"
+    ]
+  },
+  {
+    "campaign": 26,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2022-09-03",
+    "to": "2022-09-04",
+    "patterns": [
+      "amazon\\d{3,4}\\.(com|xyz)"
+    ]
+  },
+  {
+    "campaign": 27,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2022-09-09",
+    "to": "2022-09-11",
+    "patterns": [
+      "amazon[a-z]{0,3}\\d{1,4}\\.com"
+    ]
+  },
+  {
+    "campaign": 28,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "session": 1,
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 1,
+    "from": "2022-10-16",
+    "to": "2022-10-16",
+    "patterns": [
+      "(?=.*amazon991)amazon\\d{4}\\.com"
+    ]
+  },
+  {
+    "campaign": 29,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "session": 1,
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 1,
+    "from": "2024-02-29",
+    "to": "2024-02-29",
+    "patterns": [
+      "amazonl\\d{1}\\.com"
+    ]
+  },
+  {
+    "campaign": 30,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2021-04-30",
+    "to": "2021-05-01",
+    "patterns": [
+      "[a-z]{0,3}amazon[a-z]{0,2}\\d{1}\\.com"
+    ]
+  },
+  {
+    "campaign": 31,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "session": 1,
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 1,
+    "from": "2019-05-23",
+    "to": "2019-05-23",
+    "patterns": [
+      "(?=.*amazonre0)amazonre\\d{2}\\.com"
+    ]
+  },
+  {
+    "campaign": 32,
+    "size": 2,
+    "families": {
+      "amazon": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2019-05-09",
+    "to": "2019-05-09",
+    "patterns": [
+      "amazontfyg\\d{1}\\.com"
+    ]
+  },
+  {
+    "campaign": 33,
+    "size": 2,
+    "families": {
+      "dhl": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2025-06-02",
+    "to": "2025-06-03",
+    "patterns": [
+      "dhl\\-[a-z]{2}\\.cfd"
+    ]
+  },
+  {
+    "campaign": 34,
+    "size": 2,
+    "families": {
+      "dhl": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2024-03-05",
+    "to": "2024-03-06",
+    "patterns": []
+  },
+  {
+    "campaign": 35,
+    "size": 2,
+    "families": {
+      "dhl": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2025-05-27",
+    "to": "2025-05-28",
+    "patterns": [
+      "[a-z]{2,3}\\-[a-z]{2,3}\\.top"
+    ]
+  },
+  {
+    "campaign": 36,
+    "size": 2,
+    "families": {
+      "dhl": 2
+    },
+    "clues": {
+      "burst": 1,
+      "template": 1
+    },
+    "sessions": 2,
+    "from": "2023-04-11",
+    "to": "2023-04-12",
+    "patterns": []
+  }
+]

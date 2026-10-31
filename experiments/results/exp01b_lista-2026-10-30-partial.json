@@ -1,0 +1,168 @@
+[
+  {
+    "brand": "apple",
+    "listed": 1002,
+    "sampled": 45,
+    "tally": {
+      "timed": 29,
+      "first certificate not from Let's Encrypt": 14,
+      "no certificate": 2
+    },
+    "timed": 29,
+    "first_seen_from": "2017-06-30",
+    "first_seen_to": "2024-05-20",
+    "hour_counts_utc": [
+      0,
+      1,
+      1,
+      3,
+      1,
+      1,
+      2,
+      2,
+      3,
+      2,
+      0,
+      0,
+      1,
+      1,
+      3,
+      1,
+      2,
+      0,
+      0,
+      1,
+      0,
+      3,
+      1,
+      0
+    ],
+    "weekday_counts_utc": [
+      3,
+      3,
+      3,
+      6,
+      7,
+      3,
+      4
+    ],
+    "p_value": 0.6456771614192903,
+    "human_rhythm": false,
+    "offset": 8,
+    "band": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      -11,
+      -10,
+      -9,
+      -8,
+      -7,
+      -6,
+      -5,
+      -4
+    ],
+    "band_mass": 0.9261948260904681,
+    "bot_share": 0.9,
+    "entropy_bits": 3.9262723741395074,
+    "posterior": {
+      "-11": 0.04363307448061352,
+      "-10": 0.038003361960444876,
+      "-9": 0.030313287195310873,
+      "-8": 0.025086908986789135,
+      "-7": 0.024629373361362023,
+      "-6": 0.02721651200229931,
+      "-5": 0.030032814605874168,
+      "-4": 0.029365433284991277,
+      "-3": 0.026334070324187196,
+      "-2": 0.023593526425273646,
+      "-1": 0.02387757716007106,
+      "0": 0.0298624968278392,
+      "1": 0.04051706184388936,
+      "2": 0.05134483245981346,
+      "3": 0.05601822117363348,
+      "4": 0.05491586297372448,
+      "5": 0.055087090158455754,
+      "6": 0.05991008237516095,
+      "7": 0.06578994987446846,
+      "8": 0.06598123184656784,
+      "9": 0.05824370119018169,
+      "10": 0.049623084723170285,
+      "11": 0.04545779434240738,
+      "12": 0.04516265042347061
+    }
+  },
+  {
+    "brand": "facebook",
+    "listed": 953,
+    "sampled": 45,
+    "tally": {
+      "no certificate": 8,
+      "timed": 4,
+      "not looked up yet": 32,
+      "first certificate not from Let's Encrypt": 1
+    },
+    "timed": 4,
+    "verdict": "too few timed domains (< 20)"
+  },
+  {
+    "brand": "metamask",
+    "listed": 279,
+    "sampled": 45,
+    "tally": {
+      "not looked up yet": 45
+    },
+    "timed": 0,
+    "verdict": "too few timed domains (< 20)"
+  },
+  {
+    "brand": "paypal",
+    "listed": 253,
+    "sampled": 45,
+    "tally": {
+      "not looked up yet": 45
+    },
+    "timed": 0,
+    "verdict": "too few timed domains (< 20)"
+  },
+  {
+    "brand": "steam",
+    "listed": 260,
+    "sampled": 45,
+    "tally": {
+      "not looked up yet": 45
+    },
+    "timed": 0,
+    "verdict": "too few timed domains (< 20)"
+  },
+  {
+    "brand": "santander",
+    "listed": 78,
+    "sampled": 45,
+    "tally": {
+      "not looked up yet": 45
+    },
+    "timed": 0,
+    "verdict": "too few timed domains (< 20)"
+  },
+  {
+    "brand": "usps",
+    "listed": 66,
+    "sampled": 45,
+    "tally": {
+      "not looked up yet": 45
+    },
+    "timed": 0,
+    "verdict": "too few timed domains (< 20)"
+  }
+]

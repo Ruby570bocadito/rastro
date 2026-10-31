@@ -1,0 +1,211 @@
+"""Husmo, the detective ferret: tells an investigation in plain words, and says how sure it is.
+
+Each line is (kind, text). Kinds: "fact" (read from a public source), "deduction" (what the
+clues add up to), "caution" (what the data cannot say) and "action" (what to do next).
+"""
+
+from __future__ import annotations
+
+from collections import Counter
+
+from rastro import brands, calendar_clues, rhythm
+from rastro.investigate import Investigation
+
+KIND_LABELS = {
+    "certificate": ("a shared certificate", "un certificado compartido"),
+    "word": ("the same unusual word", "la misma palabra rara"),
+    "session": ("the same work session", "la misma sesión de trabajo"),
+    "burst": ("the same launch", "el mismo lanzamiento"),
+    "ip": ("the same server address", "la misma dirección de servidor"),
+    "nameserver": ("the same name servers", "los mismos servidores de nombres"),
+    "template": ("the same template", "la misma plantilla"),
+}
+WEEKENDS = {
+    "sat-sun": ("They rest on Saturdays and Sundays.", "Descansan sábado y domingo."),
+    "fri-sat": ("They rest on Fridays and Saturdays.", "Descansan viernes y sábado."),
+    "sun": ("They rest on Sundays only.", "Solo descansan el domingo."),
+    "none": ("They work all seven days.", "Trabajan los siete días de la semana."),
+}
+DST = {
+    "eu": ("Their clock jumps with European summer time.", "Su reloj salta con el horario de verano europeo."),
+    "us": ("Their clock jumps with US daylight saving time.", "Su reloj salta con el horario de verano de EE. UU."),
+    "south": ("Their clock jumps with southern-hemisphere summer time.",
+              "Su reloj salta con el horario de verano del hemisferio sur."),
+    "none": ("Their clock does not change in summer.", "Su reloj no cambia en verano."),
+}
+
+
+GONE = {   # (English one, English many), (Spanish one, Spanish many)
+    "unregistered": (("{n} is no longer registered", "{n} are no longer registered"),
+                     ("{n} ya no está registrado", "{n} ya no están registrados")),
+    "suspended": (("{n} is already suspended", "{n} are already suspended"),
+                  ("{n} ya está suspendido", "{n} ya están suspendidos")),
+    "defensive": (("{n} is held by a brand-protection registrar", "{n} are held by brand-protection registrars"),
+                  ("{n} lo tiene un registrador de protección de marca",
+                   "{n} los tienen registradores de protección de marca")),
+    "reregistered": (("{n} was registered again, maybe by somebody else",
+                      "{n} were registered again, maybe by somebody else"),
+                     ("{n} se ha vuelto a registrar, quizá por otra persona",
+                      "{n} se han vuelto a registrar, quizá por otra persona")),
+}
+NOTES = {
+    "shared_hosting": ("The seed's certificates also cover {n} other domains: shared hosting, so they say nothing "
+                       "about its owner and were left out.",
+                       "Los certificados de la semilla cubren además {n} dominios: es hosting compartido, así que no "
+                       "dicen nada de su dueño y se han dejado fuera."),
+    "capped": ("{n} lookalikes looked related; only the closest {max} were checked.",
+               "{n} dominios parecidos parecían relacionados; solo se han revisado los {max} más cercanos."),
+    "lonely": ("No sibling joined the seed yet: the pattern to watch is a guess from its name alone.",
+               "Ningún hermano se ha unido aún a la semilla: el patrón que vigilar es una apuesta a partir de su "
+               "nombre."),
+}
+
+
+def note(code: str, values: dict, lang: str = "en") -> str:
+    return NOTES[code][1 if lang == "es" else 0].format(**values)
+
+
+def _list(items: list[str], lang: str) -> str:
+    if len(items) <= 1:
+        return "".join(items)
+    return ", ".join(items[:-1]) + (" and " if lang == "en" else " y ") + items[-1]
+
+
+def _p(p: float) -> str:
+    return "< 0.0001" if p < 0.0001 else f"= {p:.4f}"
+
+
+def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
+    es = lang == "es"
+    out: list[tuple[str, str]] = []
+    seed = inv.members[inv.seed]
+    brand = brands.display(inv.brand) if inv.brand else None
+    if es:
+        out.append(("fact", f"El enlace lleva a {inv.seed}" + (f", que imita a {brand}." if brand else ".")))
+    else:
+        out.append(("fact", f"The link leads to {inv.seed}" + (f", a lookalike of {brand}." if brand else ".")))
+    r = seed.registration
+    registrar = r.registrar.rstrip(".") if r and r.registrar else None
+    if r and (r.registered or registrar):
+        when = f"{r.registered:%Y-%m-%d %H:%M} UTC" if r.registered else None
+        if es:
+            out.append(("fact", "Se registró" + (f" el {when}" if when else "")
+                        + (f" en {registrar}." if registrar else ".")))
+        else:
+            out.append(("fact", "It was registered" + (f" on {when}" if when else "")
+                        + (f" through {registrar}." if registrar else ".")))
+
+    crew = inv.crew
+    listed = sum(1 for d in crew if "list" in inv.members[d].sources)
+    if inv.crew_pattern:
+        times = [t for d in crew if (t := inv.members[d].first_seen)]
+        span = f"{min(times):%Y-%m-%d}", f"{max(times):%Y-%m-%d}"
+        if es:
+            text = f"Su nombre sigue una plantilla: {inv.crew_pattern.regex}. La comparten {len(crew)} dominios"
+            text += f", {listed} de ellos en la lista pública de phishing" if listed else ""
+            text += f", de {span[0]} a {span[1]}." if times else "."
+        else:
+            text = f"Its name follows a template: {inv.crew_pattern.regex}. {len(crew)} domains share it"
+            text += f", {listed} of them on the public phishing list" if listed else ""
+            text += f", from {span[0]} to {span[1]}." if times else "."
+        out.append(("deduction", text))
+    else:
+        out.append(("caution", "Aún no encuentro hermanos construidos igual." if es
+                    else "I found no siblings built like it yet."))
+
+    if len(inv.campaign) > 1:
+        kinds: dict[str, int] = {}
+        for a, b, _, ks in inv.edges:
+            if a in inv.campaign and b in inv.campaign:
+                for k in ks:
+                    kinds[k] = kinds.get(k, 0) + 1
+        labels = [KIND_LABELS[k][1 if es else 0] for k in sorted(kinds, key=lambda k: -kinds[k])
+                  if k in KIND_LABELS and k != "template"]
+        n = len(inv.campaign) - 1
+        if es:
+            out.append(("deduction", f"{n} dominio{'s' if n > 1 else ''} se le une{'n' if n > 1 else ''} por pistas "
+                                     f"que suman: {_list(labels, lang)}."))
+        else:
+            out.append(("deduction", f"{n} domain{'s are' if n > 1 else ' is'} tied to it by clues that add up: "
+                                     f"{_list(labels, lang)}."))
+    elif inv.crew_pattern:
+        out.append(("caution", "Ninguna pista lo ata a un lanzamiento concreto: la banda lo sacó suelto, días lejos de "
+                               "sus otros dominios." if es else
+                    "No clue ties it to a particular launch: the crew put it out on its own, days away from its "
+                    "other domains."))
+    else:
+        out.append(("caution", "Ninguna pista lo une con fuerza a otro dominio todavía." if es
+                    else "No clue ties it strongly to another domain yet."))
+
+    c = inv.clues
+    if c and inv.rhythm_found:
+        tz, west, east = rhythm.tz_name(c.offset), rhythm.tz_name(c.band[0]), rhythm.tz_name(c.band[-1])
+        if es:
+            out.append(("deduction", f"Sus {inv.clock_events} actos con hora caen en una jornada laboral: lo más "
+                                     f"probable, {tz}; entre {west} y {east} con un {c.band_mass:.0%} de probabilidad "
+                                     f"(test de ritmo p {_p(c.p_value)})."))
+        else:
+            out.append(("deduction", f"Their {inv.clock_events} timed actions fall into a working day: most likely "
+                                     f"{tz}, between {west} and {east} with {c.band_mass:.0%} probability "
+                                     f"(rhythm test p {_p(c.p_value)})."))
+        if c.weekend in WEEKENDS:
+            out.append(("deduction", WEEKENDS[c.weekend][1 if es else 0]))
+        if c.dst in DST:
+            out.append(("deduction", DST[c.dst][1 if es else 0]))
+        if c.weekend == "inconclusive" and c.dst == "inconclusive":
+            out.append(("caution", "Para saber su fin de semana o su horario de verano hacen falta más sesiones." if es
+                        else "Their weekend and summer time need more sessions to tell."))
+        elif c.dst == "inconclusive":
+            out.append(("caution", f"Para saber si cambia la hora en verano hacen falta más sesiones (unas "
+                                   f"{calendar_clues.DST_MIN_SESSIONS})." if es else
+                        f"Whether their clock changes in summer needs more sessions to tell (about "
+                        f"{calendar_clues.DST_MIN_SESSIONS})."))
+        elif c.weekend == "inconclusive":
+            out.append(("caution", f"Para saber qué días descansa hacen falta más sesiones (unas "
+                                   f"{calendar_clues.WEEKEND_MIN_SESSIONS} en {calendar_clues.WEEKEND_MIN_WEEKS} "
+                                   "semanas)." if es else
+                        f"Their days off need more sessions to tell (about {calendar_clues.WEEKEND_MIN_SESSIONS} "
+                        f"over {calendar_clues.WEEKEND_MIN_WEEKS} weeks)."))
+    elif c:
+        p = f"p {_p(c.p_value)}" if c.p_value is not None else ""
+        out.append(("caution", f"Sus {inv.clock_events} actos con hora aún no dibujan una jornada laboral ({p}): "
+                               "no me atrevo con el mapa." if es else
+                    f"Their {inv.clock_events} timed actions do not draw a working day yet ({p}): no map."))
+    else:
+        out.append(("caution", "No tengo actos con hora: sin mapa." if es else "No timed actions: no map."))
+
+    if inv.crew_pattern:
+        b = inv.crew_pattern.breadth_log10
+        out.append(("action", f"Para cazar el siguiente, vigila {inv.crew_pattern.regex}: unos 10^{b:.1f} nombres "
+                              "posibles, lo bastante estrecho para no dar falsas alarmas." if es else
+                    f"To catch the next one, watch {inv.crew_pattern.regex}: about 10^{b:.1f} possible names, "
+                    "narrow enough to stay quiet."))
+    elif inv.guess:
+        out.append(("action", f"Una apuesta a partir de su nombre: vigila {inv.guess}." if es else
+                    f"A guess from its name alone: watch {inv.guess}."))
+
+    gone = Counter(inv.left_out.values())
+    if gone:
+        parts = [GONE[code][1 if es else 0][gone[code] > 1].format(n=gone[code]) for code in GONE if gone[code]]
+        total = len(set(inv.attributed) | {inv.seed})
+        out.append(("fact", f"De los {total} dominios atribuidos, {_list(parts, lang)}." if es else
+                    f"Of the {total} attributed domains, {_list(parts, lang)}."))
+    live = sum(len(r.domains) for r in inv.reports)
+    n = len(inv.reports)
+    if live == 1:
+        out.append(("action", "Solo queda uno activo: abajo tienes el borrador de aviso a su registrador, para que lo "
+                              "revises y lo envíes tú." if es else
+                    "Only one is still live: the abuse report draft for its registrar is below, for you to review "
+                    "and send."))
+    elif live:
+        out.append(("action", f"Quedan {live} activos: abajo tienes {n} borrador{'es' if n > 1 else ''} de aviso, uno "
+                              "por registrador, para que los revises y envíes tú." if es else
+                    f"{live} are still live: {n} abuse report draft{'s' if n > 1 else ''} below, one per registrar, "
+                    "for you to review and send."))
+    else:
+        out.append(("caution", "Ninguno sigue activo con un registrador que yo pueda consultar: nada que avisar."
+                    if es else "None is still live with a registrar I can look up: nothing to report."))
+    out.append(("caution", "No he visitado ningún dominio: me lo han contado los certificados, los registros y el DNS "
+                           "público." if es else
+                "I never visited the domains: certificates, registries and public DNS told me all this."))
+    return out
