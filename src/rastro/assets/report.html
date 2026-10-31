@@ -451,7 +451,7 @@ details > summary { cursor: pointer; font-weight: 600; }
       defensive: "lo tiene un registrador de protección de marcas: probablemente defensivo",
       reregistered: "se registró de nuevo después de su etapa de phishing, quizá por otra persona", reported: "en un aviso" },
     step6: "Paso 6", evidence: "Pruebas", evSum: (n) => `Los ${n} dominios revisados`,
-    cols: ["Dominio", "Primer acto (UTC)", "Registrado (UTC)", "Registrador", "Encontrado en", "Estado"],
+    cols: ["Dominio", "Primer acto (UTC)", "Registrado (UTC)", "Registrador", "Encontrado en", "Estado", "Nombre (0-1)"],
     src: { seed: "semilla", list: "lista pública", store: "vigilante", certificate: "certificado" },
     how: "Cómo se ha hecho", sources: "Fuentes: ",
     srcNames: { crtsh: "crt.sh (transparencia de certificados)", rdap: "RDAP (registros de dominios)", dns: "DNS público sobre HTTPS",
@@ -463,7 +463,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     hidden: (n) => `${n} dominios más no caben en el dibujo; están en las pruebas.`,
     weekendV: { "sat-sun": "sáb–dom", "fri-sat": "vie–sáb", sun: "dom", none: "trabaja 7 días", inconclusive: "no concluyente" },
     dstV: { eu: "europeo", us: "EE. UU.", south: "austral", none: "no cambia", inconclusive: "no concluyente" },
-    tip: { first: "Primer acto", reg: "Registrado", registrar: "Registrador", found: "Encontrado en", status: "Estado" },
+    tip: { first: "Primer acto", reg: "Registrado", registrar: "Registrador", found: "Encontrado en", status: "Estado", score: "Puntuación del nombre" },
     foot: (v) => `Rastro ${v} · código abierto (Apache-2.0) · contorno de tierra: Natural Earth · este informe no hace ninguna petición de red`,
     mapLabel: "Mapa del mundo con la probabilidad de cada huso horario",
     tlLabel: "Línea de tiempo de los dominios atribuidos", graphLabel: "Grafo de la campaña",
@@ -497,7 +497,7 @@ details > summary { cursor: pointer; font-weight: 600; }
       defensive: "held by a brand-protection registrar: probably defensive",
       reregistered: "registered again after its phishing days, maybe by somebody else", reported: "in a report" },
     step6: "Step 6", evidence: "Evidence", evSum: (n) => `All ${n} domains checked`,
-    cols: ["Domain", "First act (UTC)", "Registered (UTC)", "Registrar", "Found in", "Status"],
+    cols: ["Domain", "First act (UTC)", "Registered (UTC)", "Registrar", "Found in", "Status", "Name (0-1)"],
     src: { seed: "seed", list: "public list", store: "watcher", certificate: "certificate" },
     how: "How this was made", sources: "Sources: ",
     srcNames: { crtsh: "crt.sh (Certificate Transparency)", rdap: "RDAP (domain registries)", dns: "public DNS over HTTPS",
@@ -509,7 +509,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     hidden: (n) => `${n} more domains do not fit in the drawing; they are in the evidence.`,
     weekendV: { "sat-sun": "Sat–Sun", "fri-sat": "Fri–Sat", sun: "Sun", none: "works 7 days", inconclusive: "inconclusive" },
     dstV: { eu: "European", us: "US", south: "southern", none: "none", inconclusive: "inconclusive" },
-    tip: { first: "First act", reg: "Registered", registrar: "Registrar", found: "Found in", status: "Status" },
+    tip: { first: "First act", reg: "Registered", registrar: "Registrar", found: "Found in", status: "Status", score: "Name score" },
     foot: (v) => `Rastro ${v} · open source (Apache-2.0) · land outline: Natural Earth · this report makes no network requests`,
     mapLabel: "World map with the probability of each time zone",
     tlLabel: "Timeline of the attributed domains", graphLabel: "Campaign graph",
@@ -625,7 +625,8 @@ details > summary { cursor: pointer; font-weight: 600; }
     function show(n) {
       tip.replaceChildren(el("b", {}, n.id));
       const rows = [[T.tip.first, minute(n.first)], [T.tip.reg, minute(n.registered)], [T.tip.registrar, n.registrar || "—"],
-        [T.tip.found, (n.sources || []).map((s) => T.src[s] || s).join(", ")], [T.tip.status, n.status ? (T.reasons[n.status] || n.status) : "—"]];
+        [T.tip.found, (n.sources || []).map((s) => T.src[s] || s).join(", ")], [T.tip.status, n.status ? (T.reasons[n.status] || n.status) : "—"],
+        ...(n.score == null ? [] : [[T.tip.score, Math.min(n.score, 0.99).toFixed(2)]])];
       rows.forEach(([k, v]) => { const d = el("div"); d.append(el("span", { class: "mono" }, k + ": "), v); tip.append(d); });
       tip.hidden = false;
       const box = cork.getBoundingClientRect(), sx = box.width / W, sy = box.height / H;
@@ -859,13 +860,15 @@ details > summary { cursor: pointer; font-weight: 600; }
     const nodes = D.domains;
     $("ev-sum").textContent = T.evSum(D.counts.checked + 1);
     const table = $("evidence"), head = el("tr");
-    T.cols.forEach((c) => head.append(el("th", { scope: "col" }, c)));
+    const scored = nodes.some((n) => n.score != null);      // the name-score column only with a name model
+    T.cols.slice(0, scored ? undefined : -1).forEach((c) => head.append(el("th", { scope: "col" }, c)));
     const thead = el("thead"); thead.append(head); table.append(thead);
     const body = el("tbody");
     nodes.forEach((n) => {
       const tr = el("tr", n.seed ? { class: "is-seed" } : {});
       [n.id, minute(n.first), minute(n.registered), n.registrar || "—", (n.sources || []).map((s) => T.src[s] || s).join(", "),
-        n.status ? (T.reasons[n.status] || n.status) : "—"].forEach((v, i) => tr.append(el("td", i === 0 ? { class: "mono" } : {}, v)));
+        n.status ? (T.reasons[n.status] || n.status) : "—", n.score == null ? "—" : Math.min(n.score, 0.99).toFixed(2)]
+        .slice(0, scored ? undefined : -1).forEach((v, i) => tr.append(el("td", i === 0 ? { class: "mono" } : {}, v)));
       body.append(tr);
     });
     table.append(body);

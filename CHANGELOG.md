@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Experiment 07: a logistic-regression model of the domain name alone (`src/rastro/scorer.py`). It does not ship: on fresh certificates it would bury the alerts in false alarms, and live campaigns hide among its training negatives. `--name-model FILE` lets `rastro score`, `rastro investigate` and `rastro watch` use a model you train with `experiments/exp07_puntuador.py --save FILE`.
+- Registrable domains now treat country second levels such as `co.id`, `com.my` or `ac.th` as public suffixes.
+
 ## 0.1.0 · 2026-10-31
 
 First public release.

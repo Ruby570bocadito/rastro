@@ -20,6 +20,7 @@ from rastro import (
     pattern,
     report,
     rhythm,
+    scorer,
     store,
     watch,
 )
@@ -107,7 +108,11 @@ def _print_burst(b: bursts.Burst) -> None:
 
 def cmd_watch(args) -> int:
     allow = {d.lower() for d in _lines(args.allow)} if args.allow else set()
-    w = watch.Watcher(args.log, allow=allow, max_breadth=args.max_breadth, allow_broad=args.allow_broad)
+    model = _name_model(args.name_model)
+    keep_score = args.score_keep if args.score_keep is not None else (
+        model.meta.get("threshold_at_fpr_0.001") if model and args.db else None)
+    w = watch.Watcher(args.log, allow=allow, max_breadth=args.max_breadth, allow_broad=args.allow_broad, model=model,
+                      keep_score=keep_score, alert_score=args.score_alerts)
     if args.learn:
         w.arm_learned(_lines(args.learn), min_support=args.min_support)
     w.arm_regex((args.regex or []) + (_lines(args.regex_file) if args.regex_file else []))
@@ -117,8 +122,12 @@ def cmd_watch(args) -> int:
     for regex, breadth in w.skipped:
         print(f"skipped  {regex}  (about 10^{breadth:.1f} names: too broad, it would raise false alarms;"
               " --allow-broad arms it anyway)")
-    if not w.armed and not args.bursts_every:
-        print("Nothing to watch: give --learn, --regex or --regex-file, or --bursts-every with --db.")
+    if w.keep_score is not None:
+        print(f"name model: also keeping names that score {w.keep_score:.3f} or more")
+    if w.alert_score is not None:
+        print(f"name model: alerting on names that score {w.alert_score:.3f} or more")
+    if not w.armed and not args.bursts_every and w.alert_score is None:
+        print("Nothing to watch: give --learn, --regex or --regex-file, --score-alerts, or --bursts-every with --db.")
         return 1
     conn = store.connect(args.db) if args.db else None
     out = open(args.alerts, "a", encoding="utf-8") if args.alerts else None
@@ -219,7 +228,8 @@ def cmd_investigate(args) -> int:
     sources = investigate.Sources.public(Path(args.cache), offline=args.offline, crt=not args.no_crtsh,
                                          rdap_=not args.no_rdap, dns_=not args.no_dns)
     inv = investigate.investigate(args.link, sources, list_lines=lines, conn=conn, max_candidates=args.max_candidates,
-                                  sims=args.sims, on_status=lambda s: print("  " + s, flush=True))
+                                  sims=args.sims, on_status=lambda s: print("  " + s, flush=True),
+                                  model=_name_model(args.name_model))
     print()
     for k, (_, text) in enumerate(husmo.narrate(inv, args.lang), 1):
         print(f"{k}. {text}")
@@ -250,6 +260,33 @@ def cmd_demo(args) -> int:
     print(f"\n{'Expediente' if es else 'Case file'}: {out.resolve()}")
     if args.open:
         webbrowser.open(out.resolve().as_uri())
+    return 0
+
+
+NO_MODEL = ("No name model is shipped: experiment 07 found that a model of the name alone is not reliable yet. "
+            "Train one with experiments/exp07_puntuador.py --save FILE and pass --name-model FILE.")
+
+
+def _name_model(path: str | None) -> scorer.Model | None:
+    return scorer.loads(Path(path).read_bytes()) if path else scorer.default()
+
+
+def cmd_score(args) -> int:
+    model = _name_model(args.name_model)
+    if model is None:
+        print(NO_MODEL)
+        return 1
+    names, skipped = [], 0
+    for raw in list(args.domains) + (_lines(args.file) if args.file else []):
+        try:
+            names.append(investigate.seed_domain(raw))
+        except ValueError:
+            skipped += 1
+    for s, d in scorer.rank(model, sorted(set(names)))[:args.top or None]:
+        why = ", ".join(husmo.reason(k, v) for k, v, _ in model.reasons(d, 3))
+        print(f"{min(s, 0.999):.3f}  {d}" + (f"  ({why})" if why else ""))
+    if skipped:
+        print(f"{skipped} lines were not domain names")
     return 0
 
 
@@ -286,7 +323,14 @@ def main(argv: list[str] | None = None) -> int:
     inv.add_argument("--no-rdap", action="store_true", help="skip RDAP (no registrations or abuse contacts)")
     inv.add_argument("--no-dns", action="store_true", help="skip the public DNS-over-HTTPS resolver")
     inv.add_argument("--cache", default="data/raw", help="folder for cached crt.sh, RDAP and DNS answers")
+    inv.add_argument("--name-model", help="experimental: add the scores of a name model trained by experiment 07")
     inv.set_defaults(run=cmd_investigate)
+    sc = sub.add_parser("score", help="experimental: score names with a name model trained by experiment 07")
+    sc.add_argument("domains", nargs="*", help="domains or links")
+    sc.add_argument("--file", help="file of domains or links, one per line (- for stdin)")
+    sc.add_argument("--top", type=int, default=0, help="show only the N highest scores")
+    sc.add_argument("--name-model", help="a name model trained by experiment 07 (none is shipped)")
+    sc.set_defaults(run=cmd_score)
     de = sub.add_parser("demo", help="investigate a made-up case offline and write its case file")
     de.add_argument("--lang", choices=["en", "es"], default="en", help="language of the case file")
     de.add_argument("--report", help="where to write the case file (default: rastro-demo.html)")
@@ -315,6 +359,12 @@ def main(argv: list[str] | None = None) -> int:
     w.add_argument("--allow-broad", action="store_true", help="arm broad learned patterns too")
     w.add_argument("--allow", help="file of extra official domains that must never alert")
     w.add_argument("--alerts", help="append alerts to this file as JSON lines")
+    w.add_argument("--score-alerts", type=float, help="with --name-model, also alert on names that score at least this")
+    w.add_argument("--score-keep", type=float,
+                   help="with --name-model and --db, also keep names that score at least this (default: the "
+                        "model's threshold for 1 false positive in 1,000)")
+    w.add_argument("--name-model", help="experimental: a name model trained by experiment 07, for --score-alerts "
+                                        "and --score-keep")
     w.add_argument("--tiles", type=int, default=20, help="read the latest N tiles of 256 certificates and stop")
     w.add_argument("--follow", action="store_true",
                    help="keep reading new tiles (Let's Encrypt's log moves about 400 KB/s)")

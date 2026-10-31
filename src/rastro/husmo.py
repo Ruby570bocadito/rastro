@@ -48,6 +48,29 @@ GONE = {   # (English one, English many), (Spanish one, Spanish many)
                      ("{n} se ha vuelto a registrar, quizá por otra persona",
                       "{n} se han vuelto a registrar, quizá por otra persona")),
 }
+REASONS = {   # what made a name look like known phishing: (English, Spanish)
+    "brand": ("the brand {brand}", "la marca {brand}"),
+    "brand+more": ("the brand with other words around it", "la marca con otras palabras alrededor"),
+    "w": ('the word "{value}"', "la palabra «{value}»"),
+    "tld": ("the .{value} ending", "la terminación .{value}"),
+    "g": ('the letters "{value}"', "las letras «{value}»"),
+    "digits": ("{value} digits", "{value} cifras"),
+    "hyphens": ("{value} hyphens", "{value} guiones"),
+    "length": ("a long name", "un nombre largo"),
+    "punycode": ("non-Latin letters", "letras no latinas"),
+    "digits+hyphens": ("digits and hyphens together", "cifras y guiones juntos"),
+    "brand-only": ("just the brand's name", "solo el nombre de la marca"),
+}
+
+
+def reason(kind: str, value: str, lang: str = "en") -> str:
+    """One of the scorer's reasons, in words."""
+    template = REASONS.get(kind)
+    if template is None:
+        return f"{kind} {value}".strip()
+    return template[1 if lang == "es" else 0].format(value=value, brand=brands.display(value) if value else "")
+
+
 NOTES = {
     "shared_hosting": ("The seed's certificates also cover {n} other domains: shared hosting, so they say nothing "
                        "about its owner and were left out.",
@@ -84,6 +107,15 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
         out.append(("fact", f"El enlace lleva a {inv.seed}" + (f", que imita a {brand}." if brand else ".")))
     else:
         out.append(("fact", f"The link leads to {inv.seed}" + (f", a lookalike of {brand}." if brand else ".")))
+    if inv.name_score is not None:
+        why = _list([reason(k, v, lang) for k, v in inv.name_reasons], lang)
+        shown = min(inv.name_score, 0.99)      # a model of the name alone never gets to certainty
+        if es:
+            out.append(("deduction", f"Solo por su nombre, mi modelo le da un {shown:.2f} sobre 1 de parecido "
+                                     "con el phishing conocido" + (f": {why}." if why else ".")))
+        else:
+            out.append(("deduction", f"By its name alone, my model gives it {shown:.2f} out of 1 for looking "
+                                     "like known phishing" + (f": {why}." if why else ".")))
     r = seed.registration
     registrar = r.registrar.rstrip(".") if r and r.registrar else None
     if r and (r.registered or registrar):

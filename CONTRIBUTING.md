@@ -44,6 +44,7 @@ They are what make Rastro safe to run and to share, so a change that breaks one 
 - `src/rastro/bursts.py`: spots campaigns being born among stored names.
 - `src/rastro/campaigns.py`: groups domains into campaigns from clues that add up.
 - `src/rastro/pattern.py`: learns a readable regular expression from a campaign's domains and reports how many names it could match.
+- `src/rastro/scorer.py` and `src/rastro/assets/scorer.bin`: the name model (logistic regression on hashed features of the name), trained by experiment 07.
 - `src/rastro/rhythm.py`: the time-zone model, with bots, early and late crews, and the rhythm test.
 - `src/rastro/calendar_clues.py`: daylight saving, weekend and holiday clues, with the bars below which they stay silent.
 - `src/rastro/brands.py`: imitated brands, their official domains and how they are written.

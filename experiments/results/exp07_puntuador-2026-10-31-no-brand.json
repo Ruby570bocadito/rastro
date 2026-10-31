@@ -1,0 +1,105 @@
+{
+  "negatives_kind": "no-brand",
+  "listed_registrables": 165407,
+  "platforms_left_out": 1180,
+  "positives": 116474,
+  "only_through_subdomains": 39683,
+  "negatives": 52759,
+  "cross_validation": {
+    "all": {
+      "positives": 116474,
+      "negatives": 52759,
+      "auc": 0.7874,
+      "recall_at_fpr_0.01": 0.2307,
+      "recall_at_fpr_0.001": 0.0892
+    },
+    "with_brand": {
+      "positives": 5688,
+      "negatives": 72,
+      "auc": 0.9255,
+      "recall_at_fpr_0.01": 0.3592,
+      "recall_at_fpr_0.001": 0.3592
+    },
+    "only_through_subdomains": {
+      "positives": 39683,
+      "negatives": 52759,
+      "auc": 0.6978,
+      "recall_at_fpr_0.01": 0.1332,
+      "recall_at_fpr_0.001": 0.0415
+    },
+    "threshold_at_fpr_0.01": 0.9958,
+    "threshold_at_fpr_0.001": 0.9999
+  },
+  "fresh_sample": {
+    "certificates": 15360,
+    "names": 11172,
+    "log_entries_per_day": 14770607,
+    "known_listed_whole": 0,
+    "known_listed_any": 63,
+    "names_with_brand": 46,
+    "old_rule": {
+      "flagged": 6,
+      "per_day": 5770,
+      "known_whole_caught": 0
+    },
+    "thresholds": [
+      {
+        "threshold": 0.5,
+        "flagged": 4268,
+        "per_day": 4104229,
+        "known_whole_caught": 0,
+        "known_any_caught": 13,
+        "with_brand": 41
+      },
+      {
+        "threshold": 0.8,
+        "flagged": 2153,
+        "per_day": 2070385,
+        "known_whole_caught": 0,
+        "known_any_caught": 4,
+        "with_brand": 32
+      },
+      {
+        "threshold": 0.9,
+        "flagged": 1333,
+        "per_day": 1281850,
+        "known_whole_caught": 0,
+        "known_any_caught": 3,
+        "with_brand": 29
+      },
+      {
+        "threshold": 0.95,
+        "flagged": 774,
+        "per_day": 744300,
+        "known_whole_caught": 0,
+        "known_any_caught": 2,
+        "with_brand": 26
+      },
+      {
+        "threshold": 0.99,
+        "flagged": 203,
+        "per_day": 195210,
+        "known_whole_caught": 0,
+        "known_any_caught": 0,
+        "with_brand": 17
+      },
+      {
+        "threshold": 0.9958,
+        "flagged": 101,
+        "per_day": 97124,
+        "known_whole_caught": 0,
+        "known_any_caught": 0,
+        "with_brand": 11
+      },
+      {
+        "threshold": 0.9999,
+        "flagged": 7,
+        "per_day": 6731,
+        "known_whole_caught": 0,
+        "known_any_caught": 0,
+        "with_brand": 1
+      }
+    ]
+  },
+  "seconds": 89
+}

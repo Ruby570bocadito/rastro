@@ -118,6 +118,7 @@ Each piece was tested on real campaigns before it went into the product. The det
 | Do template families split into campaigns? | Yes: one family was a single 68-domain launch, another came in waves |
 | How much data do the calendar clues need? | The weekend, about 50 sessions over 8 weeks. Daylight saving, hundreds |
 | Does one link unfold end to end? | A Coinbase lookalike caught live, and missing from the public list, unfolded into a crew of 95 domains. Only it was still live, and the clock gave UTC−7 again |
+| Can a model of the name alone spot phishing among fresh certificates? | Not yet: AUC 0.79 on new templates, but at any threshold with fewer than about 7,000 false alarms a day it caught none of the fresh listed names. No name model ships until it has clean benign names to learn from |
 | Does one URL expand to its siblings through urlscan? | Pending |
 
 ## What Rastro will never do
@@ -130,7 +131,7 @@ Each piece was tested on real campaigns before it went into the product. The det
 ## Roadmap
 
 - Expansion from one URL through urlscan, for campaigns whose names change but whose pages do not.
-- A small machine-learning model that scores every new certificate, so the watcher finds lookalikes without a seed or a template.
+- A name model worth shipping: experiment 07 showed that it first needs clean benign names, such as domains registered years ago and never listed.
 - Husmo reading the deductions aloud in the case file.
 - Following up abuse reports, to measure how long each registrar takes to act.
 

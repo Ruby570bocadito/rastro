@@ -6,7 +6,9 @@ What experiments 03 and 04 taught, built in:
 - each domain alerts once, although its pre-certificate and certificate both reach the log;
 - with a database, the watch remembers where it stopped and picks up from there;
 - it stores only certificates that carry a brand lookalike or an alert (0.4 % of a live
-  sample; storing everything would take about 6 GB a day) and counts the rest.
+  sample; storing everything would take about 6 GB a day) and counts the rest;
+- with the name model (experiment 07) it can also keep, or alert on, names that score high
+  without any seed, brand or pattern.
 """
 
 from __future__ import annotations
@@ -20,7 +22,7 @@ from collections.abc import Callable, Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 
-from rastro import brands, pattern, store
+from rastro import brands, pattern, scorer, store
 from rastro.bursts import Burst, find_bursts
 from rastro.domains import registrable
 from rastro.sources import ctlog
@@ -42,9 +44,11 @@ class Alert:
     pattern: str
     log: str
     index: int
+    score: float | None = None    # set when the name model, not a pattern, raised the alert
 
     def line(self) -> str:
-        return f"ALERT {self.logged_at} UTC  {self.domain}  matches {self.pattern}"
+        why = f"matches {self.pattern}" if self.pattern else f"scores {self.score:.3f} on the name model"
+        return f"ALERT {self.logged_at} UTC  {self.domain}  {why}"
 
     def json(self) -> str:
         return json.dumps(asdict(self))
@@ -52,8 +56,13 @@ class Alert:
 
 class Watcher:
     def __init__(self, log: str, allow: Iterable[str] = (), max_breadth: float = NARROW_LOG10,
-                 allow_broad: bool = False):
+                 allow_broad: bool = False, model: scorer.Model | None = None, keep_score: float | None = None,
+                 alert_score: float | None = None):
         self.log = log
+        self.model = model
+        self.keep_score = keep_score if model else None
+        self.alert_score = alert_score if model else None
+        self._scores: dict[str, float] = {}
         self.allow = set(allow) | brands.official_domains()
         self.max_breadth = max_breadth
         self.allow_broad = allow_broad
@@ -75,6 +84,15 @@ class Watcher:
         for r in regexes:
             self.armed.append(Armed(r, re.compile(r), None))
 
+    def score(self, name: str) -> float:
+        """The name model's score, remembered so a name met again costs nothing."""
+        s = self._scores.get(name)
+        if s is None:
+            if len(self._scores) > 500_000:
+                self._scores.clear()
+            s = self._scores[name] = self.model.score(name)
+        return s
+
     def handle(self, entries: list[ctlog.Entry]) -> list[Alert]:
         alerts = []
         self.seen += len(entries)
@@ -83,20 +101,29 @@ class Watcher:
                 if name in self.alerted:
                     continue
                 hit = next((a for a in self.armed if a.compiled.fullmatch(name)), None)
+                score = None
                 if hit is None:
-                    continue
+                    if self.alert_score is None or (score := self.score(name)) < self.alert_score:
+                        continue
                 if name in self.allow:
                     self.suppressed += 1
                     continue
                 self.alerted.add(name)
-                alerts.append(Alert(f"{e.logged_at:%Y-%m-%d %H:%M:%S}", name, hit.regex, self.log, e.index))
+                alerts.append(Alert(f"{e.logged_at:%Y-%m-%d %H:%M:%S}", name, hit.regex if hit else "", self.log,
+                                    e.index, None if hit else round(score, 4)))
         return alerts
 
     def keep(self, entries: list[ctlog.Entry]) -> list[ctlog.Entry]:
-        """The entries worth storing: those with a name that alerted or that carries a brand without being one of
-        its official domains. Each is kept whole, so the names it shares a certificate with stay linked."""
+        """The entries worth storing: those with a name that alerted, that carries a brand without being one of
+        its official domains, or that the name model scores at least `keep_score`. Each is kept whole, so the
+        names it shares a certificate with stay linked."""
         def wanted(name: str) -> bool:
-            return name in self.alerted or (name not in self.allow and brands.brand_of(name) is not None)
+            if name in self.alerted:
+                return True
+            if name in self.allow:
+                return False
+            return brands.brand_of(name) is not None or (
+                self.keep_score is not None and self.score(name) >= self.keep_score)
 
         kept = [e for e in entries if any(wanted(registrable(n)) for n in e.names)]
         self.kept += len(kept)

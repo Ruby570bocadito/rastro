@@ -172,6 +172,30 @@ A filtered watch read 10,240 fresh certificates from Sycamore 2027h1 and kept 18
 
 The seed's name and the case files stay in `data/raw/`, out of the repository.
 
+## 07 · A model of the name alone
+
+**Question.** Can a small machine-learning model, looking only at a domain's name, rank fresh certificate names by how much they look like phishing, so the watcher could find lookalikes without a seed, a brand or a pattern?
+
+**Method.** `src/rastro/scorer.py`: logistic regression on 2^18 hashed features of the name (character 3- to 5-grams, words, the ending, the brand it carries, length, hyphens, digits, punycode), trained by AdaGrad in pure Python. Positives: the 116,474 registrable domains that Phishing.Database lists whole (the bare name or www), so they were registered for phishing. Left out: 1,180 hosting platforms (ten or more listed host names, such as duckdns.org or github.io) and the 39,683 domains listed only through a subdomain, a mix of tricks like amazon.x1g.top and hacked legitimate sites. Negatives: 52,838 registrable names from 160 tiles of Let's Encrypt's Sycamore log, plus the five-minute live sample. Measured three ways: five-fold cross-validation grouped by template, so no family sits on both sides; the subdomain-only names, never trained on; and a later sample of 60 tiles (15,360 certificates, 11,172 names) never trained on. `experiments/exp07_puntuador.py`, results in `results/exp07_puntuador-2026-10-31-*.json`.
+
+**Result.**
+
+| | ROC AUC | Recall at 1 % false positives | Recall at 0.1 % |
+|---|---:|---:|---:|
+| All names, grouped cross-validation | 0.79 | 22 % | 7 % |
+| Names that carry a brand (167 negatives) | 0.80 | | |
+| Listed only through a subdomain, never trained on | 0.70 | 12 % | 3 % |
+
+On the later sample, every threshold strict enough to keep false alarms under about 7,000 a day caught none of the fresh names already on the list, and a threshold of 0.99 would flag about 167,000 names a day. The highest scores went to random-looking strings and to ordinary names in languages other than English.
+
+**What went wrong, and why it matters.**
+
+- **The negatives are not clean.** Certificate Transparency carries the live campaigns too. A batch of facebook--signup-… names on .ph sat among the training negatives, so the model learned them as normal and gave the same campaign almost 0 in the later sample, while the old rule (a brand plus a throwaway shape) flagged some of them.
+- **Leaving brand names out of the negatives does not fix it.** With the brands' official domains as the only branded negatives, the campaign rose to between 0.77 and 0.999, but the model learned that any brand means phishing: microsoftonline.com scored 0.93 and ordinary businesses with a brand inside their name about 0.99. The branded AUC of 0.93 in that variant only measures brands against their own official domains.
+- **Base rates.** Phishing is a tiny share of the millions of names a day in the log, so a name-only model needs a false-positive rate far below what it reaches here before its alerts mean anything.
+
+**Decision.** No name model ships with Rastro, and Husmo gives no name score by default. The code stays for experiments: `--save FILE` keeps a trained model, and `--name-model FILE` adds its scores to `rastro score`, `rastro investigate` and `rastro watch`. The next attempt needs clean benign names, for example domains registered years ago, still alive and never listed, read through RDAP.
+
 ## 02 · Expansion from one URL
 
 Pending. Does one URL expand to at least 10 sibling domains in 2 minutes with the free urlscan quota plus crt.sh?

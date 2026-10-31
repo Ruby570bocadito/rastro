@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from rastro import brands, calendar_clues, campaigns, pattern, rhythm
+from rastro import brands, calendar_clues, campaigns, pattern, rhythm, scorer
 from rastro.domains import registrable
 from rastro.sources import crtsh, dns, rdap
 
@@ -113,6 +113,7 @@ class Member:
     ips: frozenset[str] = frozenset()
     nameservers: frozenset[str] = frozenset()
     co_certified: frozenset[str] = frozenset()
+    score: float | None = None                            # the name scorer's 0-1, when a model is shipped
 
     @property
     def registered(self) -> datetime | None:
@@ -179,6 +180,8 @@ class Investigation:
     left_out: dict[str, str]
     notes: list[tuple[str, dict]]          # (code, values): husmo.note() words them
     sources_used: list[str]
+    name_score: float | None = None        # the seed's name score, and the features behind it
+    name_reasons: list[tuple[str, str]] = field(default_factory=list)
 
     @property
     def attributed(self) -> list[str]:
@@ -367,7 +370,8 @@ def abuse_reports(seed: str, brand: str | None, members: dict[str, Member], doma
 
 def investigate(link: str, sources: Sources, list_lines: Iterable[str] = (), conn: sqlite3.Connection | None = None,
                 max_candidates: int = 150, sims: int = 5000, workers: int = 4,
-                on_status: Callable[[str], None] = lambda s: None, now: datetime | None = None) -> Investigation:
+                on_status: Callable[[str], None] = lambda s: None, now: datetime | None = None,
+                model: scorer.Model | None = None, use_model: bool = True) -> Investigation:
     host = seed_host(link)
     seed = registrable(host)
     brand = brands.brand_of(seed)
@@ -428,6 +432,10 @@ def investigate(link: str, sources: Sources, list_lines: Iterable[str] = (), con
     if crew_pattern is None and len(attributed) == 1:
         notes.append(("lonely", {}))
 
+    model = model or (scorer.default() if use_model else None)
+    if model:
+        for m in members.values():
+            m.score = round(model.score(m.name), 4)
     crew_listed = len(set(crew) & listed)
     reports, left_out = abuse_reports(seed, brand, members, attributed, crew_pattern, crew_listed, edges)
     return Investigation(
@@ -436,4 +444,6 @@ def investigate(link: str, sources: Sources, list_lines: Iterable[str] = (), con
         clock_events=len(times), session_hours=[t.hour + t.minute / 60 for t in starts],
         guess=None if crew_pattern else guess_from_one(seed), reports=reports, left_out=left_out, notes=notes,
         sources_used=sources.names() + (["list"] if listed else []) + (["store"] if conn else []),
+        name_score=members[seed].score,
+        name_reasons=[(k, v) for k, v, _ in model.reasons(seed, 3)] if model else [],
     )
