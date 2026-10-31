@@ -131,15 +131,19 @@ def _asset(name: str) -> str:
     return resources.files("rastro").joinpath("assets", name).read_text(encoding="utf-8")
 
 
-def render(inv: Investigation, lang: str = "en", demo: dict | None = None) -> str:
-    page = _asset("report.html")
+def fill(template: str, title: str, lang: str, blocks: dict[str, str]) -> str:
+    """A page from one of the assets: its inline scripts hashed into the CSP, its placeholders filled."""
+    page = _asset(template)
     scripts = re.findall(r"<script>(.*?)</script>", page, flags=re.S)
     hashes = " ".join("'sha256-" + base64.b64encode(hashlib.sha256(s.encode("utf-8")).digest()).decode() + "'"
                       for s in scripts)
-    title = f"Rastro · {inv.seed}"
     for placeholder, value in (("{{SCRIPT_HASHES}}", hashes), ("{{LANG}}", "es" if lang == "es" else "en"),
-                               ("{{TITLE}}", html.escape(title)), ("/*CASE*/", safe_json(case_data(inv, lang, demo))),
-                               ("/*LAND*/", _asset("land.json"))):
+                               ("{{TITLE}}", html.escape(title)), *blocks.items()):
         assert page.count(placeholder) == 1, placeholder
         page = page.replace(placeholder, value)
     return page
+
+
+def render(inv: Investigation, lang: str = "en", demo: dict | None = None) -> str:
+    return fill("report.html", f"Rastro · {inv.seed}", lang,
+                {"/*CASE*/": safe_json(case_data(inv, lang, demo)), "/*LAND*/": _asset("land.json")})

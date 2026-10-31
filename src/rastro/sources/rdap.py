@@ -151,22 +151,33 @@ def parse(payload: dict, domain: str, server: str) -> Registration:
                         status=tuple(payload.get("status") or ()), server=server)
 
 
-def lookup(domain: str, cache_dir: Path, offline: bool = False, pause: float = 0.2) -> Registration | None:
-    """The registration of a registrable domain, or None when it is not registered, its TLD has no RDAP
-    server, or the server never answered."""
+def check(domain: str, cache_dir: Path, offline: bool = False, fresh: bool = False,
+          pause: float = 0.2) -> tuple[str, Registration | None]:
+    """What the registry says about a domain: ("found", registration), or "not-found", "no-server" (its TLD has
+    no RDAP server) or "no-answer" with None. `fresh` skips the cache, as the tracker needs today's answer."""
     cache_dir = Path(cache_dir)
     path = cache_dir / f"rdap_{domain}.json"
     base = servers_for(cache_dir, offline).get(domain.rsplit(".", 1)[-1])
-    if path.exists():
+    if path.exists() and not fresh:
         payload = json.loads(path.read_text(encoding="utf-8"))
-    elif offline or base is None:
-        return None
+    elif base is None:
+        return "no-server", None
+    elif offline:
+        return "no-answer", None
     else:
         payload = _get(f"{base}domain/{domain}", timeout=30, retries=3)
         time.sleep(pause)
         if payload is None:
-            return None
+            return "no-answer", None
         if payload:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps(payload), encoding="utf-8")
-    return parse(payload, domain, base or "") if payload else None
+    if not payload:
+        return "not-found", None
+    return "found", parse(payload, domain, base or "")
+
+
+def lookup(domain: str, cache_dir: Path, offline: bool = False, pause: float = 0.2) -> Registration | None:
+    """The registration of a registrable domain, or None when it is not registered, its TLD has no RDAP
+    server, or the server never answered."""
+    return check(domain, cache_dir, offline=offline, pause=pause)[1]

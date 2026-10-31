@@ -1,10 +1,12 @@
-"""Command line: `rastro investigate`, `demo`, `pattern`, `rhythm`, `logs`, `watch`, `campaigns` and `bursts`."""
+"""Command line: `rastro investigate`, `demo`, `track`, `pattern`, `rhythm`, `logs`, `watch`, `campaigns`, `bursts`
+and `score`."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import sys
+import time
 import webbrowser
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -22,6 +24,7 @@ from rastro import (
     rhythm,
     scorer,
     store,
+    track,
     watch,
 )
 from rastro.domains import registrable
@@ -132,11 +135,15 @@ def cmd_watch(args) -> int:
     conn = store.connect(args.db) if args.db else None
     out = open(args.alerts, "a", encoding="utf-8") if args.alerts else None
 
+    followed = track.connect(args.track) if args.track else None
+
     def on_alert(alert: watch.Alert) -> None:
         print(alert.line(), flush=True)
         if out:
             out.write(alert.json() + "\n")
             out.flush()
+        if followed:
+            track.add(followed, [alert.domain], _instant(alert.logged_at.replace(" ", "T")), source="watch")
 
     try:
         if args.follow:
@@ -214,6 +221,7 @@ def cmd_campaigns(args) -> int:
 
 
 DEFAULT_LIST = "data/raw/lists/phishing-domains-ACTIVE.txt"
+DEFAULT_TRACK = "data/raw/track.sqlite"
 
 
 def cmd_investigate(args) -> int:
@@ -239,6 +247,11 @@ def cmd_investigate(args) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(report.render(inv, args.lang), encoding="utf-8")
     print(f"\nCase file: {out.resolve()}")
+    if args.track:
+        live = [d for r in inv.reports for d in r.domains]
+        new = track.add(track.connect(args.track), live, inv.when, source="investigate")
+        print(f"Following {new} new of {len(live)} live domains in {args.track}: run `rastro track check` "
+              "every few hours to see when each registrar acts.")
     if args.json:
         Path(args.json).write_text(json.dumps(report.case_data(inv, args.lang), ensure_ascii=False, indent=1),
                                    encoding="utf-8")
@@ -269,6 +282,75 @@ NO_MODEL = ("No name model is shipped: experiment 07 found that a model of the n
 
 def _name_model(path: str | None) -> scorer.Model | None:
     return scorer.loads(Path(path).read_bytes()) if path else scorer.default()
+
+
+def cmd_track_add(args) -> int:
+    conn = track.connect(args.db)
+    now = datetime.now(UTC)
+    since = _instant(args.since) if args.since else now
+    if since is None:
+        print(f"--since needs a date and time in ISO 8601, such as 2026-11-01T09:00Z, not {args.since!r}")
+        return 2
+    names, skipped = [], 0
+    for raw in list(args.domains) + (_lines(args.file) if args.file else []):
+        try:
+            names.append(investigate.seed_domain(raw))
+        except ValueError:
+            skipped += 1
+    new = track.add(conn, names, since, source="manual", reported=args.reported)
+    for path in args.alerts or []:
+        for line in _lines(path):
+            alert = json.loads(line)
+            new += track.add(conn, [alert["domain"]], _instant(alert["logged_at"].replace(" ", "T")), source="watch")
+    for path in args.case or []:
+        case = json.loads(Path(path).read_text(encoding="utf-8"))
+        new += track.add(conn, [d for r in case.get("reports", []) for d in r["domains"]], since, source="case",
+                         reported=args.reported)
+    total = conn.execute("SELECT COUNT(*) FROM tracked").fetchone()[0]
+    print(f"{new} new domains followed, {total} in {args.db}" + (f" ({skipped} lines were not domains)" if skipped
+                                                                 else ""))
+    return 0
+
+
+def cmd_track_check(args) -> int:
+    conn = track.connect(args.db)
+    sources = track.Sources.public(Path(args.cache))
+    rounds = args.times if args.every else 1
+    for k in range(rounds):
+        counts = track.check(conn, sources, on_seen=lambda d, s: print(
+            f"  {s.state:<9} {d}" + (f"  ({s.registrar})" if s.registrar else ""), flush=True))
+        print(f"{datetime.now(UTC):%Y-%m-%d %H:%M} UTC · " + (", ".join(f"{n} {state}" for state, n in sorted(
+            counts.items())) or "nothing left to check: every followed domain is down"), flush=True)
+        if k < rounds - 1:
+            time.sleep(args.every * 3600)
+    return 0
+
+
+def cmd_track_report(args) -> int:
+    conn = track.connect(args.db)
+    rows = track.scoreboard(conn, args.from_report)
+    if not rows:
+        print("Nothing to score yet: add domains with `rastro track add`" + (" --reported" if args.from_report else "")
+              + " and run `rastro track check`.")
+        return 1
+    done, total = sum(r.taken_down for r in rows), sum(r.domains for r in rows)
+    clock = "from each abuse report" if args.from_report else "from when each domain was followed"
+    print(f"TAKEDOWN SCOREBOARD · {total} domain{'s' if total != 1 else ''}, {done} taken down, "
+          f"{sum(r.still_up for r in rows)} still up · timed {clock}")
+    print(f"{'Registrar':<42} {'Domains':>7} {'Down':>5}  {'Median':<10} Still up after 1 day · 3 days · 7 days")
+    for r in rows:
+        after = " · ".join(f"{r.after[m]:.0%}" for m in track.MARKS)
+        median = track.hours_text(r.median_hours)
+        print(f"{r.registrar[:42]:<42} {r.domains:>7} {r.taken_down:>5}  {median:<10} {after}")
+    print("Kaplan-Meier estimate: a domain still up counts as up until its last check.")
+    if args.html:
+        page = report.fill("scoreboard.html", "Rastro · takedown scoreboard", args.lang,
+                           {"/*BOARD*/": report.safe_json(track.page_data(conn, args.lang,
+                                                                          from_report=args.from_report))})
+        Path(args.html).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.html).write_text(page, encoding="utf-8")
+        print(f"Scoreboard: {Path(args.html).resolve()}")
+    return 0
 
 
 def cmd_score(args) -> int:
@@ -324,6 +406,8 @@ def main(argv: list[str] | None = None) -> int:
     inv.add_argument("--no-dns", action="store_true", help="skip the public DNS-over-HTTPS resolver")
     inv.add_argument("--cache", default="data/raw", help="folder for cached crt.sh, RDAP and DNS answers")
     inv.add_argument("--name-model", help="experimental: add the scores of a name model trained by experiment 07")
+    inv.add_argument("--track", nargs="?", const=DEFAULT_TRACK, metavar="DB",
+                     help=f"follow the live domains with `rastro track` (default database: {DEFAULT_TRACK})")
     inv.set_defaults(run=cmd_investigate)
     sc = sub.add_parser("score", help="experimental: score names with a name model trained by experiment 07")
     sc.add_argument("domains", nargs="*", help="domains or links")
@@ -337,6 +421,31 @@ def main(argv: list[str] | None = None) -> int:
     de.add_argument("--sims", type=int, default=5000, help="simulations for the rhythm test")
     de.add_argument("--open", action="store_true", help="open the case file in your browser")
     de.set_defaults(run=cmd_demo)
+    tr = sub.add_parser("track", help="follow domains after they are found and score registrars by how fast they act")
+    tsub = tr.add_subparsers(dest="track_command", required=True)
+    ta = tsub.add_parser("add", help="start following domains")
+    ta.add_argument("domains", nargs="*", help="domains or links")
+    ta.add_argument("--file", help="file of domains or links, one per line")
+    ta.add_argument("--alerts", nargs="*", help="alerts files written by `rastro watch --alerts`")
+    ta.add_argument("--case", nargs="*", help="case data written by `rastro investigate --json`: its reported domains")
+    ta.add_argument("--since", help="when to start the clock (ISO 8601, default now)")
+    ta.add_argument("--reported", action="store_true",
+                    help="their abuse reports went out at --since (default now); works on domains already followed")
+    ta.add_argument("--db", default=DEFAULT_TRACK)
+    ta.set_defaults(run=cmd_track_add)
+    tc = tsub.add_parser("check", help="ask the registry and a public resolver about every domain still up")
+    tc.add_argument("--every", type=float, help="check again every N hours")
+    tc.add_argument("--times", type=int, default=28, help="with --every, how many rounds (default 28)")
+    tc.add_argument("--db", default=DEFAULT_TRACK)
+    tc.add_argument("--cache", default="data/raw", help="folder for RDAP and DNS answers")
+    tc.set_defaults(run=cmd_track_check)
+    tp = tsub.add_parser("report", help="the scoreboard: how long each registrar takes to act")
+    tp.add_argument("--html", help="also write the scoreboard as a self-contained HTML page")
+    tp.add_argument("--from-report", action="store_true",
+                    help="only reported domains, timed from their abuse report instead of from when they were followed")
+    tp.add_argument("--lang", choices=["en", "es"], default="en")
+    tp.add_argument("--db", default=DEFAULT_TRACK)
+    tp.set_defaults(run=cmd_track_report)
     p = sub.add_parser("pattern", help="learn naming patterns from a file of domains (one per line, - for stdin)")
     p.add_argument("file")
     p.add_argument("--min-support", type=int, default=3)
@@ -363,6 +472,8 @@ def main(argv: list[str] | None = None) -> int:
     w.add_argument("--score-keep", type=float,
                    help="with --name-model and --db, also keep names that score at least this (default: the "
                         "model's threshold for 1 false positive in 1,000)")
+    w.add_argument("--track", nargs="?", const=DEFAULT_TRACK, metavar="DB",
+                   help=f"follow every alerted domain with `rastro track` (default database: {DEFAULT_TRACK})")
     w.add_argument("--name-model", help="experimental: a name model trained by experiment 07, for --score-alerts "
                                         "and --score-keep")
     w.add_argument("--tiles", type=int, default=20, help="read the latest N tiles of 256 certificates and stop")

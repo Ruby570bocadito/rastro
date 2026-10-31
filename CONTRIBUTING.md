@@ -40,6 +40,7 @@ They are what make Rastro safe to run and to share, so a change that breaks one 
 - `src/rastro/husmo.py`: Husmo's words for an investigation, in English and Spanish.
 - `src/rastro/report.py` and `src/rastro/assets/report.html`: the self-contained HTML case file.
 - `src/rastro/demo.py`: the made-up world behind `rastro demo`.
+- `src/rastro/track.py` and `src/rastro/assets/scoreboard.html`: follows domains after they are found and scores registrars with Kaplan-Meier survival curves.
 - `src/rastro/watch.py`: the live watcher (narrow patterns only, official-domain allowlist, one alert per domain, resume).
 - `src/rastro/bursts.py`: spots campaigns being born among stored names.
 - `src/rastro/campaigns.py`: groups domains into campaigns from clues that add up.

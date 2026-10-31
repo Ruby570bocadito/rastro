@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src {{SCRIPT_HASHES}}; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>{{TITLE}}</title>
+<style>
+:root {
+  --bg: #e7ddc7; --paper: #fbf7ee; --ink: #1f2430; --muted: #5b616e; --line: #d1c5aa; --string: #c4302a;
+  --marker: #f1c21b; --pin: #2a55c4; --ok: #2c8a56; --violet: #7a4fb0; --amber: #b8661b; --note: #fff0a6;
+  --on-note: #2b2616; --night: rgba(31, 36, 48, .06);
+  --shadow: 0 1px 0 rgba(70, 50, 20, .08), 0 10px 26px -14px rgba(70, 50, 20, .45);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", "Helvetica Neue", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12161c; --paper: #1b2029; --ink: #ece6d8; --muted: #9ba3b1; --line: #2e3745; --string: #ff5e52;
+    --marker: #ffd23f; --pin: #84a8ff; --ok: #4fca8c; --violet: #b58cff; --amber: #f0a35e; --note: #3a3418;
+    --on-note: #f5ecc9; --night: rgba(255, 255, 255, .05);
+    --shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 12px 30px -14px rgba(0, 0, 0, .85);
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background-color: var(--bg); background-image: var(--grain); color: var(--ink); font: 400 15px/1.55 var(--font-body); }
+.page {
+  max-width: 1180px; margin: 0 auto; display: grid; gap: 18px; padding-block: 18px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.masthead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { width: 40px; height: 40px; flex: none; }
+.logo .paw { fill: var(--string); }
+.wordmark { font: 800 32px/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; }
+.tag { font: 500 12px/1.3 var(--font-mono); color: var(--muted); }
+.stamp { font: 700 14px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--string); border: 2px solid var(--string); padding: 6px 10px; transform: rotate(-2deg); border-radius: 3px; }
+h1 { margin: 0; font: 800 clamp(30px, 5vw, 52px)/1.02 var(--font-display); letter-spacing: .01em; }
+.lede { margin: 6px 0 0; max-width: 72ch; color: var(--muted); font-size: 16px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.chip { font: 500 13px/1.2 var(--font-mono); padding: 6px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); }
+.chip b { font-weight: 700; }
+.chip-hot { border-color: var(--string); color: var(--string); }
+.panel { min-width: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 16px; box-shadow: var(--shadow); display: grid; gap: 12px; }
+.ptitle { margin: 0; font: 700 24px/1.05 var(--font-display); letter-spacing: .04em; text-transform: uppercase; }
+.sub { margin: 0; color: var(--muted); font-size: 13.5px; }
+#chart { display: block; width: 100%; height: auto; }
+.axis { stroke: var(--line); stroke-width: 1; }
+.grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
+.half { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 6 5; }
+.tick { font: 500 11px var(--font-mono); fill: var(--muted); }
+.curve { fill: none; stroke-width: 2.6; stroke-linejoin: round; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+.legend li { display: flex; align-items: center; gap: 7px; }
+.legend i { width: 18px; height: 4px; border-radius: 2px; display: inline-block; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 7px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+td.num { font-variant-numeric: tabular-nums; text-align: right; }
+td.mono { font-family: var(--font-mono); overflow-wrap: anywhere; }
+.share { display: flex; align-items: center; gap: 8px; min-width: 110px; }
+.share span { font: 600 12.5px var(--font-mono); min-width: 38px; text-align: right; }
+.bar { flex: 1; height: 8px; border-radius: 4px; background: var(--night); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--string); border-radius: 4px; }
+.state { font: 600 11.5px var(--font-mono); padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+.state-live, .state-offline { color: var(--string); border-color: var(--string); }
+.state-held, .state-deleting, .state-gone { color: var(--ok); border-color: var(--ok); }
+details > summary { cursor: pointer; font-weight: 600; }
+.notes { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+.empty { margin: 0; padding: 14px; background: var(--note); color: var(--on-note); border-radius: 4px; }
+.foot { color: var(--muted); font-size: 12.5px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+        <ellipse class="paw" cx="20" cy="26" rx="8.5" ry="7.5"/>
+        <ellipse class="paw" cx="9" cy="16" rx="3.6" ry="4.6" transform="rotate(-20 9 16)"/>
+        <ellipse class="paw" cx="16" cy="10" rx="3.6" ry="4.8" transform="rotate(-6 16 10)"/>
+        <ellipse class="paw" cx="24" cy="10" rx="3.6" ry="4.8" transform="rotate(6 24 10)"/>
+        <ellipse class="paw" cx="31" cy="16" rx="3.6" ry="4.6" transform="rotate(20 31 16)"/>
+      </svg>
+      <div><div class="wordmark">Rastro</div><div class="tag" id="tag"></div></div>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </header>
+  <section>
+    <h1 id="title"></h1>
+    <p class="lede" id="lede"></p>
+    <div class="chips" id="chips"></div>
+  </section>
+  <article class="panel" aria-labelledby="h-chart">
+    <h2 class="ptitle" id="h-chart"></h2>
+    <p class="sub" id="chart-sub"></p>
+    <svg id="chart" viewBox="0 0 800 330" role="img"></svg>
+    <ul class="legend" id="legend"></ul>
+  </article>
+  <article class="panel" aria-labelledby="h-table">
+    <h2 class="ptitle" id="h-table"></h2>
+    <div class="table-wrap"><table id="table"></table></div>
+  </article>
+  <article class="panel" aria-labelledby="h-domains">
+    <h2 class="ptitle" id="h-domains"></h2>
+    <details><summary id="domains-sum"></summary><div class="table-wrap"><table id="domains"></table></div></details>
+  </article>
+  <article class="panel" aria-labelledby="h-how">
+    <h2 class="ptitle" id="h-how"></h2>
+    <ul class="notes" id="notes"></ul>
+  </article>
+  <p class="foot" id="foot"></p>
+</div>
+<script type="application/json" id="board">/*BOARD*/</script>
+<script>
+"use strict";
+(function () {
+  const D = JSON.parse(document.getElementById("board").textContent);
+  const ES = D.lang === "es";
+  const T = ES ? {
+    tag: "Marcador generado el ", stamp: "Marcador", title: "¿Cuánto tarda cada registrador en actuar?",
+    lede: "Cada revisión pregunta al registro (RDAP) y a un DNS público por cada dominio seguido, nunca al dominio. Un dominio cae cuando aparece suspendido, en borrado o fuera de su zona antes de caducar.",
+    domains: "dominios seguidos", down: "retirados", up: "siguen en pie", registrars: "registradores", waiting: "sin revisar aún",
+    chart: "Supervivencia", chartSub: "Parte de los dominios de cada registrador que seguía en pie con el paso del tiempo (Kaplan-Meier). Cuanto antes baja la línea, antes actúa.",
+    clockFollowed: "El reloj empieza cuando cada dominio entra en el seguimiento.", clockReport: "El reloj empieza cuando se envió el aviso de abuso de cada dominio; solo cuentan los dominios avisados.",
+    table: "Clasificación", cols: ["Registrador", "Dominios", "Retirados", "Mediana", "En pie tras 1 día", "3 días", "7 días"],
+    list: "Dominios", listSum: (n) => `Los ${n} dominios revisados`,
+    dcols: ["Dominio", "Registrador", "Seguido desde (UTC)", "Estado", "Tiempo", "Origen"],
+    states: { live: "vivo", offline: "sin web", held: "suspendido", deleting: "borrándose", gone: "fuera", unknown: "sin respuesta" },
+    sources: { investigate: "investigación", watch: "vigilante", case: "expediente", manual: "a mano" },
+    notYet: "aún no", days: (d) => `${d} d`, hours: (h) => `${h} h`, expired: "caducó",
+    how: "Cómo se ha hecho",
+    notes: ["Kaplan-Meier: un dominio que sigue en pie cuenta como en pie hasta su última revisión, en vez de descartarse.",
+      "El reloj empieza cuando el dominio entra en el seguimiento, que puede ser antes o después del aviso de abuso.",
+      "Un dominio que desaparece después de su fecha de caducidad no cuenta como retirado.",
+      "Con pocos dominios por registrador, la clasificación dice poco: mira la columna de dominios."],
+    empty: "Todavía no hay revisiones: añade dominios con `rastro track add` y ejecuta `rastro track check`.",
+    foot: (v) => `Rastro ${v} · código abierto (Apache-2.0) · esta página no hace ninguna petición de red`,
+    chartLabel: "Curvas de supervivencia de los dominios por registrador", x: "tiempo desde que se siguen", y: "en pie",
+  } : {
+    tag: "Scoreboard generated on ", stamp: "Scoreboard", title: "How long does each registrar take to act?",
+    lede: "Each check asks the registry (RDAP) and a public resolver about every followed domain, never the domain itself. A domain is down once it shows up suspended, being deleted or out of its zone before it expired.",
+    domains: "domains followed", down: "taken down", up: "still up", registrars: "registrars", waiting: "not checked yet",
+    chart: "Survival", chartSub: "The share of each registrar's domains still up as time passes (Kaplan-Meier). The sooner a line drops, the sooner that registrar acts.",
+    clockFollowed: "The clock starts when each domain enters the tracker.", clockReport: "The clock starts when each domain's abuse report went out; only reported domains count.",
+    table: "Ranking", cols: ["Registrar", "Domains", "Down", "Median", "Up after 1 day", "3 days", "7 days"],
+    list: "Domains", listSum: (n) => `All ${n} checked domains`,
+    dcols: ["Domain", "Registrar", "Followed since (UTC)", "State", "Time", "From"],
+    states: { live: "live", offline: "no site", held: "suspended", deleting: "deleting", gone: "gone", unknown: "no answer" },
+    sources: { investigate: "investigation", watch: "watcher", case: "case file", manual: "by hand" },
+    notYet: "not yet", days: (d) => `${d} d`, hours: (h) => `${h} h`, expired: "expired",
+    how: "How this was made",
+    notes: ["Kaplan-Meier: a domain still up counts as up until its last check, instead of being dropped.",
+      "The clock starts when a domain enters the tracker, which may be before or after its abuse report.",
+      "A domain that disappears after its expiry date does not count as taken down.",
+      "With few domains per registrar, the ranking says little: look at the domains column."],
+    empty: "No checks yet: add domains with `rastro track add` and run `rastro track check`.",
+    foot: (v) => `Rastro ${v} · open source (Apache-2.0) · this page makes no network requests`,
+    chartLabel: "Survival curves of the domains, by registrar", x: "time since followed", y: "still up",
+  };
+  const SVG = "http://www.w3.org/2000/svg";
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, attrs, text) => { const n = document.createElement(tag); for (const k in attrs || {}) n.setAttribute(k, attrs[k]); if (text != null) n.textContent = text; return n; };
+  const sv = (tag, attrs, text) => { const n = document.createElementNS(SVG, tag); for (const k in attrs || {}) n.setAttribute(k, attrs[k]); if (text != null) n.textContent = text; return n; };
+  const span = (h) => h == null ? T.notYet : h < 48 ? T.hours(Math.round(h)) : T.days((h / 24).toFixed(1));
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const COLORS = ["--string", "--pin", "--ok", "--violet", "--amber", "--muted"];
+
+  $("tag").textContent = T.tag + D.generated.slice(0, 16).replace("T", " ") + " UTC";
+  $("stamp").textContent = T.stamp;
+  $("title").textContent = T.title;
+  $("lede").textContent = T.lede;
+  const chips = $("chips");
+  const chip = (n, label, hot) => { const c = el("span", { class: "chip" + (hot ? " chip-hot" : "") }); c.append(el("b", {}, String(n)), " " + label); chips.append(c); };
+  chip(D.counts.domains, T.domains); chip(D.counts.taken_down, T.down); chip(D.counts.still_up, T.up, D.counts.still_up > 0);
+  chip(D.counts.registrars, T.registrars);
+  if (D.counts.waiting) chip(D.counts.waiting, T.waiting);
+  ["h-chart", "h-table", "h-domains", "h-how"].forEach((id, i) => { $(id).textContent = [T.chart, T.table, T.list, T.how][i]; });
+  $("chart-sub").textContent = T.chartSub + " " + (D.from_report ? T.clockReport : T.clockFollowed);
+
+  if (!D.rows.length) {
+    $("chart").replaceWith(el("p", { class: "empty" }, T.empty));
+  } else {
+    const svg = $("chart"); svg.setAttribute("aria-label", T.chartLabel);
+    const W = 800, H = 330, L = 56, R = 16, top = 14, bottom = 290;
+    const horizon = Math.max(D.horizon, 24);
+    const x = (h) => L + Math.min(h, horizon) / horizon * (W - L - R);
+    const y = (s) => top + (1 - s) * (bottom - top);
+    [0, 0.25, 0.5, 0.75, 1].forEach((s) => {
+      svg.append(sv("line", { x1: L, y1: y(s), x2: W - R, y2: y(s), class: s === 0.5 ? "half" : "grid" }));
+      svg.append(sv("text", { x: L - 8, y: y(s) + 4, "text-anchor": "end", class: "tick" }, Math.round(s * 100) + "%"));
+    });
+    const stepDays = horizon > 24 * 21 ? 7 : horizon > 24 * 6 ? 1 : 0.25;
+    for (let h = 0; h <= horizon + 0.1; h += stepDays * 24) {
+      const label = h === 0 ? "0" : h % 24 === 0 ? T.days(h / 24) : span(h);
+      const anchor = x(h) > W - R - 24 ? "end" : "middle";
+      svg.append(sv("line", { x1: x(h), y1: bottom, x2: x(h), y2: bottom + 5, class: "axis" }));
+      svg.append(sv("text", { x: x(h), y: bottom + 18, "text-anchor": anchor, class: "tick" }, label));
+    }
+    svg.append(sv("line", { x1: L, y1: bottom, x2: W - R, y2: bottom, class: "axis" }));
+    svg.append(sv("text", { x: W - R, y: H - 4, "text-anchor": "end", class: "tick" }, T.x));
+    const shown = D.rows.slice().sort((a, b) => b.domains - a.domains).slice(0, COLORS.length);
+    const legend = $("legend");
+    shown.forEach((row, i) => {
+      const color = css(COLORS[i]);
+      let d = `M${x(0)} ${y(1)}`;
+      row.curve.forEach(([h, s], k) => { if (k) d += ` H${x(h).toFixed(1)} V${y(s).toFixed(1)}`; });
+      const last = D.domains.filter((n) => n.registrar === row.registrar).reduce((m, n) => Math.max(m, n.hours), 0);
+      d += ` H${x(Math.max(last, row.curve[row.curve.length - 1][0])).toFixed(1)}`;
+      svg.append(sv("path", { d, class: "curve", stroke: color }));
+      const li = el("li"); const sw = el("i"); sw.style.background = color;
+      li.append(sw, `${row.registrar} (${row.domains})`); legend.append(li);
+    });
+  }
+
+  const table = $("table");
+  const head = el("tr"); T.cols.forEach((c) => head.append(el("th", { scope: "col" }, c)));
+  const thead = el("thead"); thead.append(head); table.append(thead);
+  const body = el("tbody");
+  D.rows.forEach((r) => {
+    const tr = el("tr");
+    tr.append(el("td", {}, r.registrar), el("td", { class: "num" }, String(r.domains)), el("td", { class: "num" }, String(r.taken_down)),
+      el("td", {}, span(r.median_hours)));
+    D.marks.forEach((m) => {
+      const td = el("td"); const box = el("div", { class: "share" }); const bar = el("div", { class: "bar" }); const fill = el("i");
+      fill.style.width = Math.round(r.after[String(m)] * 100) + "%"; bar.append(fill);
+      box.append(el("span", {}, Math.round(r.after[String(m)] * 100) + "%"), bar); td.append(box); tr.append(td);
+    });
+    body.append(tr);
+  });
+  table.append(body);
+
+  $("domains-sum").textContent = T.listSum(D.domains.length);
+  const dt = $("domains");
+  const dh = el("tr"); T.dcols.forEach((c) => dh.append(el("th", { scope: "col" }, c)));
+  const dth = el("thead"); dth.append(dh); dt.append(dth);
+  const db = el("tbody");
+  D.domains.forEach((n) => {
+    const tr = el("tr");
+    const st = el("span", { class: "state state-" + n.state }, n.expired ? T.expired : (T.states[n.state] || n.state));
+    const stTd = el("td"); stTd.append(st);
+    tr.append(el("td", { class: "mono" }, n.domain), el("td", {}, n.registrar), el("td", {}, n.since.slice(0, 16).replace("T", " ")),
+      stTd, el("td", {}, span(n.hours)), el("td", {}, T.sources[n.source] || n.source || "—"));
+    db.append(tr);
+  });
+  dt.append(db);
+
+  const notes = $("notes");
+  T.notes.forEach((t) => notes.append(el("li", {}, t)));
+  $("foot").textContent = T.foot(D.version);
+})();
+</script>
+</body>
+</html>

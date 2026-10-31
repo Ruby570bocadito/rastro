@@ -101,10 +101,35 @@ Rastro lee los registros de Certificate Transparency directamente, con la API es
 - Con `--db` retoma donde lo dejó y guarda solo los certificados con un dominio falso de marca o que dieron alerta: entre el 0,2 y el 0,4 % del registro, decenas de MB al día en vez de unos 6 GB. `--store-all` lo guarda todo.
 - Sin `--follow` lee las últimas `--tiles` teselas y para. `rastro logs` lista los registros actuales, que cambian cada seis meses.
 
+## Sigue las retiradas
+
+```bash
+rastro investigate "hxxps://dominio-falso[.]example/ruta" --track --lang es
+```
+
+```bash
+rastro track add dominio-falso.example --reported
+```
+
+```bash
+rastro track check --every 6
+```
+
+```bash
+rastro track report --html data/raw/marcador.html --from-report --lang es
+```
+
+Rastro sigue los dominios vivos de una investigación (`--track`), cada dominio que hace saltar al vigilante (`rastro watch --track`) y los que añadas a mano. Cada revisión pregunta al registro (RDAP) y a un DNS público por cada dominio que sigue en pie, nunca al dominio, y anota si está vivo, sin web, suspendido, borrándose o fuera. Un dominio cae la primera vez que aparece suspendido, borrándose o fuera de su zona antes de caducar.
+
+`--reported` apunta cuándo enviaste el aviso de abuso, y `--from-report` cronometra a cada registrador desde ese momento. El marcador es una estimación de Kaplan-Meier: un dominio que sigue en pie cuenta como en pie hasta su última revisión en vez de descartarse, así que un registrador que nunca actúa no puede parecer rápido. Se llena con el tiempo: ejecuta la revisión cada pocas horas durante un par de semanas.
+
+![Un marcador de retiradas con registradores inventados: curvas de supervivencia y clasificación](https://raw.githubusercontent.com/Ruby570bocadito/rastro/main/docs/demo-scoreboard.png)
+
 ## Otros comandos
 
 | Comando | Qué hace |
 |---|---|
+| `rastro track add\|check\|report` | sigue los dominios después de encontrarlos y puntúa a los registradores por su rapidez |
 | `rastro campaigns --domains FICHERO --dns` | agrupa dominios en campañas, desde una lista o desde lo que guardó el vigilante (`--db`) |
 | `rastro bursts --db data/ct.sqlite --hours 24` | busca campañas naciendo entre los nombres que guardó el vigilante |
 | `rastro pattern FICHERO` | aprende el patrón de nombres de una campaña y dice cuántos nombres podría cazar |
@@ -136,7 +161,6 @@ Cada pieza se probó con campañas reales antes de entrar en el producto. Los de
 
 - Expansión desde una URL con urlscan, para campañas que cambian de nombres pero no de página.
 - Un modelo de nombres que merezca la pena incluir: el experimento 07 mostró que antes necesita nombres benignos limpios, como dominios registrados hace años y nunca listados.
-- Seguimiento de los avisos de abuso, para medir cuánto tarda cada registrador en actuar.
 
 ## Desarrollo
 

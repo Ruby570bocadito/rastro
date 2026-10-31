@@ -101,10 +101,35 @@ Rastro reads Certificate Transparency logs directly, through the static CT API, 
 - With `--db` it resumes where it stopped and keeps only the certificates that carry a brand lookalike or raised an alert: about 0.2 to 0.4 % of the log, tens of MB a day instead of about 6 GB. `--store-all` keeps everything.
 - Without `--follow` it reads the latest `--tiles` tiles and stops. `rastro logs` lists the current logs, which rotate every six months.
 
+## Follow the takedowns
+
+```bash
+rastro investigate "hxxps://lookalike-domain[.]example/path" --track
+```
+
+```bash
+rastro track add lookalike-domain.example --reported
+```
+
+```bash
+rastro track check --every 6
+```
+
+```bash
+rastro track report --html data/raw/scoreboard.html --from-report
+```
+
+Rastro follows the live domains of an investigation (`--track`), every domain the watcher alerts on (`rastro watch --track`) and any you add by hand. Each check asks the registry (RDAP) and a public resolver about every domain still up, never the domain itself, and records whether it is live, offline, suspended, being deleted or gone. A domain is taken down the first time it shows up suspended, being deleted or out of its zone before it expired.
+
+`--reported` stamps when you sent the abuse report, and `--from-report` times each registrar from that moment. The scoreboard is a Kaplan-Meier estimate: a domain still up counts as up until its last check instead of being dropped, so a registrar that never acts cannot look fast. It fills with time, so run the check every few hours for a couple of weeks.
+
+![A takedown scoreboard with made-up registrars: survival curves and the ranking](https://raw.githubusercontent.com/Ruby570bocadito/rastro/main/docs/demo-scoreboard.png)
+
 ## Other commands
 
 | Command | What it does |
 |---|---|
+| `rastro track add\|check\|report` | follows domains after they are found and scores registrars by how fast they act |
 | `rastro campaigns --domains FILE --dns` | groups domains into campaigns, from a list or from the watcher's store (`--db`) |
 | `rastro bursts --db data/ct.sqlite --hours 24` | finds campaigns being born among the names the watcher stored |
 | `rastro pattern FILE` | learns a campaign's naming pattern and says how many names it could match |
@@ -136,7 +161,6 @@ Each piece was tested on real campaigns before it went into the product. The det
 
 - Expansion from one URL through urlscan, for campaigns whose names change but whose pages do not.
 - A name model worth shipping: experiment 07 showed that it first needs clean benign names, such as domains registered years ago and never listed.
-- Following up abuse reports, to measure how long each registrar takes to act.
 
 ## Development
 
