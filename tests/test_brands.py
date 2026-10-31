@@ -38,3 +38,28 @@ def test_hosting_platforms_are_public_suffixes():
 def test_addresses_are_told_from_names():
     assert is_ip("192.0.2.4") and is_ip("[2001:db8::1]")
     assert not is_ip("192.0.2.4.example.com")
+
+
+def test_the_built_in_list_loads_from_its_file():
+    assert brands.BRANDS[0] == "correos"
+    assert brands.display("bbva") == "BBVA" and brands.display("netflix") == "Netflix"
+    assert "dhlparcel.es" in brands.official_domains()
+
+
+def test_a_brands_file_adds_brands_for_a_while(tmp_path):
+    path = tmp_path / "mine.txt"
+    path.write_text("# my bank\nbancoeste | Banco Este | bancoeste.es\nmiapp\n", encoding="utf-8")
+    names, official = brands.from_file(str(path))
+    assert brands.brand_of("bancoeste-verifica.top") is None
+    with brands.extra(names, official):
+        assert brands.brand_of("bancoeste-verifica.top") == "bancoeste"
+        assert brands.display("bancoeste") == "Banco Este" and brands.display("miapp") == "Miapp"
+        assert "bancoeste.es" in brands.official_domains()
+    assert brands.brand_of("bancoeste-verifica.top") is None
+    assert "bancoeste.es" not in brands.official_domains()
+
+
+def test_a_bad_brand_key_is_refused_with_its_line(tmp_path):
+    import pytest
+    with pytest.raises(ValueError, match="line 2"):
+        brands.parse("ok\nnot ok | Name\n")

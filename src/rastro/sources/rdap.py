@@ -20,7 +20,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from rastro.domains import platform
-from rastro.sources import NETWORK_ERRORS, USER_AGENT
+from rastro.sources import NETWORK_ERRORS, RETRY_STATUS, USER_AGENT, wait
 
 BOOTSTRAP = "https://data.iana.org/rdap/dns.json"
 BOOTSTRAP_MAX_AGE = 7 * 24 * 3600
@@ -57,17 +57,19 @@ def _get(url: str, timeout: float, retries: int, accept: str = "application/rdap
     req = urllib.request.Request(url, headers={"Accept": accept, "User-Agent": USER_AGENT})
     delay = 2.0
     for _ in range(retries):
+        pause = delay
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return json.loads(resp.read())
         except urllib.error.HTTPError as err:
             if err.code == 404:
                 return {}
-            if err.code not in (429, 500, 502, 503, 504):
+            if err.code not in RETRY_STATUS:
                 return None
+            pause = wait(err, delay)
         except (*NETWORK_ERRORS, json.JSONDecodeError):
             pass
-        time.sleep(delay)
+        time.sleep(pause)
         delay = min(delay * 2, 30)
     return None
 

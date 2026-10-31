@@ -48,7 +48,7 @@ They are what make Rastro safe to run and to share, so a change that breaks one 
 - `src/rastro/scorer.py` and `src/rastro/assets/scorer.bin`: the name model (logistic regression on hashed features of the name), trained by experiment 07.
 - `src/rastro/rhythm.py`: the time-zone model, with bots, early and late crews, and the rhythm test.
 - `src/rastro/calendar_clues.py`: daylight saving, weekend and holiday clues, with the bars below which they stay silent.
-- `src/rastro/brands.py`: imitated brands, their official domains and how they are written.
+- `src/rastro/assets/brands.txt`: imitated brands, how they are written and their official domains; `src/rastro/brands.py` reads it and decides what makes a lookalike.
 - `src/rastro/store.py`: SQLite store of what the watcher kept and of where each watch stopped.
 - `src/rastro/sources/`: Certificate Transparency logs (`ctlog.py`, `der.py`), crt.sh (`crtsh.py`), RDAP (`rdap.py`) and DNS over HTTPS (`dns.py`), each cached on disk.
 - `src/rastro/__main__.py`: the `rastro` command line.
@@ -58,7 +58,7 @@ They are what make Rastro safe to run and to share, so a change that breaks one 
 
 ## Adding a brand
 
-Add it to `BRANDS` in `src/rastro/brands.py` (names of four letters or fewer must match a whole word), list its official domains in `OFFICIAL` so they never alert, and add to `DISPLAY` how it is written if capitalising it is not enough. Add a test with made-up lookalikes.
+Add a line to `src/rastro/assets/brands.txt`: `key | how it is written | official domains`. Keys of four letters or fewer must match a whole word; the official domains never alert; the name can stay empty when capitalising the key is enough. Order matters, the first brand that matches wins. Add a test with made-up lookalikes. To try a brand without changing Rastro, put the same line in a file of your own and pass `rastro --brands FILE`.
 
 ## Experiments
 

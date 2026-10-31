@@ -15,10 +15,12 @@ import urllib.request
 from pathlib import Path
 
 from rastro.domains import registrable
-from rastro.sources import NETWORK_ERRORS, USER_AGENT
+from rastro.sources import NETWORK_ERRORS, USER_AGENT, retryable, wait
 
 RESOLVER = "https://cloudflare-dns.com/dns-query"
 TYPES = {"A": 1, "NS": 2}
+# Phishing domains move and die within days, so a day-old answer is old news: asked again after this.
+MAX_AGE_HOURS = 24.0
 
 
 def answers(payload: dict, rtype: str) -> list[str]:
@@ -27,10 +29,13 @@ def answers(payload: dict, rtype: str) -> list[str]:
     return sorted({a["data"].rstrip(".").lower() for a in payload.get("Answer", []) if a.get("type") == code})
 
 
-def query(name: str, rtype: str, cache_dir: Path, pause: float = 0.1, retries: int = 3, fresh: bool = False) -> dict:
-    """The resolver's JSON answer, from the cache unless `fresh` (the tracker needs today's answer)."""
+def query(name: str, rtype: str, cache_dir: Path, pause: float = 0.1, retries: int = 3, fresh: bool = False,
+          max_age_hours: float = MAX_AGE_HOURS) -> dict:
+    """The resolver's JSON answer, from the cache when younger than `max_age_hours`, unless `fresh` (the tracker
+    needs today's answer). A stale answer is still better than none when the resolver never answers."""
     path = Path(cache_dir) / f"dns_{rtype}_{name}.json"
-    if path.exists() and not fresh:
+    cached = path.exists() and not fresh
+    if cached and time.time() - path.stat().st_mtime < max_age_hours * 3600:
         return json.loads(path.read_text(encoding="utf-8"))
     url = RESOLVER + "?" + urllib.parse.urlencode({"name": name, "type": rtype})
     req = urllib.request.Request(url, headers={"Accept": "application/dns-json", "User-Agent": USER_AGENT})
@@ -40,11 +45,15 @@ def query(name: str, rtype: str, cache_dir: Path, pause: float = 0.1, retries: i
             with urllib.request.urlopen(req, timeout=20) as resp:
                 payload = json.loads(resp.read())
             break
-        except (*NETWORK_ERRORS, json.JSONDecodeError):
-            time.sleep(2 ** attempt)
+        except (*NETWORK_ERRORS, json.JSONDecodeError) as err:
+            if not retryable(err):
+                break
+            time.sleep(wait(err, 2 ** attempt))
     if payload:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload), encoding="utf-8")
+    elif cached:
+        payload = json.loads(path.read_text(encoding="utf-8"))
     time.sleep(pause)
     return payload
 

@@ -135,6 +135,8 @@ Rastro sigue los dominios vivos de una investigación (`--track`), cada dominio 
 | `rastro pattern FICHERO` | aprende el patrón de nombres de una campaña y dice cuántos nombres podría cazar |
 | `rastro rhythm FICHERO` | estima el huso de una banda a partir de horas UTC, con las pistas de fin de semana, horario de verano y festivos |
 
+Rastro conoce unas 60 marcas, listadas en [brands.txt](https://github.com/Ruby570bocadito/rastro/blob/main/src/rastro/assets/brands.txt). `rastro --brands FICHERO <comando>` añade las tuyas, una por línea como `clave | Nombre | dominios oficiales`.
+
 ## Validado con datos reales
 
 Cada pieza se probó con campañas reales antes de entrar en el producto. Los detalles, y lo que falló, están en [experiments](https://github.com/Ruby570bocadito/rastro/blob/main/experiments/README.md) (en inglés).

@@ -43,3 +43,21 @@ def test_rhythm_command_reads_iso_times(tmp_path, capsys):
     assert "human rhythm: yes" in out
     assert "weekend: inconclusive" in out          # ten days are not enough to judge a weekend
     assert "daylight saving: inconclusive" in out
+
+
+def test_brands_option_teaches_new_brands_to_any_command(tmp_path, capsys):
+    mine = tmp_path / "brands.txt"
+    mine.write_text("bancoeste | Banco Este | bancoeste.es\n", encoding="utf-8")
+    args = ["investigate", "hxxps://bancoeste-verifica-4821[.]top/x", "--offline", "--no-crtsh", "--no-rdap",
+            "--no-dns", "--sims", "100", "--cache", str(tmp_path / "cache"), "--report", str(tmp_path / "case.html")]
+    assert main(["--brands", str(mine), *args]) == 0
+    assert "imitating bancoeste" in capsys.readouterr().out
+    assert main(args) == 0
+    assert "no known brand" in capsys.readouterr().out
+
+
+def test_a_broken_brands_file_stops_before_running(tmp_path, capsys):
+    bad = tmp_path / "brands.txt"
+    bad.write_text("not a key\n", encoding="utf-8")
+    assert main(["--brands", str(bad), "pattern", str(bad)]) == 2
+    assert "line 1" in capsys.readouterr().out

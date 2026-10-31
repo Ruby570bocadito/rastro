@@ -19,7 +19,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from rastro.domains import registrable
-from rastro.sources import NETWORK_ERRORS, USER_AGENT
+from rastro.sources import NETWORK_ERRORS, USER_AGENT, retryable, wait
 
 BASE = "https://crt.sh/"
 
@@ -69,7 +69,9 @@ def fetch(query: str, cache_dir: Path, max_age_hours: float = 24, retries: int =
             return rows
         except (*NETWORK_ERRORS, json.JSONDecodeError) as err:
             last_error = err
-            time.sleep(delay)
+            if not retryable(err):
+                break
+            time.sleep(wait(err, delay))
             delay = min(delay * 2, 60)
     raise RuntimeError(f"crt.sh did not answer for {query!r}: {last_error}")
 
@@ -127,8 +129,10 @@ def log_time(cert_id: int, cache_dir: Path, timeout: float = 60, retries: int = 
                 with urllib.request.urlopen(req, timeout=timeout) as resp:
                     page = resp.read().decode("utf-8", errors="replace")
                 break
-            except NETWORK_ERRORS:
-                time.sleep(delay)
+            except NETWORK_ERRORS as err:
+                if not retryable(err):
+                    break
+                time.sleep(wait(err, delay))
                 delay = min(delay * 2, 60)
         if page is None:
             return None
