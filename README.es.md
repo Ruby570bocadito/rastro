@@ -26,14 +26,14 @@ Husmo, un hurón detective, explica cada deducción y cuánta seguridad tiene. R
 Python 3.11 o superior, sin dependencias.
 
 ```bash
-pipx install rastro-osint
+pipx install git+https://github.com/Ruby570bocadito/rastro
 ```
 
 ```bash
 rastro demo --open --lang es
 ```
 
-También vale `pip install rastro-osint`, o instalarlo directamente desde GitHub con `pip install git+https://github.com/Ruby570bocadito/rastro`.
+También vale `pip install git+https://github.com/Ruby570bocadito/rastro`, y cada [versión publicada](https://github.com/Ruby570bocadito/rastro/releases) trae un wheel que puedes instalar con `pipx install` sobre el archivo descargado.
 
 La demo es un caso inventado. Sus marcas no existen, sus dominios acaban en `.test` (reservado, así que nadie puede registrar uno), sus direcciones son de los rangos reservados para documentación y su banda está simulada en UTC+3, de lunes a viernes. El expediente marca esa verdad bajo el mapa, para que compares la respuesta de Rastro con la realidad.
 

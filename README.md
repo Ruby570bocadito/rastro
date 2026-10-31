@@ -26,14 +26,14 @@ Husmo, a detective ferret, explains every deduction and how sure it is. Rastro n
 Python 3.11 or newer, no dependencies.
 
 ```bash
-pipx install rastro-osint
+pipx install git+https://github.com/Ruby570bocadito/rastro
 ```
 
 ```bash
 rastro demo --open
 ```
 
-`pip install rastro-osint` works too, and so does installing straight from GitHub with `pip install git+https://github.com/Ruby570bocadito/rastro`.
+`pip install git+https://github.com/Ruby570bocadito/rastro` works too, and each [release](https://github.com/Ruby570bocadito/rastro/releases) carries a wheel you can install with `pipx install` on the downloaded file.
 
 The demo is a made-up case. Its brands do not exist, its domains end in `.test` (reserved, so nobody can register one), its addresses come from the ranges reserved for documentation, and its crew is simulated at UTC+3, Monday to Friday. The case file marks that truth under the map, so you can check Rastro's answer against it. `--lang es` writes the case file in Spanish.
 

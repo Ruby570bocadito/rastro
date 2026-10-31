@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Rastro installs from GitHub, not PyPI: `pipx install git+https://github.com/Ruby570bocadito/rastro`. Each tag publishes a GitHub release with the wheel and the source archive.
+
 ## 0.1.1 · 2026-10-31
 
 - Links on free hosting platforms (pages.dev, web.app, github.io, vercel.app and others) are investigated as the site they are, not as the platform: each subdomain is its own registrable name, RDAP is not asked about it, and its abuse report draft goes to the platform. Siblings that no longer resolve stay out, with their reason.
