@@ -6,6 +6,7 @@ clues add up to), "caution" (what the data cannot say) and "action" (what to do 
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 
 from rastro import brands, calendar_clues, rhythm
@@ -96,6 +97,64 @@ def _list(items: list[str], lang: str) -> str:
 
 def _p(p: float) -> str:
     return "< 0.0001" if p < 0.0001 else f"= {p:.4f}"
+
+
+# The pieces of the regular expressions Rastro learns, in the order they are tried.
+_PIECES = re.compile(r"\(\?=\.\*(?P<look>[^)]*)\)"
+                     r"|\\d\{(?P<d1>\d+)(?:,(?P<d2>\d+))?\}|\[a-z\]\{(?P<a1>\d+)(?:,(?P<a2>\d+))?\}"
+                     r"|\[a-z0-9\.-\]\+(?P<any>)|\((?P<alt>[^()]*)\)|\\(?P<esc>.)|(?P<dash>-)|(?P<lit>[^\\()\[\]-]+)")
+_SAID = {
+    "en": {"digits": "{a} digits", "digits_range": "{a} to {b} digits", "letters": "{a} letters",
+           "letters_range": "{a} to {b} letters", "look": "any name with {x} in it", "or": " or ",
+           "dot": "dot", "dash": "dash"},
+    "es": {"digits": "{a} cifras", "digits_range": "de {a} a {b} cifras", "letters": "{a} letras",
+           "letters_range": "de {a} a {b} letras", "look": "cualquier nombre con {x} dentro", "or": " o ",
+           "dot": "punto", "dash": "guion"},
+}
+
+
+def spoken_pattern(regex: str, lang: str = "en") -> str:
+    """A learned regular expression as Husmo would say it:
+    paqexpres-\\d{4}\\.top -> "paqexpres dash 4 digits dot top"."""
+    say = _SAID["es" if lang == "es" else "en"]
+    words = []
+    for m in _PIECES.finditer(regex):
+        if m["look"] is not None:
+            words.append(say["look"].format(x=m["look"].replace("\\", "")))
+        elif m["d1"]:
+            words.append(say["digits_range" if m["d2"] else "digits"].format(a=m["d1"], b=m["d2"]))
+        elif m["a1"]:
+            words.append(say["letters_range" if m["a2"] else "letters"].format(a=m["a1"], b=m["a2"]))
+        elif m["alt"] is not None:
+            options = [o.replace("\\", "") for o in m["alt"].split("|")]
+            words.append(", ".join(options[:-1]) + say["or"] + options[-1] if len(options) > 1 else options[0])
+        elif m["esc"]:
+            words.append(say["dot"] if m["esc"] == "." else m["esc"])
+        elif m["dash"]:
+            words.append(say["dash"])
+        elif m["lit"]:
+            words.append(m["lit"])
+    return " ".join(w for w in words if w)
+
+
+def spoken(text: str, lang: str = "en") -> str:
+    """What Husmo says for a line: patterns, time zones and numbers turned into words a voice reads well."""
+    es = lang == "es"
+    out = []
+    for token in text.split(" "):
+        core, tail = (token[:-1], token[-1]) if token[-1:] in ".,:;" else (token, "")
+        if "\\" in core or "{" in core or "(?=" in core:
+            token = spoken_pattern(core, lang) + tail
+        out.append(token)
+    said = " ".join(out)
+    plus, minus = ("más", "menos") if es else ("plus", "minus")
+    said = re.sub(r"UTC([+−-])(\d+)", lambda m: f"UTC {plus if m[1] == '+' else minus} {m[2]}", said)
+    said = re.sub(r"10\^(\d+(?:\.\d+)?)", (r"10 elevado a \1" if es else r"10 to the power of \1"), said)
+    said = said.replace("p = ", "p igual a " if es else "p equals ")
+    said = said.replace("p < ", "p menor que " if es else "p below ")
+    if es:
+        said = re.sub(r"(?<![\w.])(\d+)\.(\d+)(?![\w.])", r"\1,\2", said)
+    return said
 
 
 def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:

@@ -14,7 +14,7 @@
   --on-marker: #1f2430; --on-string: #ffffff; --glint: #ffffff; --dot: #b9ad93; --night: rgba(31, 36, 48, .08);
   --fur: #8b5d3b; --fur-dark: #5a3a25; --fur-light: #f3e6cc; --mask: #4a3022; --eye-dark: #140d0a;
   --ear-in: #e7a9a1; --nose-pink: #c4747a; --whisker: rgba(70, 45, 30, .55); --mouth: #3b1a14;
-  --hat-a: #8d6c47; --hat-b: #66492f; --lens: rgba(160, 205, 255, .38);
+  --hat-a: #8d6c47; --hat-b: #66492f; --lens: rgba(160, 205, 255, .38); --tongue: #e0717b;
   --shadow: 0 1px 0 rgba(70, 50, 20, .08), 0 10px 26px -14px rgba(70, 50, 20, .45);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", "Helvetica Neue", sans-serif;
@@ -138,6 +138,14 @@ h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); lette
 .hat-a { fill: var(--hat-a); } .hat-line { stroke: var(--hat-b); stroke-width: 1.4; opacity: .7; }
 .hat-brim, .hat-knot { fill: var(--hat-b); }
 .m-line { fill: none; stroke: var(--mouth); stroke-width: 2.6; stroke-linecap: round; }
+.m-fill { fill: var(--mouth); }
+.tongue { fill: var(--tongue); }
+.listen-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; }
+.btn-listen { font-weight: 700; }
+.btn-listen[aria-pressed="true"] { border-color: var(--string); color: var(--string); }
+.btn-listen:disabled { opacity: .55; cursor: not-allowed; }
+.listen-note { margin: 0; font-size: 11.5px; color: var(--muted); max-width: 34ch; }
+.log li.speaking { background: var(--note); color: var(--on-note); box-shadow: 0 0 0 5px var(--note); border-radius: 2px; }
 .lens-handle { stroke: var(--fur-dark); stroke-width: 5; stroke-linecap: round; }
 .lens-glass { fill: var(--lens); stroke: var(--hat-b); stroke-width: 4; }
 .log { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; counter-reset: ev; }
@@ -328,7 +336,17 @@ details > summary { cursor: pointer; font-weight: 600; }
             <path d="M40 64 C42 28 118 28 120 64 Z" fill="url(#tweed)"/>
             <path class="hat-brim" d="M30 64 Q80 78 130 64 Q80 55 30 64 Z"/>
             <circle class="hat-knot" cx="80" cy="34" r="4"/>
-            <path class="m-line" d="M74 114 Q77 117.5 80 114.5 Q83 117.5 86 114"/>
+            <g class="mouth">
+              <path id="m-rest" class="m-line" d="M74 114 Q77 117.5 80 114.5 Q83 117.5 86 114"/>
+              <path id="m-M" class="m-line" d="M74.5 115 L85.5 115" visibility="hidden"/>
+              <ellipse id="m-S" class="m-fill" cx="80" cy="115.5" rx="4.8" ry="1.8" visibility="hidden"/>
+              <ellipse id="m-E" class="m-fill" cx="80" cy="115.6" rx="5.8" ry="2.7" visibility="hidden"/>
+              <g id="m-A" visibility="hidden">
+                <ellipse class="m-fill" cx="80" cy="116" rx="5.8" ry="4"/>
+                <ellipse class="tongue" cx="80" cy="118.1" rx="3.4" ry="1.6"/>
+              </g>
+              <ellipse id="m-O" class="m-fill" cx="80" cy="116" rx="3.6" ry="3.9" visibility="hidden"/>
+            </g>
           </g>
           <line class="lens-handle" x1="133" y1="141" x2="146" y2="155"/>
           <circle class="lens-glass" cx="125" cy="132" r="12.5"/>
@@ -337,6 +355,10 @@ details > summary { cursor: pointer; font-weight: 600; }
         <div>
           <div class="det-name" id="h-det">Husmo</div>
           <div class="det-role" data-t="role"></div>
+          <div class="listen-row">
+            <button id="listen" class="btn btn-listen" type="button" aria-pressed="false" disabled></button>
+            <p id="listen-note" class="listen-note" aria-live="polite"></p>
+          </div>
         </div>
       </div>
       <ol class="log" id="log"></ol>
@@ -423,6 +445,9 @@ details > summary { cursor: pointer; font-weight: 600; }
   const ES = D.lang === "es";
   const T = ES ? {
     tag: "Expediente generado el ", stamp: "Expediente", eyebrow: "Investigación de phishing",
+    listen: "▶ Escuchar a Husmo", stop: "■ Parar", voiceLooking: "Buscando una voz del sistema…",
+    voiceName: (n) => `Voz del sistema, sin conexión: ${n}`, noSpeech: "Este navegador no puede leer en voz alta.",
+    noVoice: "No hay ninguna voz en español instalada que funcione sin conexión. Husmo no usa voces en la nube: mandarían el texto del caso a un servicio externo.",
     demoStamp: "Demo", eyebrowDemo: "Investigación de phishing · demostración con datos inventados",
     demoTruth: (tzName) => `La banda simulada trabaja en ${tzName}, de lunes a viernes: compara el mapa con la verdad (la marca «real» bajo las barras).`, truth: "real",
     demoNote: "Todo en este expediente es inventado: las marcas PaqExpres y BancoNorte no existen, los dominios acaban en .test (reservado: nadie puede registrarlo), las direcciones son de los rangos reservados para documentación y los registradores son de ejemplo. La banda está simulada con el mismo modelo de jornada que usa el mapa.",
@@ -469,6 +494,9 @@ details > summary { cursor: pointer; font-weight: 600; }
     tlLabel: "Línea de tiempo de los dominios atribuidos", graphLabel: "Grafo de la campaña",
   } : {
     tag: "Case file generated on ", stamp: "Case file", eyebrow: "Phishing investigation",
+    listen: "▶ Listen to Husmo", stop: "■ Stop", voiceLooking: "Looking for a system voice…",
+    voiceName: (n) => `Offline system voice: ${n}`, noSpeech: "This browser cannot read aloud.",
+    noVoice: "No offline English voice is installed. Husmo never uses cloud voices: they would send the case's text to an outside service.",
     demoStamp: "Demo", eyebrowDemo: "Phishing investigation · demo with made-up data",
     demoTruth: (tzName) => `The simulated crew works at ${tzName}, Monday to Friday: check the map against the truth (the "truth" mark under the bars).`, truth: "truth",
     demoNote: "Everything in this case file is made up: the brands PaqExpres and BancoNorte do not exist, the domains end in .test (reserved: nobody can register it), the addresses come from the ranges reserved for documentation and the registrars are examples. The crew is simulated with the same working-day model the map uses.",
@@ -882,6 +910,115 @@ details > summary { cursor: pointer; font-weight: 600; }
     D.notes.forEach((n) => ul.append(el("li", {}, n)));
     T.never.forEach((n) => ul.append(el("li", {}, n)));
     $("foot").textContent = T.foot(D.version);
+  })();
+
+  /* ---------- Husmo speaks: offline system voices only, calm held mouth shapes ---------- */
+  (function speaks() {
+    const btn = $("listen"), note = $("listen-note"), synth = window.speechSynthesis;
+    const items = Array.from(document.querySelectorAll("#log li"));
+    const shapes = {};
+    ["rest", "M", "S", "E", "A", "O"].forEach((k) => { shapes[k] = $("m-" + k); });
+    const HOLD = 160;          // each mouth shape stays at least this long: about six changes a second at most
+    const CPS = 14;            // characters a voice reads per second, to follow it between word boundaries
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let voice = null, run = 0, shape = "rest", swapped = 0;
+    btn.textContent = T.listen;
+    function mouth(v) {
+      if (v === shape) return;
+      shapes[shape].setAttribute("visibility", "hidden");
+      shapes[v].setAttribute("visibility", "visible");
+      shape = v;
+    }
+    function viseme(ch) {
+      const c = (ch || " ").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+      if (c === "a") return "A";
+      if (c === "e" || c === "i" || c === "y") return "E";
+      if (c === "o" || c === "u" || c === "w") return "O";
+      if (c === "m" || c === "b" || c === "p") return "M";
+      return /[a-z0-9ñ]/.test(c) ? "S" : "rest";
+    }
+    // Cloud voices would send the case's text, attacker domains included, to an outside service.
+    function pick(final) {
+      const all = synth.getVoices();
+      if (!all.length && !final) return;
+      const local = all.filter((v) => v.localService && (ES ? /^es/i : /^en/i).test(v.lang));
+      voice = local.find((v) => (ES ? /^es[-_]ES/i : /^en[-_]US/i).test(v.lang)) || local[0] || null;
+      btn.disabled = !voice;
+      note.textContent = voice ? T.voiceName(voice.name) : T.noVoice;
+    }
+    if (!synth || !window.SpeechSynthesisUtterance) {
+      note.textContent = T.noSpeech;
+      return;
+    }
+    note.textContent = T.voiceLooking;
+    synth.addEventListener("voiceschanged", () => pick(false));
+    setTimeout(() => { if (!voice) pick(true); }, 1500);
+    pick(false);
+
+    function say(text, my) {
+      return new Promise((resolve) => {
+        const u = new SpeechSynthesisUtterance(text);
+        u.voice = voice;
+        u.lang = voice.lang;
+        u.pitch = 1.05;
+        let started = 0, word = -1, wordAt = 0, over = false;
+        const guard = setTimeout(() => finish(), text.length * 120 + 5000);
+        function finish() {
+          if (over) return;
+          over = true;
+          clearTimeout(guard);
+          // close the mouth only once the last shape has had its time, unless the next line already began
+          setTimeout(() => { if (my !== run || synth.speaking !== true) mouth("rest"); },
+            Math.max(0, HOLD - (performance.now() - swapped)));
+          resolve();
+        }
+        u.onstart = () => { started = performance.now(); };
+        u.onboundary = (e) => {
+          if (e.name !== "sentence" && typeof e.charIndex === "number") { word = e.charIndex; wordAt = performance.now(); }
+        };
+        u.onend = finish;
+        u.onerror = finish;
+        synth.speak(u);
+        // a 40 ms tick is plenty for at most six shapes a second
+        const tick = () => {
+          if (over) return;
+          if (my !== run) { finish(); return; }
+          const now = performance.now();
+          if (started && !still && now - swapped >= HOLD) {
+            // with word boundaries, follow the voice inside the current word; without them, a calm loop
+            const pos = word >= 0 ? word + Math.floor((now - wordAt) / 1000 * CPS)
+              : Math.floor((now - started) / 1000 * CPS) % text.length;
+            const v = viseme(text[Math.min(pos, text.length - 1)]);
+            if (v !== shape) { mouth(v); swapped = now; }
+          }
+          setTimeout(tick, 40);
+        };
+        tick();
+      });
+    }
+    function stop() {
+      run++;
+      try { synth.cancel(); } catch (e) { /* nothing was speaking */ }
+      items.forEach((li) => li.classList.remove("speaking"));
+      mouth("rest");
+      btn.textContent = T.listen;
+      btn.setAttribute("aria-pressed", "false");
+    }
+    async function play() {
+      synth.cancel();
+      const my = ++run;
+      btn.textContent = T.stop;
+      btn.setAttribute("aria-pressed", "true");
+      for (let i = 0; i < D.narration.length && my === run; i++) {
+        items.forEach((li) => li.classList.remove("speaking"));
+        items[i].classList.add("speaking");
+        await say(D.narration[i].speech || D.narration[i].text, my);
+        if (my === run) await new Promise((r) => setTimeout(r, 250));
+      }
+      if (my === run) stop();
+    }
+    btn.addEventListener("click", () => (btn.getAttribute("aria-pressed") === "true" ? stop() : play()));
+    window.addEventListener("pagehide", stop);
   })();
 })();
 </script>

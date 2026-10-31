@@ -108,7 +108,7 @@ def case_data(inv: Investigation, lang: str = "en", demo: dict | None = None) ->
         "counts": {"crew": len(inv.crew), "campaign": len(inv.campaign), "attributed": len(inv.attributed),
                    "registered": len(registered), "checked": len(inv.members) - 1,
                    "reported": sum(len(r.domains) for r in inv.reports)},
-        "narration": [{"kind": k, "text": t} for k, t in husmo.narrate(inv, lang)],
+        "narration": [{"kind": k, "text": t, "speech": husmo.spoken(t, lang)} for k, t in husmo.narrate(inv, lang)],
         "graph": _graph(inv),
         "template": inv.crew_pattern.regex if inv.crew_pattern else None,
         "clock": None if c is None else {

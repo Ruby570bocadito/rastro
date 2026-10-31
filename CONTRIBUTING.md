@@ -29,7 +29,7 @@ They are what make Rastro safe to run and to share, so a change that breaks one 
 - **Never connect to an investigated domain.** Ask public services instead: Certificate Transparency logs, crt.sh, RDAP registries, a public DNS-over-HTTPS resolver.
 - **Never look for people.** No registrant, administrative or technical contacts, no names and no addresses of persons. Rastro stops at time zones and infrastructure.
 - **Never send anything for the user.** Abuse reports are drafts.
-- **Case files reach nothing.** They make no network requests, and they write attacker-controlled text as text, never as HTML.
+- **Case files reach nothing.** They make no network requests, they write attacker-controlled text as text, never as HTML, and Husmo only speaks with offline system voices, because a cloud voice would send the case's text away.
 - **No live names in the repository.** Tests and examples use made-up names under `.test` or `.example` and addresses from the documentation ranges. Names seen live stay in `data/raw/`, which git ignores.
 - **No dependencies in the core.** The package uses the standard library only.
 - **Say how sure.** A new clue needs an "inconclusive" answer below the amount of data it needs, measured in an experiment.

@@ -39,6 +39,10 @@ The demo is a made-up case. Its brands do not exist, its domains end in `.test` 
 
 ![The map closing in on the crew's time zone, and the timeline of its launches](https://raw.githubusercontent.com/Ruby570bocadito/rastro/main/docs/demo-map.gif)
 
+Press **Listen to Husmo** and the ferret reads its deductions aloud, line by line, with calm mouth shapes. It only uses voices installed on your system: a cloud voice would send the case's text, attacker domains included, to an outside service, so without an offline voice the button stays off and says why.
+
+![Husmo reading its first deductions aloud, each line lit up as it speaks](https://raw.githubusercontent.com/Ruby570bocadito/rastro/main/docs/demo-talk.gif)
+
 ## How it works
 
 ```mermaid
@@ -132,7 +136,6 @@ Each piece was tested on real campaigns before it went into the product. The det
 
 - Expansion from one URL through urlscan, for campaigns whose names change but whose pages do not.
 - A name model worth shipping: experiment 07 showed that it first needs clean benign names, such as domains registered years ago and never listed.
-- Husmo reading the deductions aloud in the case file.
 - Following up abuse reports, to measure how long each registrar takes to act.
 
 ## Development

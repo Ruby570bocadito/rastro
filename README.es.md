@@ -39,6 +39,10 @@ La demo es un caso inventado. Sus marcas no existen, sus dominios acaban en `.te
 
 ![El mapa cerrándose sobre el huso de la banda, y la línea de tiempo de sus lanzamientos](https://raw.githubusercontent.com/Ruby570bocadito/rastro/main/docs/demo-map.gif)
 
+Pulsa **Escuchar a Husmo** y el hurón lee en voz alta sus deducciones, una a una, moviendo la boca con calma. Solo usa voces instaladas en tu sistema: una voz en la nube mandaría el texto del caso, dominios de los atacantes incluidos, a un servicio externo, así que sin una voz sin conexión el botón queda apagado y explica por qué.
+
+![Husmo leyendo en voz alta sus primeras deducciones, con cada línea resaltada mientras habla](https://raw.githubusercontent.com/Ruby570bocadito/rastro/main/docs/demo-talk.gif)
+
 ## Cómo funciona
 
 ```mermaid
@@ -132,7 +136,6 @@ Cada pieza se probó con campañas reales antes de entrar en el producto. Los de
 
 - Expansión desde una URL con urlscan, para campañas que cambian de nombres pero no de página.
 - Un modelo de nombres que merezca la pena incluir: el experimento 07 mostró que antes necesita nombres benignos limpios, como dominios registrados hace años y nunca listados.
-- Husmo leyendo en voz alta sus deducciones en el expediente.
 - Seguimiento de los avisos de abuso, para medir cuánto tarda cada registrador en actuar.
 
 ## Desarrollo
