@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Links on free hosting platforms (pages.dev, web.app, github.io, vercel.app and others) are investigated as the site they are, not as the platform: each subdomain is its own registrable name, RDAP is not asked about it, and its abuse report draft goes to the platform. Siblings that no longer resolve stay out, with their reason.
+- Brands written to look like the real thing are recognised: punycode homographs (Cyrillic or Greek letters), a lone digit for a letter (paypa1, app1e, 5team) and letter pairs (arnazon, vvhatsapp). A number is never read as letters.
+- A brand found only in a subdomain (amazon.co.uk.login-check.top) names the target, and Husmo says the siblings are searched by the registrable name.
+- `rastro investigate` refuses IP addresses and link shorteners with a reason, instead of investigating `2.4` or `bit.ly`.
 - Experiment 07b: the name model with benign names checked by age through RDAP. Worse than 07 (too few benign names, 131 of them with a brand), so still no model ships; the notes say what data the next try needs.
 - The RDAP, DNS, crt.sh and CT clients retry on any network failure, such as a server closing the connection without answering, instead of stopping a long run.
 - RDAP keeps the registration date even when a registry gives no time of day.

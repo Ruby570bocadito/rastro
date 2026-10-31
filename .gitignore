@@ -12,3 +12,4 @@ data/raw/
 
 # case files written by `rastro demo`
 rastro-demo*.html
+.coverage

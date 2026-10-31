@@ -79,3 +79,33 @@ def test_a_lonely_seed_gets_a_guess_and_an_honest_note():
     assert inv.guess == r"paqexpres-entrega-\d{4}\.top"
     assert inv.clues is None and not inv.rhythm_found
     assert ("lonely", {}) in inv.notes
+
+
+def test_addresses_and_shorteners_are_refused_with_a_reason():
+    with pytest.raises(ValueError, match="address"):
+        investigate.seed_host("http://192.0.2.4/login")
+    with pytest.raises(ValueError, match="shortener"):
+        investigate.seed_host("https://bit.ly/3abc")
+
+
+def test_a_brand_in_a_subdomain_names_the_target_but_not_the_template():
+    inv = investigate.investigate("https://amazon.co.uk.login-check.top/x", investigate.Sources(), sims=100)
+    assert inv.seed == "login-check.top" and inv.brand == "amazon"
+    assert inv.members[inv.seed].brand is None
+    assert ("brand_in_subdomain", {"brand": "Amazon", "seed": "login-check.top"}) in inv.notes
+
+
+def test_platform_sites_are_reported_to_the_platform_not_a_registrar():
+    seed, gone = "correos-envio-4821.pages.dev", "correos-envio-4822.pages.dev"
+
+    def addresses(d):
+        return frozenset({"203.0.113.9"}) if d == seed else frozenset()
+
+    sources = investigate.Sources(lambda d: (None, frozenset()), lambda d: None, addresses, lambda d: frozenset())
+    inv = investigate.investigate(f"https://{seed}/s/1", sources, list_lines=[gone, "correos-envio-4823.pages.dev"],
+                                  sims=100)
+    assert inv.seed == seed and inv.brand == "correos"
+    [report] = inv.reports
+    assert report.registrar == "Cloudflare Pages (pages.dev)" and report.email is None
+    assert report.domains == [seed] and "hosted on your platform" in report.body
+    assert inv.left_out == {gone: "unresolved", "correos-envio-4823.pages.dev": "unresolved"}

@@ -48,6 +48,10 @@ GONE = {   # (English one, English many), (Spanish one, Spanish many)
                       "{n} were registered again, maybe by somebody else"),
                      ("{n} se ha vuelto a registrar, quizá por otra persona",
                       "{n} se han vuelto a registrar, quizá por otra persona")),
+    "unresolved": (("{n} was on a hosting platform and no longer resolves",
+                    "{n} were on hosting platforms and no longer resolve"),
+                   ("{n} estaba en una plataforma de hosting y ya no resuelve",
+                    "{n} estaban en plataformas de hosting y ya no resuelven")),
 }
 REASONS = {   # what made a name look like known phishing: (English, Spanish)
     "brand": ("the brand {brand}", "la marca {brand}"),
@@ -79,6 +83,10 @@ NOTES = {
                        "dicen nada de su dueño y se han dejado fuera."),
     "capped": ("{n} lookalikes looked related; only the closest {max} were checked.",
                "{n} dominios parecidos parecían relacionados; solo se han revisado los {max} más cercanos."),
+    "brand_in_subdomain": ("The link imitates {brand} only in a subdomain, which the crew can change at will; its "
+                           "siblings are looked for by the name of {seed}.",
+                           "El enlace imita a {brand} solo en un subdominio, que la banda puede cambiar a su antojo; "
+                           "sus hermanos se buscan por el nombre de {seed}."),
     "lonely": ("No sibling joined the seed yet: the pattern to watch is a guess from its name alone.",
                "Ningún hermano se ha unido aún a la semilla: el patrón que vigilar es una apuesta a partir de su "
                "nombre."),

@@ -31,7 +31,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from rastro import brands, calendar_clues, campaigns, pattern, rhythm, scorer
-from rastro.domains import registrable
+from rastro.domains import PLATFORMS, SHORTENERS, is_ip, platform, registrable
 from rastro.sources import crtsh, dns, rdap
 
 HOSTNAME = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
@@ -47,6 +47,7 @@ REASONS = {
     "suspended": "already suspended",
     "defensive": "held by a brand-protection registrar, probably a defensive registration",
     "reregistered": "registered again after its phishing days, maybe by somebody else",
+    "unresolved": "on a hosting platform and no longer resolves",
 }
 # Registrars that hold names for brand-protection programmes; a lookalike there is probably defensive.
 BRAND_PROTECTION = ("markmonitor", "csc corporate domains", "corporation service company", "com laude",
@@ -61,6 +62,12 @@ def seed_host(link: str) -> str:
     if "://" not in s:
         s = "http://" + s
     host = (urllib.parse.urlsplit(s).hostname or "").rstrip(".")
+    if is_ip(host):
+        raise ValueError(f"{link!r} points at an address, not a domain name: there is no registration or naming "
+                         "template to follow")
+    if registrable(host) in SHORTENERS:
+        raise ValueError(f"{host} is a link shortener: expand the link with a link-preview service, without opening "
+                         "it, and investigate the link it leads to")
     try:
         host = host.encode("idna").decode("ascii")
     except UnicodeError:
@@ -113,6 +120,7 @@ class Member:
     ips: frozenset[str] = frozenset()
     nameservers: frozenset[str] = frozenset()
     co_certified: frozenset[str] = frozenset()
+    dns_checked: bool = False                             # its addresses were asked for, so empty means none
     score: float | None = None                            # the name scorer's 0-1, when a model is shipped
 
     @property
@@ -137,6 +145,8 @@ class Member:
 
     def reportable(self) -> str | None:
         """Why this domain stays out of an abuse report (a key of REASONS), or None when it belongs in one."""
+        if platform(self.name):
+            return "unresolved" if self.dns_checked and not self.ips else None
         r = self.registration
         if r is None:
             return "unregistered"
@@ -228,10 +238,12 @@ class Sources:
 
 def _from_list(seed: str, lines: Iterable[str]) -> dict[str, int]:
     brand = brands.brand_of(seed)
+    # a quick filter when the seed spells its brand out; a lookalike spelling (paypa1) needs every name read
+    spelled = brand if brand and brand in seed else None
     out: dict[str, int] = {}
     for line in lines:
         name = line.strip().lower()
-        if not name or name.startswith("#") or (brand and brand not in name):
+        if not name or name.startswith("#") or (spelled and spelled not in name):
             continue
         d = registrable(name)
         rank = related(seed, d)
@@ -261,6 +273,7 @@ def _profile(m: Member, sources: Sources) -> Member:
         m.registration = sources.registration(m.name)
     if sources.addresses:
         m.ips = sources.addresses(m.name)
+        m.dns_checked = True
     if sources.nameservers:
         m.nameservers = sources.nameservers(m.name)
     return m
@@ -332,6 +345,9 @@ def abuse_reports(seed: str, brand: str | None, members: dict[str, Member], doma
         if why:
             left_out[d] = why
             continue
+        if suffix := platform(d):
+            groups[(f"{PLATFORMS[suffix]} ({suffix})", None)].append(m)
+            continue
         r = m.registration
         groups[(r.registrar or "Unknown registrar", r.abuse_email)].append(m)
     who = f"imitating {brands.display(brand)}" if brand else "used for phishing"
@@ -339,8 +355,9 @@ def abuse_reports(seed: str, brand: str | None, members: dict[str, Member], doma
     for (registrar, email), ms in sorted(groups.items(), key=lambda kv: -len(kv[1])):
         ms.sort(key=lambda m: (m.name != seed, m.name))
         many = len(ms) > 1
+        where = "hosted on your platform" if platform(ms[0].name) else "registered through you"
         lines = [f"Hello {registrar} abuse team,", "",
-                 f"{'These domains' if many else 'This domain'}, registered through you, "
+                 f"{'These domains' if many else 'This domain'}, {where}, "
                  f"{'appear' if many else 'appears'} to be part of one phishing operation {who}:", ""]
         for m in ms:
             facts = []
@@ -363,7 +380,7 @@ def abuse_reports(seed: str, brand: str | None, members: dict[str, Member], doma
         subject = f"Phishing domain{'s' if many else ''} {who}: {', '.join(m.name for m in ms[:3])}" + (
             f" and {len(ms) - 3} more" if len(ms) > 3 else "")
         first = ms[0].registration
-        reports.append(AbuseReport(registrar, first.registrar_id, email, first.abuse_phone,
+        reports.append(AbuseReport(registrar, first and first.registrar_id, email, first and first.abuse_phone,
                                    [m.name for m in ms], subject, "\n".join(lines)))
     return reports, left_out
 
@@ -377,6 +394,10 @@ def investigate(link: str, sources: Sources, list_lines: Iterable[str] = (), con
     brand = brands.brand_of(seed)
     notes: list[tuple[str, dict]] = []
     members = {seed: Member(seed, brand, {"seed"})}
+    # amazon.co.uk.login-check.top: the brand sits in a subdomain the crew makes up at will, so it names the
+    # target but not the template its siblings share
+    if brand is None and (brand := brands.brand_of(host)):
+        notes.append(("brand_in_subdomain", {"brand": brands.display(brand), "seed": seed}))
 
     ranks = _from_list(seed, list_lines)
     listed = set(ranks)
