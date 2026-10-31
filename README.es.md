@@ -147,7 +147,7 @@ Cada pieza se probó con campañas reales antes de entrar en el producto. Los de
 | ¿Se parten las familias de plantilla en campañas? | Sí: una familia era un único lanzamiento de 68 dominios, otra llegó en oleadas |
 | ¿Cuántos datos necesitan las pistas de calendario? | El fin de semana, unas 50 sesiones en 8 semanas. El horario de verano, cientos |
 | ¿Se despliega un enlace de principio a fin? | Un dominio falso de Coinbase cazado en vivo, que no estaba en la lista pública, se desplegó en una banda de 95 dominios. Solo él seguía activo, y el reloj volvió a dar UTC−7 |
-| ¿Detecta un modelo solo con el nombre el phishing entre los certificados nuevos? | Todavía no: AUC 0,79 con plantillas nuevas, pero con cualquier umbral de menos de unas 7.000 falsas alarmas al día no cazó ninguno de los nombres frescos de la lista. No se incluye ningún modelo de nombres hasta que tenga nombres benignos limpios de los que aprender |
+| ¿Detecta un modelo solo con el nombre el phishing entre los certificados nuevos? | Todavía no. Con nombres del registro como benignos (07), las campañas vivas se colaron entre ellos; con nombres de más de un año comprobados por RDAP (07b), 3.600 benignos fueron pocos y llamó phishing a casi todo. No se incluye ningún modelo de nombres |
 | ¿Se expande una URL a sus hermanos con urlscan? | Pendiente |
 
 ## Lo que Rastro nunca hará
@@ -160,7 +160,7 @@ Cada pieza se probó con campañas reales antes de entrar en el producto. Los de
 ## Hoja de ruta
 
 - Expansión desde una URL con urlscan, para campañas que cambian de nombres pero no de página.
-- Un modelo de nombres que merezca la pena incluir: el experimento 07 mostró que antes necesita nombres benignos limpios, como dominios registrados hace años y nunca listados.
+- Un modelo de nombres que merezca la pena incluir: los experimentos 07 y 07b mostraron que necesita miles de nombres benignos limpios con marca; una semana de vigilante los reúne y RDAP los ordena por edad.
 
 ## Desarrollo
 

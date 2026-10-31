@@ -196,6 +196,18 @@ On the later sample, every threshold strict enough to keep false alarms under ab
 
 **Decision.** No name model ships with Rastro, and Husmo gives no name score by default. The code stays for experiments: `--save FILE` keeps a trained model, and `--name-model FILE` adds its scores to `rastro score`, `rastro investigate` and `rastro watch`. The next attempt needs clean benign names, for example domains registered years ago, still alive and never listed, read through RDAP.
 
+## 07b · Benign names checked by age
+
+**Question.** Does experiment 07's model improve once its benign examples are clean, that is, names a registry says were registered at least a year before they were seen in the log and are not on hold? A phishing domain is registered days before its first certificate, so a year-old name is very unlikely to belong to a live campaign.
+
+**Method.** `experiments/exp07b_edad.py` looked up 6,088 training names through RDAP: every one that carries a brand (88) and a random 6,000 of the rest, all from TLDs with an RDAP server. 5,897 answered, and 3,602 were at least a year old and not on hold, 131 of them carrying a brand once the brands' official domains joined. Same positives, folds, later sample and model as experiment 07. Results in `results/exp07b_edad-2026-10-31.json`.
+
+**Result.** Worse. Cross-validated AUC fell to 0.72 (0.83 on names with a brand, against 131 branded benign names), and at the threshold that lets 1 % of benign names through it caught 10 % of the phishing ones. On the later sample it flagged 8,957 of 11,172 fresh names at a score of 0.5. Made-up lookalikes scored 1.0, but so did made-up ordinary businesses with a brand inside their name, such as applevalleyplumbing.com (1.0) and chasepointdental.com (0.96), and microsoftonline.com scored 1.0; only official domains that were in the benign set itself, such as paypal.com, scored low.
+
+**Why.** Clean labels came at the price of quantity: 3,602 benign names against 116,474 phishing ones are too few for the model to learn what an ordinary name looks like, and only 131 of them carry a brand, which is exactly where the watcher needs help. Names that carry a brand are about 0.3 % of the log, so this sample could not give more.
+
+**Next.** Collect before training: a week of `rastro watch --db` keeps only the names that carry a brand, which should give thousands of them, and RDAP can then sort them by age into clean benign examples and fresh suspects. Until a model beats the plain rule on such data, none ships.
+
 ## 02 · Expansion from one URL
 
 Pending. Does one URL expand to at least 10 sibling domains in 2 minutes with the free urlscan quota plus crt.sh?

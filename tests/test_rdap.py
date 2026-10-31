@@ -41,3 +41,28 @@ def test_servers_prefer_https():
         "https://rdap.verisign.com/com/v1"]]]}
     assert rdap.servers(boot) == {"top": "https://rdap.example/", "xyz": "https://rdap.example/",
                                   "com": "https://rdap.verisign.com/com/v1/"}
+
+
+def test_a_dropped_connection_is_retried(monkeypatch):
+    import http.client
+    import io
+
+    calls = []
+
+    class Answer(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    def urlopen(req, timeout):
+        calls.append(req.full_url)
+        if len(calls) < 3:
+            raise http.client.RemoteDisconnected("Remote end closed connection without response")
+        return Answer(b'{"ldhName": "x.top"}')
+
+    monkeypatch.setattr(rdap.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(rdap.time, "sleep", lambda seconds: None)
+    assert rdap._get("https://rdap.example/domain/x.top", timeout=1, retries=3) == {"ldhName": "x.top"}
+    assert len(calls) == 3

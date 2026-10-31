@@ -15,7 +15,7 @@ import urllib.request
 from pathlib import Path
 
 from rastro.domains import registrable
-from rastro.sources import USER_AGENT
+from rastro.sources import NETWORK_ERRORS, USER_AGENT
 
 RESOLVER = "https://cloudflare-dns.com/dns-query"
 TYPES = {"A": 1, "NS": 2}
@@ -40,7 +40,7 @@ def query(name: str, rtype: str, cache_dir: Path, pause: float = 0.1, retries: i
             with urllib.request.urlopen(req, timeout=20) as resp:
                 payload = json.loads(resp.read())
             break
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
+        except (*NETWORK_ERRORS, json.JSONDecodeError):
             time.sleep(2 ** attempt)
     if payload:
         path.parent.mkdir(parents=True, exist_ok=True)

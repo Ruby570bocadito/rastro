@@ -1,0 +1,82 @@
+{
+  "positives": 116474,
+  "looked_up": 6088,
+  "looked_up_with_brand": 88,
+  "rdap_outcomes": {
+    "found": 5897,
+    "no-answer": 189,
+    "not-found": 2
+  },
+  "negatives": 3602,
+  "negatives_with_brand": 131,
+  "cross_validation": {
+    "all": {
+      "positives": 116474,
+      "negatives": 3602,
+      "auc": 0.7158,
+      "recall_at_fpr_0.01": 0.0994,
+      "recall_at_fpr_0.001": 0.0
+    },
+    "with_brand": {
+      "positives": 5688,
+      "negatives": 131,
+      "auc": 0.8253,
+      "recall_at_fpr_0.01": 0.2957,
+      "recall_at_fpr_0.001": 0.2957
+    },
+    "threshold_at_fpr_0.01": 1.0,
+    "threshold_at_fpr_0.001": 1.0
+  },
+  "fresh_sample": {
+    "names": 11172,
+    "names_with_brand": 46,
+    "thresholds": [
+      {
+        "threshold": 0.5,
+        "flagged": 8957,
+        "per_day": 8613302,
+        "with_brand": 38
+      },
+      {
+        "threshold": 0.8,
+        "flagged": 8073,
+        "per_day": 7763223,
+        "with_brand": 37
+      },
+      {
+        "threshold": 0.9,
+        "flagged": 7475,
+        "per_day": 7188170,
+        "with_brand": 37
+      },
+      {
+        "threshold": 0.95,
+        "flagged": 6916,
+        "per_day": 6650620,
+        "with_brand": 36
+      },
+      {
+        "threshold": 0.99,
+        "flagged": 5773,
+        "per_day": 5551479,
+        "with_brand": 33
+      }
+    ]
+  },
+  "probes": {
+    "paypal-verify-4821.top": 1.0,
+    "facebook--signup-zsignupzzzzq7.ph": 1.0,
+    "amazon-cloud-accounts-xy.ph": 1.0,
+    "correos-envio-4821.top": 1.0,
+    "microsofterrorfound-help-desk-1.ph": 1.0,
+    "google.com": 0.8888,
+    "paypal.com": 0.0057,
+    "microsoftonline.com": 0.9995,
+    "amazonaws.com": 0.0004,
+    "riverhomebakery.com": 0.7769,
+    "applevalleyplumbing.com": 0.9996,
+    "chasepointdental.com": 0.9646,
+    "smith-garden-design.co.uk": 0.9879
+  },
+  "seconds": 1666
+}

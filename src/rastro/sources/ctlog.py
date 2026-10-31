@@ -16,7 +16,7 @@ import urllib.request
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
-from rastro.sources import USER_AGENT, der
+from rastro.sources import NETWORK_ERRORS, USER_AGENT, der
 
 TILE = 256
 LOG_LIST = "https://www.gstatic.com/ct/log_list/v3/log_list.json"
@@ -39,7 +39,7 @@ def _get(url: str, timeout: float = 60, retries: int = 4) -> bytes:
             req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return resp.read()
-        except (urllib.error.URLError, TimeoutError) as err:
+        except NETWORK_ERRORS as err:
             last_error = err
             time.sleep(delay)
             delay *= 2

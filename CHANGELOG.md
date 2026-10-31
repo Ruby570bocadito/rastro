@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Experiment 07b: the name model with benign names checked by age through RDAP. Worse than 07 (too few benign names, 131 of them with a brand), so still no model ships; the notes say what data the next try needs.
+- The RDAP, DNS, crt.sh and CT clients retry on any network failure, such as a server closing the connection without answering, instead of stopping a long run.
+- RDAP keeps the registration date even when a registry gives no time of day.
 - `rastro track`: follows domains after they are found (`add`, `check`, `report`), through RDAP and public DNS only, and scores registrars by how long their domains stay up, as Kaplan-Meier survival curves, timed from when each domain was followed or, with `--from-report`, from its abuse report. `rastro investigate --track` and `rastro watch --track` feed it. The scoreboard is a self-contained HTML page too.
 - RDAP answers now tell a domain that is not registered from a TLD without an RDAP server, and DNS answers keep the resolver's verdict (NXDOMAIN means out of the zone).
 - Husmo speaks: a Listen button in the case file reads the deductions aloud with an offline system voice, never a cloud one, while the ferret's mouth follows the words (each shape held at least 160 ms) and the line being read lights up. Learned patterns, time zones and numbers are turned into words a voice reads well.

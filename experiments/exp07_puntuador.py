@@ -108,6 +108,44 @@ def summary(pos: list[float], neg: list[float]) -> dict:
     return out
 
 
+def phishing_list() -> tuple[dict[str, set[str]], set[str], set[str], set[str]]:
+    """The list's registrable domains with their listed host names, the hosting platforms among them, the usable
+    listed domains, and those listed whole (registered for phishing)."""
+    hosts: dict[str, set[str]] = defaultdict(set)
+    for line in LIST.read_text(encoding="utf-8", errors="replace").splitlines():
+        name = line.strip().lower()
+        if name and not name.startswith("#"):
+            hosts[registrable(name)].add(name)
+    platforms = {r for r, hs in hosts.items() if len(hs) >= PLATFORM_MIN}
+    listed = {r for r in hosts if r not in platforms and usable(r)}
+    whole = {r for r in listed if r in hosts[r] or f"www.{r}" in hosts[r]}
+    return hosts, platforms, listed, whole
+
+
+def ct_samples(log: str, eval_tiles: int = 60, eval_stride: int = 50, train_tiles: int = 160,
+               train_stride: int = 200) -> tuple[list[dict], list[dict], dict[str, str]]:
+    """The later tiles, the training tiles, and when each training name was first seen (ISO time), the
+    five-minute live sample included."""
+    tiles_file = PRIVATE / "tiles.json"
+    if tiles_file.exists():
+        eval_ids, train_ids = json.loads(tiles_file.read_text(encoding="utf-8"))
+    else:
+        last = ctlog.tree_size(log) // ctlog.TILE - 1
+        eval_ids = [last - k * eval_stride for k in range(eval_tiles)]
+        train_ids = [eval_ids[-1] - train_stride * (k + 1) for k in range(train_tiles)]
+        tiles_file.write_text(json.dumps([eval_ids, train_ids]), encoding="utf-8")
+    fresh_tiles = [tile(log, n) for n in eval_ids]
+    train = [tile(log, n) for n in train_ids]
+    seen: dict[str, str] = {}
+    for t in train:
+        for r in t["registrables"]:
+            seen[r] = min(seen.get(r, t["first_at"]), t["first_at"])
+    if LIVE.exists():
+        for r, at in sqlite3.connect(LIVE).execute("SELECT registrable, MIN(logged_at) FROM names GROUP BY registrable"):
+            seen[r] = min(seen.get(r, at), at)
+    return fresh_tiles, train, seen
+
+
 def main() -> int:
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -126,31 +164,13 @@ def main() -> int:
     PRIVATE.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
 
-    hosts: dict[str, set[str]] = defaultdict(set)
-    for line in LIST.read_text(encoding="utf-8", errors="replace").splitlines():
-        name = line.strip().lower()
-        if name and not name.startswith("#"):
-            hosts[registrable(name)].add(name)
-    platforms = {r for r, hs in hosts.items() if len(hs) >= PLATFORM_MIN}
-    listed = {r for r in hosts if r not in platforms and usable(r)}
-    whole = {r for r in listed if r in hosts[r] or f"www.{r}" in hosts[r]}
+    hosts, platforms, listed, whole = phishing_list()
     through_subdomains = listed - whole
     print(f"list: {len(hosts):,} registrables · {len(platforms):,} platforms left out · {len(whole):,} listed whole "
           f"· {len(through_subdomains):,} only through subdomains", flush=True)
 
-    tiles_file = PRIVATE / "tiles.json"
-    if tiles_file.exists():
-        eval_ids, train_ids = json.loads(tiles_file.read_text(encoding="utf-8"))
-    else:
-        last = ctlog.tree_size(args.log) // ctlog.TILE - 1
-        eval_ids = [last - k * args.eval_stride for k in range(args.eval_tiles)]
-        train_ids = [eval_ids[-1] - args.train_stride * (k + 1) for k in range(args.train_tiles)]
-        tiles_file.write_text(json.dumps([eval_ids, train_ids]), encoding="utf-8")
-    fresh_tiles = [tile(args.log, n) for n in eval_ids]
-    train_tiles = [tile(args.log, n) for n in train_ids]
-    ct_train = {r for t in train_tiles for r in t["registrables"]}
-    if LIVE.exists():
-        ct_train |= {r for (r,) in sqlite3.connect(LIVE).execute("SELECT DISTINCT registrable FROM names")}
+    fresh_tiles, _, seen = ct_samples(args.log, args.eval_tiles, args.eval_stride, args.train_tiles, args.train_stride)
+    ct_train = set(seen)
     fresh = {r for t in fresh_tiles for r in t["registrables"] if usable(r)}
     official = brands.official_domains()
     if args.negatives == "no-brand":

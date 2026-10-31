@@ -19,7 +19,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from rastro.domains import registrable
-from rastro.sources import USER_AGENT
+from rastro.sources import NETWORK_ERRORS, USER_AGENT
 
 BASE = "https://crt.sh/"
 
@@ -67,7 +67,7 @@ def fetch(query: str, cache_dir: Path, max_age_hours: float = 24, retries: int =
             rows = json.loads(body)
             path.write_bytes(body)
             return rows
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as err:
+        except (*NETWORK_ERRORS, json.JSONDecodeError) as err:
             last_error = err
             time.sleep(delay)
             delay = min(delay * 2, 60)
@@ -127,7 +127,7 @@ def log_time(cert_id: int, cache_dir: Path, timeout: float = 60, retries: int = 
                 with urllib.request.urlopen(req, timeout=timeout) as resp:
                     page = resp.read().decode("utf-8", errors="replace")
                 break
-            except (urllib.error.URLError, TimeoutError):
+            except NETWORK_ERRORS:
                 time.sleep(delay)
                 delay = min(delay * 2, 60)
         if page is None:

@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from rastro.sources import USER_AGENT
+from rastro.sources import NETWORK_ERRORS, USER_AGENT
 
 BOOTSTRAP = "https://data.iana.org/rdap/dns.json"
 BOOTSTRAP_MAX_AGE = 7 * 24 * 3600
@@ -37,6 +37,7 @@ class Registration:
     abuse_phone: str | None
     status: tuple[str, ...]
     server: str
+    registered_day: datetime | None = None   # the registration even when the registry gives only its date
 
 
 def servers(bootstrap: dict) -> dict[str, str]:
@@ -63,7 +64,7 @@ def _get(url: str, timeout: float, retries: int, accept: str = "application/rdap
                 return {}
             if err.code not in (429, 500, 502, 503, 504):
                 return None
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
+        except (*NETWORK_ERRORS, json.JSONDecodeError):
             pass
         time.sleep(delay)
         delay = min(delay * 2, 30)
@@ -148,7 +149,8 @@ def parse(payload: dict, domain: str, server: str) -> Registration:
                 break
     return Registration(domain=domain, registered=registered, expires=events.get("expiration"), registrar=name,
                         registrar_id=rid, abuse_email=email, abuse_phone=phone,
-                        status=tuple(payload.get("status") or ()), server=server)
+                        status=tuple(payload.get("status") or ()), server=server,
+                        registered_day=events.get("registration"))
 
 
 def check(domain: str, cache_dir: Path, offline: bool = False, fresh: bool = False,
