@@ -109,3 +109,12 @@ def test_a_refused_key_stops_at_once(monkeypatch, tmp_path):
 def test_scan_ids_cannot_leave_the_result_path(tmp_path):
     with pytest.raises(ValueError):
         urlscan.Client(tmp_path, key="k").result("../../search/?q=x")
+
+
+def test_the_richest_live_scan_is_chosen_over_the_newest_dead_one():
+    def hit(uuid, when, status, requests):
+        return {"_id": uuid, "task": {"time": when}, "page": {"domain": "x.top", "status": status},
+                "stats": {"requests": requests}}
+    payload = {"results": [hit("dead", "2026-10-30", "451", 2), hit("live", "2026-09-01", "200", 115),
+                           hit("thin", "2026-09-05", "200", 3), {"_id": "other", "page": {"domain": "y.top"}}]}
+    assert urlscan.live_first(payload, "x.top") == ["live", "thin", "dead"]

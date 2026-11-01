@@ -218,4 +218,20 @@ On the later sample, every threshold strict enough to keep false alarms under ab
 
 **Run.** `python -I experiments/exp02_urlscan.py --seeds 20` (seeds sampled from the public list, spread over brands) or `--seeds-file FILE`.
 
-**Status.** Code and tests ready (`tests/test_urlscan.py`, scripted urlscan); not run yet, it needs a free account.
+**Results, 2026-11-01.** 20 seeds sampled from the public list, spread over brands. Aggregates in `results/exp02_urlscan-2026-11-01-*`; domain names stay in `data/raw/`.
+
+| Pass | Scan used | Seeds urlscan had seen | Median siblings | Siblings in all | On the list or with the seed's brand | Seconds per seen seed |
+|---|---|---:|---:|---:|---:|---:|
+| 1 | the newest | 6 of 20 | 0 | 1 | 0 | 7.5 |
+| 2 | the richest live page | 6 of 20 | 0 | 122 | 2 | 18.7 |
+
+**Verdict: fails.** No expansion goes into `rastro investigate`.
+
+**What the two passes showed.**
+
+- **Coverage is the first wall.** urlscan had never scanned 14 of the 20 listed domains. A seed it never saw cannot expand.
+- **The newest scan is the wrong one.** In pass 1 every seed's newest scan was of a page already taken down or blocked (HTTP 404, 403 or 451) that loaded 2 to 5 files, so there was no kit to follow. Some of the same seeds had older scans of the live page with 110 to 116 requests. Pass 2 picks the live page with the most requests (`urlscan.live_first`). This change was made after seeing pass 1, so pass 2 is not a blind test.
+- **When a live kit is found, the files lead somewhere, but not cleanly.** Two seeds expanded. A Coinbase lookalike on a hosting platform reached 27 domains, every one through a single shared file: two Coinbase lookalikes, among job boards and unrelated sites, the mark of one widely copied asset. A fake Telegram download site reached 95 domains, most sharing 2 to 14 files with it, nearly all of them gambling and download-portal sites. That looks like one operator's network, but none of them is on the list and none carries the brand, so this run cannot tell a crew from a shared template.
+- **Speed is not the problem.** A seen seed took 7 to 44 seconds, within the free quota.
+
+**Next, if it is tried again.** Fresh seeds, from the watcher or from a link received that day, which urlscan users are likelier to have scanned while live. A sibling needs at least two shared files, which removes the single-asset noise. Precision needs a better check than list-or-brand, for example whether the siblings' first certificates fall in the seed's work sessions (experiment 05).

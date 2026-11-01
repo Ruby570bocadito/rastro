@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Experiment 02 is ready to run: a read-only urlscan.io client (`rastro.sources.urlscan`) that expands a domain to the sites that loaded the same kit files, never submitting a scan. It needs a free API key in `URLSCAN_API_KEY`; nothing uses it in `rastro investigate` until the experiment passes.
+- Experiment 02: a read-only urlscan.io client (`rastro.sources.urlscan`) expands a domain to the sites that loaded the same kit files, never submitting a scan. It failed its bar (14 of 20 seeds never scanned; the expansions found could not be confirmed), so `rastro investigate` does not use it. It needs a free API key in `URLSCAN_API_KEY`.
 - The demo case file is published on GitHub Pages, in English and Spanish, by a new `pages` workflow; the README links to it.
 - The brands live in a data file, `src/rastro/assets/brands.txt` (`key | Name | official domains`), and `rastro --brands FILE` adds your own to any command.
 - The network clients give up at once on answers that will not change (a 404, a 400) instead of retrying them, and wait as long as a server's Retry-After asks, up to five minutes.

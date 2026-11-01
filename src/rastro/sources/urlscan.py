@@ -99,10 +99,21 @@ def hits(payload: dict) -> list[tuple[str, str, str]]:
     return out
 
 
+def live_first(payload: dict, seed: str) -> list[str]:
+    """The seed's scan ids, richest live page first. The newest scan is usually of the page already taken down
+    (a 404, 403 or 451 that loads two or three files), which says nothing about the kit; experiment 02 found it so."""
+    def rank(r: dict) -> tuple:
+        page, stats = r.get("page") or {}, r.get("stats") or {}
+        return (str(page.get("status")) == "200", stats.get("requests") or 0, (r.get("task") or {}).get("time") or "")
+    mine = [r for r in payload.get("results") or []
+            if registrable(((r.get("page") or {}).get("domain") or "").lower()) == seed and r.get("_id")]
+    return [r["_id"] for r in sorted(mine, key=rank, reverse=True)]
+
+
 @dataclass
 class Expansion:
     seed: str
-    scan: str | None = None                          # the seed's newest scan, None when urlscan never saw it
+    scan: str | None = None                          # the seed's richest live scan, None when urlscan never saw it
     hashes: int = 0                                  # files on the seed's page
     common: int = 0                                  # of them, shared libraries left out
     siblings: dict[str, set[str]] = field(default_factory=dict)   # domain -> the seed's files it loaded too
@@ -111,14 +122,13 @@ class Expansion:
 
 
 def expand(client: Client, seed: str, common: int = COMMON, max_hashes: int = MAX_HASHES) -> Expansion:
-    """The domains whose scanned pages loaded the same distinctive files as the seed's newest scan."""
+    """The domains whose scanned pages loaded the same distinctive files as the seed's richest live scan."""
     start, before = time.monotonic(), client.requests
     out = Expansion(seed)
-    scans = sorted((h for h in hits(client.search(f"page.domain:{seed}", size=10)) if h[0] == seed and h[2]),
-                   key=lambda h: h[1], reverse=True)
-    result = client.result(scans[0][2]) if scans else None
+    scans = live_first(client.search(f"page.domain:{seed}", size=100), seed)
+    result = client.result(scans[0]) if scans else None
     if result:
-        out.scan = scans[0][2]
+        out.scan = scans[0]
         hashes = list(dict.fromkeys((result.get("lists") or {}).get("hashes") or []))
         out.hashes = len(hashes)
         looked = []

@@ -1,0 +1,202 @@
+[
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": true,
+    "files": 5,
+    "shared_libraries": 3,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": true,
+    "files": 3,
+    "shared_libraries": 3,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.3
+  },
+  {
+    "seen": true,
+    "files": 2,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": true,
+    "files": 21,
+    "shared_libraries": 9,
+    "siblings": 27,
+    "listed": 0,
+    "same_brand": 1,
+    "requests": 23,
+    "seconds": 36.5
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 3.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.4
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.3
+  },
+  {
+    "seen": true,
+    "files": 19,
+    "shared_libraries": 11,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 21,
+    "seconds": 36.1
+  },
+  {
+    "seen": true,
+    "files": 27,
+    "shared_libraries": 10,
+    "siblings": 95,
+    "listed": 0,
+    "same_brand": 1,
+    "requests": 29,
+    "seconds": 43.8
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  },
+  {
+    "seen": false,
+    "files": 0,
+    "shared_libraries": 0,
+    "siblings": 0,
+    "listed": 0,
+    "same_brand": 0,
+    "requests": 1,
+    "seconds": 1.2
+  }
+]
