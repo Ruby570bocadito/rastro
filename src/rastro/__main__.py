@@ -151,9 +151,12 @@ def cmd_watch(args) -> int:
         print(f"name model: also keeping names that score {w.keep_score:.3f} or more")
     if w.alert_score is not None:
         print(f"name model: alerting on names that score {w.alert_score:.3f} or more")
-    if not w.armed and not args.bursts_every and w.alert_score is None:
-        print("Nothing to watch: give --learn, --regex or --regex-file, --score-alerts, or --bursts-every with --db.")
+    if not w.armed and not args.bursts_every and w.alert_score is None and not args.db:
+        print("Nothing to watch: give --learn, --regex or --regex-file, --score-alerts, or --db to store the brand "
+              "lookalikes it reads (with --bursts-every to look for campaigns among them).")
         return 1
+    if not w.armed and w.alert_score is None:
+        print("no pattern armed: storing the brand lookalikes only")
     conn = store.connect(args.db) if args.db else None
     out = open(args.alerts, "a", encoding="utf-8") if args.alerts else None
 
