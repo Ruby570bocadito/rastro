@@ -211,7 +211,7 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
     listed = sum(1 for d in crew if "list" in inv.members[d].sources)
     if inv.crew_pattern:
         times = [t for d in crew if (t := inv.members[d].first_seen)]
-        span = f"{min(times):%Y-%m-%d}", f"{max(times):%Y-%m-%d}"
+        span = (f"{min(times):%Y-%m-%d}", f"{max(times):%Y-%m-%d}") if times else None   # none without dates
         if es:
             text = f"Su nombre sigue una plantilla: {inv.crew_pattern.regex}. La comparten {len(crew)} dominios"
             text += f", {listed} de ellos en la lista pública de phishing" if listed else ""

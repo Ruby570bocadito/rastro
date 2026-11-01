@@ -76,6 +76,12 @@ flowchart LR
 
 ## Investigate a real link
 
+First download the public list of phishing domains that Rastro searches for siblings: [Phishing.Database](https://github.com/Phishing-Database/Phishing.Database)'s active domains, about 10 MB, MIT licence. Run it again now and then: it downloads only when the list has changed.
+
+```bash
+rastro list update
+```
+
 ```bash
 rastro investigate "hxxps://lookalike-domain[.]example/path"
 ```
@@ -84,7 +90,7 @@ Paste the link as it came, defanged or not. Husmo tells the result in the termin
 
 The case file carries its data, styles and script inline, with a Content-Security-Policy that forbids every network request, so opening it contacts nobody. It never contains the path of the link, which often carries a token that identifies whoever received it, and it writes every attacker-controlled string as text, never as HTML.
 
-`--list FILE` sets the phishing list to search: by default `data/raw/lists/phishing-domains-ACTIVE.txt` when present, for example from [Phishing.Database](https://github.com/mitchellkrogza/Phishing.Database). `--db` adds what the watcher stored, `--json FILE` saves the case data, `--offline` uses cached answers only, and `--no-crtsh`, `--no-rdap` and `--no-dns` skip a source.
+`--list FILE` sets the phishing list to search: by default `data/raw/lists/phishing-domains-ACTIVE.txt` when present, as `rastro list update` leaves it. `--db` adds what the watcher stored, `--json FILE` saves the case data, `--offline` uses cached answers only, and `--no-crtsh`, `--no-rdap` and `--no-dns` skip a source.
 
 ## Watch Certificate Transparency
 

@@ -109,3 +109,15 @@ def test_platform_sites_are_reported_to_the_platform_not_a_registrar():
     assert report.registrar == "Cloudflare Pages (pages.dev)" and report.email is None
     assert report.domains == [seed] and "hosted on your platform" in report.body
     assert inv.left_out == {gone: "unresolved", "correos-envio-4823.pages.dev": "unresolved"}
+
+
+def test_a_crew_without_any_dates_is_still_told():
+    # crt.sh skipped or down: the template is found but no domain has a date; Husmo once crashed on the date span
+    from rastro import husmo
+    inv = investigate.investigate("hxxps://correos-envio-4821[.]top/s/7Hk2", investigate.Sources(),
+                                  list_lines=CREW, sims=100)
+    assert inv.crew_pattern is not None and not any(m.first_seen for m in inv.members.values())
+    for lang in ("en", "es"):
+        template = next(t for _, t in husmo.narrate(inv, lang) if "plantilla" in t or "template" in t)
+        assert template.endswith(("share it.", "domains share it, 60 of them on the public phishing list.",
+                                  "lista pública de phishing."))

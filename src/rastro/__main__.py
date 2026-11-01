@@ -28,7 +28,7 @@ from rastro import (
     watch,
 )
 from rastro.domains import registrable
-from rastro.sources import crtsh, ctlog, dns
+from rastro.sources import crtsh, ctlog, dns, phishlist
 
 
 def _lines(path: str) -> list[str]:
@@ -92,6 +92,18 @@ def cmd_rhythm(args) -> int:
     print(f"most probable {rhythm.tz_name(est.offset)} · {est.band_mass:.0%} band {band} · "
           f"bots about {est.bot_share:.0%}")
     print("(give full dates and times to also test daylight saving, the weekend and holidays)")
+    return 0
+
+
+def cmd_list_update(args) -> int:
+    print(f"Asking {args.url} for the list...", flush=True)
+    try:
+        got = phishlist.update(args.to, url=args.url)
+    except (RuntimeError, ValueError) as err:
+        print(f"No new list: {err}")
+        return 1
+    what = "Downloaded" if got.changed else "Already up to date:"
+    print(f"{what} {got.domains:,} domains ({got.size / 1e6:.1f} MB) in {got.path}")
     return 0
 
 
@@ -232,6 +244,9 @@ def cmd_investigate(args) -> int:
         return 2
     list_path = args.list or (DEFAULT_LIST if Path(DEFAULT_LIST).exists() else None)
     lines = _lines(list_path) if list_path else []
+    if not list_path:
+        print("No phishing list: siblings will come only from shared certificates and the watcher. "
+              "`rastro list update` downloads Phishing.Database's list (about 10 MB, MIT licence).\n")
     conn = store.connect(args.db) if args.db else None
     sources = investigate.Sources.public(Path(args.cache), offline=args.offline, crt=not args.no_crtsh,
                                          rdap_=not args.no_rdap, dns_=not args.no_dns)
@@ -465,6 +480,14 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("file")
     r.add_argument("--sims", type=int, default=2000)
     r.set_defaults(run=cmd_rhythm)
+    li = sub.add_parser("list", help="the public list of phishing domains that investigate searches for siblings")
+    lsub = li.add_subparsers(dest="list_command", required=True)
+    lu = lsub.add_parser("update", help="download Phishing.Database's list of active phishing domains (about 10 MB), "
+                                        "or keep the copy you have if it has not changed")
+    lu.add_argument("--to", default=DEFAULT_LIST, help=f"where to keep it (default: {DEFAULT_LIST}, where investigate "
+                                                       "looks)")
+    lu.add_argument("--url", default=phishlist.URL, help="another list in the same format, one domain per line")
+    lu.set_defaults(run=cmd_list_update)
     lg = sub.add_parser("logs", help="list the tiled Certificate Transparency logs taking new certificates")
     lg.add_argument("--days-ahead", type=int, default=90, help="expiry of the certificates you want, in days")
     lg.set_defaults(run=cmd_logs)

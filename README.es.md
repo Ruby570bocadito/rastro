@@ -76,6 +76,12 @@ flowchart LR
 
 ## Investiga un enlace real
 
+Primero descarga la lista pública de dominios de phishing en la que Rastro busca hermanos: los dominios activos de [Phishing.Database](https://github.com/Phishing-Database/Phishing.Database), unos 10 MB, licencia MIT. Vuelve a ejecutarlo de vez en cuando: solo descarga si la lista ha cambiado.
+
+```bash
+rastro list update
+```
+
 ```bash
 rastro investigate "hxxps://dominio-falso[.]example/ruta" --lang es
 ```
@@ -84,7 +90,7 @@ Pega el enlace tal como llegó, desactivado o no. Husmo cuenta el resultado en l
 
 El expediente lleva dentro sus datos, estilos y script, con una Content-Security-Policy que prohíbe cualquier petición de red, así que abrirlo no contacta con nadie. Nunca contiene la ruta del enlace, que suele llevar un token que identifica a quien lo recibió, y escribe todo texto controlado por los atacantes como texto, nunca como HTML.
 
-`--list FICHERO` indica la lista de phishing en la que buscar: por defecto `data/raw/lists/phishing-domains-ACTIVE.txt` si existe, por ejemplo la de [Phishing.Database](https://github.com/mitchellkrogza/Phishing.Database). `--db` añade lo que guardó el vigilante, `--json FICHERO` guarda los datos del caso, `--offline` usa solo respuestas guardadas, y `--no-crtsh`, `--no-rdap` y `--no-dns` se saltan una fuente.
+`--list FICHERO` indica la lista de phishing en la que buscar: por defecto `data/raw/lists/phishing-domains-ACTIVE.txt` si existe, tal como la deja `rastro list update`. `--db` añade lo que guardó el vigilante, `--json FICHERO` guarda los datos del caso, `--offline` usa solo respuestas guardadas, y `--no-crtsh`, `--no-rdap` y `--no-dns` se saltan una fuente.
 
 ## Vigila Certificate Transparency
 
