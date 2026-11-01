@@ -48,7 +48,7 @@ def cmd_pattern(args) -> int:
 
 
 def _instant(value: str) -> datetime | None:
-    """A UTC instant from an ISO 8601 time, or None for a bare hour."""
+    """A UTC instant from an ISO 8601 time, or None for a bare hour; ValueError for anything else."""
     try:
         float(value)
         return None
@@ -70,7 +70,17 @@ def _probs(probs: dict[str, float]) -> str:
 
 def cmd_rhythm(args) -> int:
     values = _lines(args.file)
-    instants = [_instant(v) for v in values]
+    if not values:
+        print(f"No times in {args.file}: give one UTC time in ISO 8601 (2026-10-30T09:15Z) or UTC hour (9.25) per "
+              "line.")
+        return 1
+    instants = []
+    for v in values:
+        try:
+            instants.append(_instant(v))
+        except ValueError:
+            print(f"{v!r} is neither a UTC time in ISO 8601 (2026-10-30T09:15Z) nor a UTC hour (9.25).")
+            return 2
     if values and all(instants):
         starts = rhythm.sessions(instants)
         _histogram([t.hour + t.minute / 60 for t in starts])
@@ -309,7 +319,10 @@ def _say_unfollowable(domains: list[str]) -> None:
 def cmd_track_add(args) -> int:
     conn = track.connect(args.db)
     now = datetime.now(UTC)
-    since = _instant(args.since) if args.since else now
+    try:
+        since = _instant(args.since) if args.since else now
+    except ValueError:
+        since = None
     if since is None:
         print(f"--since needs a date and time in ISO 8601, such as 2026-11-01T09:00Z, not {args.since!r}")
         return 2
@@ -320,18 +333,36 @@ def cmd_track_add(args) -> int:
         except ValueError:
             skipped += 1
     new = track.add(conn, names, since, source="manual", reported=args.reported)
-    _say_unfollowable(track.unfollowable(names))
+    asked, not_alerts = list(names), 0
     for path in args.alerts or []:
         for line in _lines(path):
-            alert = json.loads(line)
-            new += track.add(conn, [alert["domain"]], _instant(alert["logged_at"].replace(" ", "T")), source="watch")
+            try:
+                alert = json.loads(line)
+                domain, at = alert["domain"], _instant(alert["logged_at"].replace(" ", "T"))
+            except (ValueError, KeyError, TypeError, AttributeError):
+                at = None
+            if at is None:
+                not_alerts += 1
+                continue
+            new += track.add(conn, [domain], at, source="watch")
+            asked.append(domain)
     for path in args.case or []:
-        case = json.loads(Path(path).read_text(encoding="utf-8"))
-        new += track.add(conn, [d for r in case.get("reports", []) for d in r["domains"]], since, source="case",
-                         reported=args.reported)
+        try:
+            case = json.loads(Path(path).read_text(encoding="utf-8"))
+            reported = [d for r in case.get("reports", []) for d in r["domains"]]
+        except (ValueError, KeyError, TypeError, AttributeError):
+            print(f"{path} is not case data written by `rastro investigate --json`.")
+            return 2
+        new += track.add(conn, reported, since, source="case", reported=args.reported)
+        asked += reported
+    _say_unfollowable(track.unfollowable(asked))
     total = conn.execute("SELECT COUNT(*) FROM tracked").fetchone()[0]
-    print(f"{new} new domains followed, {total} in {args.db}" + (f" ({skipped} lines were not domains)" if skipped
-                                                                 else ""))
+    notes = []
+    if skipped:
+        notes.append(f"{skipped} lines were not domains")
+    if not_alerts:
+        notes.append(f"{not_alerts} lines were not alerts")
+    print(f"{new} new domains followed, {total} in {args.db}" + (f" ({'; '.join(notes)})" if notes else ""))
     return 0
 
 
@@ -542,15 +573,20 @@ def main(argv: list[str] | None = None) -> int:
     bu.add_argument("--max-breadth", type=float, default=12.0)
     bu.set_defaults(run=cmd_bursts)
     args = ap.parse_args(argv)
-    if not args.brands:
-        return args.run(args)
+    names, official = {}, {}
+    if args.brands:
+        try:
+            names, official = brands.from_file(args.brands)
+        except (OSError, ValueError) as err:
+            print(f"--brands {args.brands}: {err}")
+            return 2
     try:
-        names, official = brands.from_file(args.brands)
-    except (OSError, ValueError) as err:
-        print(f"--brands {args.brands}: {err}")
+        with brands.extra(names, official):
+            return args.run(args)
+    except (FileNotFoundError, IsADirectoryError, NotADirectoryError, PermissionError) as err:
+        # a path the user gave that is missing, is a folder, or cannot be read: say so instead of a traceback
+        print(f"{err.filename}: {err.strerror}")
         return 2
-    with brands.extra(names, official):
-        return args.run(args)
 
 
 if __name__ == "__main__":

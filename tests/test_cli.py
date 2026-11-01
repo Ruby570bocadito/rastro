@@ -61,3 +61,39 @@ def test_a_broken_brands_file_stops_before_running(tmp_path, capsys):
     bad.write_text("not a key\n", encoding="utf-8")
     assert main(["--brands", str(bad), "pattern", str(bad)]) == 2
     assert "line 1" in capsys.readouterr().out
+
+
+def test_rhythm_explains_an_empty_file_and_a_line_that_is_not_a_time(tmp_path, capsys):
+    empty, bad = tmp_path / "empty.txt", tmp_path / "bad.txt"
+    empty.write_text("# nothing yet\n", encoding="utf-8")
+    bad.write_text("2026-10-30T09:15:00Z\nnot a time\n", encoding="utf-8")
+    assert main(["rhythm", str(empty)]) == 1
+    assert "No times in" in capsys.readouterr().out
+    assert main(["rhythm", str(bad)]) == 2
+    assert "'not a time' is neither a UTC time" in capsys.readouterr().out
+
+
+def test_track_add_refuses_a_vague_since_and_skips_lines_that_are_not_alerts(tmp_path, capsys):
+    db = str(tmp_path / "t.sqlite")
+    assert main(["track", "add", "x.test", "--since", "yesterday", "--db", db]) == 2
+    assert "--since needs a date and time in ISO 8601" in capsys.readouterr().out
+    alerts = tmp_path / "alerts.jsonl"
+    alerts.write_text('{"domain": "a.test", "logged_at": "2026-10-30 09:00:00"}\nnot json\n{"domain": 3}\n[1]\n'
+                      '{"domain": "b.test", "logged_at": "soon"}\n'
+                      '{"domain": "c.vercel.app", "logged_at": "2026-10-30 09:00:00"}\n', encoding="utf-8")
+    assert main(["track", "add", "--alerts", str(alerts), "--db", db]) == 0
+    out = capsys.readouterr().out
+    assert "1 new domains followed" in out and "4 lines were not alerts" in out
+    assert "Not followed: c.vercel.app" in out
+    case = tmp_path / "case.json"
+    case.write_text("[1, 2, 3]", encoding="utf-8")
+    assert main(["track", "add", "--case", str(case), "--db", db]) == 2
+    assert "is not case data" in capsys.readouterr().out
+
+
+def test_a_missing_file_is_named_instead_of_a_traceback(tmp_path, capsys):
+    missing = str(tmp_path / "no-such-file.txt")
+    for argv in (["pattern", missing], ["rhythm", missing], ["watch", "--learn", missing],
+                 ["investigate", "x.test", "--list", missing, "--offline", "--no-crtsh", "--no-rdap", "--no-dns"]):
+        assert main(argv) == 2
+        assert "no-such-file.txt: No such file or directory" in capsys.readouterr().out
