@@ -4,7 +4,7 @@
 
 - Sites on hosting platforms, end to end. 17 of the 22 known platforms answer DNS for any name (checked with random names), so for their sites an address proves nothing: they are no longer left out as gone, their draft asks the platform to check whether they are still up, and `rastro track` does not follow them, since it could never see them come down without visiting them.
 - A platform's shared addresses no longer tie two of its sites into one campaign. Before, two unrelated sites on the same platform could be joined by address alone.
-- Platform drafts carry the platform's abuse form for 11 of the 22 suffixes, each checked by hand; the others have none rather than a guess.
+- Platform drafts carry the platform's abuse form for 12 of the 22 suffixes (10 operators), each checked by hand; the others have none rather than a guess.
 - Husmo says when a site lives on a platform and what DNS cannot tell about it; the case file's step 5 reads "Warn the registrar or host", shows the abuse form, names the platform in the evidence table, and counts sites that cannot be checked apart from live ones. The takedown scoreboard names platforms too.
 
 ## 0.2.0 · 2026-11-01
