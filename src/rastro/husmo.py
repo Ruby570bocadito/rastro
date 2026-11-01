@@ -10,7 +10,7 @@ import re
 from collections import Counter
 
 from rastro import brands, calendar_clues, rhythm
-from rastro.domains import PLATFORMS, dns_hides_takedown, platform, shares_certificate
+from rastro.domains import PLATFORMS, dns_hides_takedown, dynamic_dns, platform, shares_certificate
 from rastro.investigate import Investigation
 
 KIND_LABELS = {
@@ -49,6 +49,8 @@ GONE = {   # (English one, English many), (Spanish one, Spanish many)
                       "{n} were registered again, maybe by somebody else"),
                      ("{n} se ha vuelto a registrar, quizá por otra persona",
                       "{n} se han vuelto a registrar, quizá por otra persona")),
+    "sinkholed": (("{n} already points at a sinkhole", "{n} already point at sinkholes"),
+                  ("{n} ya apunta a un sumidero", "{n} ya apuntan a sumideros")),
     "unresolved": (("{n} was on a hosting platform and no longer resolves",
                     "{n} were on hosting platforms and no longer resolve"),
                    ("{n} estaba en una plataforma de hosting y ya no resuelve",
@@ -194,7 +196,15 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
         else:
             out.append(("fact", "It was registered" + (f" on {when}" if when else "")
                         + (f" through {registrar}." if registrar else ".")))
-    if suffix := platform(inv.seed):
+    if (suffix := platform(inv.seed)) and dynamic_dns(inv.seed):
+        host = PLATFORMS[suffix]
+        own = "" if seed.sinkhole else (", así que esa dirección es su propio servidor y cuenta como pista" if es else
+                                        ", so that address is their own server and counts as a clue")
+        out.append(("fact", f"Es un nombre de {host}, un DNS dinámico gratuito: nadie lo registró en un registro y el "
+                            f"nombre apunta a la dirección que elija su dueño{own}." if es else
+                    f"It is a {host} name, free dynamic DNS: nobody registered it at a registry, and the name points "
+                    f"at whatever address its owner picks{own}."))
+    elif suffix:
         host, blind, shared = PLATFORMS[suffix], dns_hides_takedown(inv.seed), shares_certificate(inv.seed)
         if es:
             out.append(("fact", f"Es un sitio en {host}, que regala subdominios: nadie lo registró en un registro, así "
@@ -210,6 +220,12 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
                            "visiting it, and I never visit." if blind else "")
                         + (" And all its sites share one certificate, so certificates cannot say when this one "
                            "appeared." if shared else "")))
+
+    if seed.sinkhole:
+        out.append(("fact", f"Su dirección ya es un sumidero ({seed.sinkhole}): alguien lo ha neutralizado y no hace "
+                            "falta avisar por él." if es else
+                    f"Its address is already a sinkhole ({seed.sinkhole}): someone has neutralized it, and it needs "
+                    "no report."))
 
     crew = inv.crew
     listed = sum(1 for d in crew if "list" in inv.members[d].sources)
@@ -307,8 +323,12 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
     if gone:
         parts = [GONE[code][1 if es else 0][gone[code] > 1].format(n=gone[code]) for code in GONE if gone[code]]
         total = len(set(inv.attributed) | {inv.seed})
-        out.append(("fact", f"De los {total} dominios atribuidos, {_list(parts, lang)}." if es else
-                    f"Of the {total} attributed domains, {_list(parts, lang)}."))
+        if total == 1:                     # the seed alone: its one reason, without the count
+            out.append(("fact", f"El único dominio atribuido es la semilla, y {parts[0].removeprefix('1 ')}." if es
+                        else f"The only attributed domain is the seed, and it {parts[0].removeprefix('1 ')}."))
+        else:
+            out.append(("fact", f"De los {total} dominios atribuidos, {_list(parts, lang)}." if es else
+                        f"Of the {total} attributed domains, {_list(parts, lang)}."))
     live = sum(len(r.domains) for r in inv.reports)
     n = len(inv.reports)
     blind = sum(dns_hides_takedown(d) for r in inv.reports for d in r.domains)

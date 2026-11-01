@@ -58,6 +58,10 @@ SHARED_CERTIFICATE = {
     "myshopify.com", "netlify.app", "ngrok-free.app", "onrender.com", "r2.dev", "surge.sh", "vercel.app",
     "weebly.com", "wixsite.com",
 }
+# Free dynamic DNS: it only points a name at whatever address its owner picks, so unlike a hosting platform the
+# address is the owner's own server, and a clue. Of 28 listed duckdns.org names that resolved on 2026-11-01, 22
+# pointed at one security company's sinkhole, which reverse DNS names (sinkhole.hyas.com).
+DYNAMIC_DNS = {"duckdns.org"}
 # Link shorteners: the host says nothing about the campaign, the page it leads to does.
 SHORTENERS = {
     "bit.ly", "bitly.com", "tinyurl.com", "t.co", "goo.gl", "is.gd", "v.gd", "cutt.ly", "rebrand.ly", "ow.ly",
@@ -87,6 +91,11 @@ def ending(name: str) -> str:
     """What a crew picks at the end of a name: the TLD (top), or the platform for one of its sites (vercel.app, not
     app, which web.app ends in too)."""
     return platform(name) or name.rstrip(".").rsplit(".", 1)[-1]
+
+
+def dynamic_dns(name: str) -> bool:
+    """Whether `name` is a free dynamic DNS name, whose address is its owner's own server."""
+    return platform(name) in DYNAMIC_DNS
 
 
 def shares_certificate(name: str) -> bool:
