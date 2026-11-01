@@ -5,6 +5,7 @@
 - Sinkholes. A domain whose address has reverse DNS saying "sinkhole" is already neutralized: it stays out of the abuse drafts (`sinkholed`), counts as down, and its address never ties two domains into one campaign, since a sinkhole holds names from many unrelated crews. On 2026-11-01, 22 of 28 listed duckdns.org names that resolved pointed at one security company's sinkhole.
 - Duck DNS is dynamic DNS, not hosting: its name points at its owner's own server, so that address counts as a clue again, unlike a hosting platform's shared addresses. Husmo explains it.
 - `dns.reverse` asks the public resolver for an address's reverse DNS name, never the address itself.
+- `rastro track` records a new state, `sinkholed`, and counts it as a takedown: a name a security team took over no longer looks live forever, and the scoreboard times it like any other takedown.
 - Checked live on two branded duckdns.org names from the public list: the sinkholed one gets no draft, the other gets one for Duck DNS. Husmo no longer calls a sinkhole the crew's own server, and says "the only attributed domain is the seed" instead of "of the 1 attributed domains".
 
 ## 0.2.2 · 2026-11-01

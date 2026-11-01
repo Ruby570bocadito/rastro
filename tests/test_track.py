@@ -123,3 +123,23 @@ def test_the_clock_can_start_at_the_abuse_report(tmp_path):
     assert track.scoreboard(conn)[0].median_hours == 24               # timed from when they were followed
     data = track.page_data(conn, from_report=True)
     assert data["from_report"] and [d["hours"] for d in data["domains"]] == [12, 36]
+
+
+def test_a_sinkhole_is_a_takedown_found_through_reverse_dns(tmp_path):
+    assert track.classify("platform", None, "noerror", {"192.0.2.66"}, sinkhole=True) == "sinkholed"
+    assert track.classify("found", reg("a.test", status=("client hold",)), "noerror", {"192.0.2.66"},
+                          sinkhole=True) == "held"                  # the registry's word comes first
+    conn = track.connect(tmp_path / "track.sqlite")
+    track.add(conn, ["phish-1.duckdns.org"], T0)
+    address = {"now": "203.0.113.50"}
+    names = {"203.0.113.50": frozenset({"vps-50.hosting.example"}),
+             "192.0.2.66": frozenset({"sinkhole.security.example"})}
+    sources = track.Sources(lambda d: ("platform", None), lambda d: ("noerror", frozenset({address["now"]})),
+                            lambda ip: names[ip])
+    track.check(conn, sources, now=T0 + timedelta(hours=6))
+    assert track.standing(conn) == ["phish-1.duckdns.org"]           # live at its owner's server
+    address["now"] = "192.0.2.66"                                    # a security team took the name over
+    track.check(conn, sources, now=T0 + timedelta(hours=30))
+    [course] = track.courses(conn)
+    assert course.taken_down and course.down_at == T0 + timedelta(hours=30)
+    assert course.registrar == "Duck DNS (duckdns.org)" and track.standing(conn) == []

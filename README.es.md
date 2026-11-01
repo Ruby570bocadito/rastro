@@ -126,7 +126,7 @@ rastro track check --every 6
 rastro track report --html data/raw/marcador.html --from-report --lang es
 ```
 
-Rastro sigue los dominios vivos de una investigación (`--track`), cada dominio que hace saltar al vigilante (`rastro watch --track`) y los que añadas a mano. Cada revisión pregunta al registro (RDAP) y a un DNS público por cada dominio que sigue en pie, nunca al dominio, y anota si está vivo, sin web, suspendido, borrándose o fuera. Un dominio cae la primera vez que aparece suspendido, borrándose o fuera de su zona antes de caducar.
+Rastro sigue los dominios vivos de una investigación (`--track`), cada dominio que hace saltar al vigilante (`rastro watch --track`) y los que añadas a mano. Cada revisión pregunta al registro (RDAP) y a un DNS público por cada dominio que sigue en pie, nunca al dominio, y anota si está vivo, sin web, suspendido, borrándose, fuera o en un sumidero (el DNS inverso de su dirección dice sinkhole). Un dominio cae la primera vez que aparece suspendido, borrándose, fuera de su zona o en un sumidero antes de caducar.
 
 `--reported` apunta cuándo enviaste el aviso de abuso, y `--from-report` cronometra a cada registrador desde ese momento. El marcador es una estimación de Kaplan-Meier: un dominio que sigue en pie cuenta como en pie hasta su última revisión en vez de descartarse, así que un registrador que nunca actúa no puede parecer rápido. Se llena con el tiempo: ejecuta la revisión cada pocas horas durante un par de semanas.
 

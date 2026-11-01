@@ -8,9 +8,10 @@ still standing, never the domain itself, and records one of these states:
 - held: the registrar or the registry suspended it (client hold or server hold);
 - deleting: pending delete or in redemption;
 - gone: no longer registered, or no longer in its TLD's zone (NXDOMAIN);
+- sinkholed: its address is a sinkhole, as the address's reverse DNS says (a security team took it over);
 - unknown: neither source answered.
 
-A takedown is the first check that finds a domain held, deleting or gone before it expired.
+A takedown is the first check that finds a domain held, deleting, gone or sinkholed before it expired.
 Time runs from when the domain entered the tracker or, with `from_report`, from when its
 abuse report went out (`rastro track add --reported`). Domains still standing are censored,
 not dropped, so each registrar's curve is a Kaplan-Meier estimate of how many of its domains
@@ -31,7 +32,7 @@ from rastro import __version__
 from rastro.domains import dns_hides_takedown, host_label, registrable
 from rastro.sources import dns, rdap
 
-DOWN = {"held", "deleting", "gone"}
+DOWN = {"held", "deleting", "gone", "sinkholed"}
 UNKNOWN_REGISTRAR = "Unknown registrar"
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS tracked (
@@ -92,8 +93,10 @@ class Seen:
     ips: tuple[str, ...] = ()
 
 
-def classify(outcome: str, reg: rdap.Registration | None, verdict: str | None, ips: Iterable[str]) -> str:
-    """The state of a domain from the registry's answer and the resolver's verdict."""
+def classify(outcome: str, reg: rdap.Registration | None, verdict: str | None, ips: Iterable[str],
+             sinkhole: bool = False) -> str:
+    """The state of a domain from the registry's answer, the resolver's verdict and, with `sinkhole`, its address's
+    reverse DNS."""
     status = " ".join(reg.status).lower() if reg else ""
     if "hold" in status:
         return "held"
@@ -101,6 +104,8 @@ def classify(outcome: str, reg: rdap.Registration | None, verdict: str | None, i
         return "deleting"
     if outcome == "not-found" or verdict == "nxdomain":
         return "gone"
+    if sinkhole:
+        return "sinkholed"
     if ips:
         return "live"
     if verdict == "noerror":
@@ -113,24 +118,27 @@ class Sources:
     """Where checks come from. Tests swap in fakes; `public` asks the registry and the resolver afresh."""
     registry: Callable[[str], tuple[str, rdap.Registration | None]]
     resolver: Callable[[str], tuple[str | None, frozenset[str]]]
+    reverse: Callable[[str], frozenset[str]] | None = None       # an address's reverse DNS names
 
     @classmethod
     def public(cls, cache_dir: Path) -> Sources:
         cache_dir = Path(cache_dir)
         return cls(lambda d: rdap.check(d, cache_dir / "rdap", fresh=True),
-                   lambda d: dns.resolve(d, cache_dir / "dns", fresh=True))
+                   lambda d: dns.resolve(d, cache_dir / "dns", fresh=True),
+                   lambda ip: dns.reverse(ip, cache_dir / "dns"))
 
 
 def look(domain: str, sources: Sources) -> Seen:
     outcome, reg = sources.registry(domain)
     verdict, ips = sources.resolver(domain)
-    return Seen(classify(outcome, reg, verdict, ips), reg.registrar if reg else host_label(domain),
+    sinkhole = bool(sources.reverse and ips and dns.sinkhole_name({n for ip in ips for n in sources.reverse(ip)}))
+    return Seen(classify(outcome, reg, verdict, ips, sinkhole), reg.registrar if reg else host_label(domain),
                 reg.status if reg else (),
                 reg.expires if reg else None, tuple(sorted(ips)))
 
 
 def standing(conn: sqlite3.Connection) -> list[str]:
-    """Domains not yet found held, deleting or gone."""
+    """Domains not yet found held, deleting, gone or sinkholed."""
     down = {d for (d,) in conn.execute(
         f"SELECT DISTINCT domain FROM checks WHERE state IN ({','.join('?' * len(DOWN))})", sorted(DOWN))}
     return [d for (d,) in conn.execute("SELECT domain FROM tracked ORDER BY since") if d not in down]

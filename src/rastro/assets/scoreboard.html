@@ -71,7 +71,7 @@ td.mono { font-family: var(--font-mono); overflow-wrap: anywhere; }
 .bar i { display: block; height: 100%; background: var(--string); border-radius: 4px; }
 .state { font: 600 11.5px var(--font-mono); padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
 .state-live, .state-offline { color: var(--string); border-color: var(--string); }
-.state-held, .state-deleting, .state-gone { color: var(--ok); border-color: var(--ok); }
+.state-held, .state-deleting, .state-gone, .state-sinkholed { color: var(--ok); border-color: var(--ok); }
 details > summary { cursor: pointer; font-weight: 600; }
 .notes { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
 .empty { margin: 0; padding: 14px; background: var(--note); color: var(--on-note); border-radius: 4px; }
@@ -133,7 +133,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     table: "Clasificación", cols: ["Registrador", "Dominios", "Retirados", "Mediana", "En pie tras 1 día", "3 días", "7 días"],
     list: "Dominios", listSum: (n) => `Los ${n} dominios revisados`,
     dcols: ["Dominio", "Registrador", "Seguido desde (UTC)", "Estado", "Tiempo", "Origen"],
-    states: { live: "vivo", offline: "sin web", held: "suspendido", deleting: "borrándose", gone: "fuera", unknown: "sin respuesta" },
+    states: { live: "vivo", offline: "sin web", held: "suspendido", deleting: "borrándose", gone: "fuera", sinkholed: "en sumidero", unknown: "sin respuesta" },
     sources: { investigate: "investigación", watch: "vigilante", case: "expediente", manual: "a mano" },
     notYet: "aún no", days: (d) => `${d} d`, hours: (h) => `${h} h`, expired: "caducó",
     how: "Cómo se ha hecho",
@@ -153,7 +153,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     table: "Ranking", cols: ["Registrar", "Domains", "Down", "Median", "Up after 1 day", "3 days", "7 days"],
     list: "Domains", listSum: (n) => `All ${n} checked domains`,
     dcols: ["Domain", "Registrar", "Followed since (UTC)", "State", "Time", "From"],
-    states: { live: "live", offline: "no site", held: "suspended", deleting: "deleting", gone: "gone", unknown: "no answer" },
+    states: { live: "live", offline: "no site", held: "suspended", deleting: "deleting", gone: "gone", sinkholed: "sinkholed", unknown: "no answer" },
     sources: { investigate: "investigation", watch: "watcher", case: "case file", manual: "by hand" },
     notYet: "not yet", days: (d) => `${d} d`, hours: (h) => `${h} h`, expired: "expired",
     how: "How this was made",
