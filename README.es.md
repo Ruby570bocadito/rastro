@@ -15,7 +15,7 @@ Un SMS de phishing es un enlace. Detrás suele haber una banda que ha registrado
 - **la banda y la campaña**: todos los dominios construidos con la misma plantilla de nombres, y los que se unen a tu enlace por pistas que suman (un certificado compartido, el mismo servidor, la misma sesión de trabajo);
 - **dónde trabaja la banda**: el huso horario de su jornada, leído de los momentos en que registró dominios y pidió certificados, con un «no concluyente» honesto cuando no hay datos suficientes;
 - **su próximo dominio**: un patrón estrecho que vigilar en Certificate Transparency y que caza el siguiente dominio falso en cuanto recibe su certificado;
-- **a quién avisar**: un borrador de aviso de abuso por registrador para los dominios que siguen activos.
+- **a quién avisar**: un borrador de aviso de abuso por registrador, o por plataforma de hosting para los sitios en subdominios gratuitos, para los dominios que siguen activos.
 
 Husmo, un hurón detective, explica cada deducción y cuánta seguridad tiene. Rastro nunca se conecta a los dominios, nunca busca a las personas que hay detrás y nunca envía nada por ti.
 
@@ -72,7 +72,7 @@ flowchart LR
    Las parejas que llegan a 1,0 entran en la misma campaña. Una plantilla sola nunca une dos dominios.
 4. **El reloj.** Los registros y los primeros certificados son actos de la propia banda, así que siguen su jornada. Rastro los agrupa en sesiones de trabajo, puntúa los 24 husos nominales frente a una jornada típica (teniendo en cuenta los bots y las bandas que empiezan antes o después) y los contrasta con una actividad uniforme durante todo el día. Con sesiones suficientes lee también el fin de semana y el horario de verano. Por debajo de lo que los experimentos vieron necesario, cada pista responde «no concluyente».
 5. **El próximo dominio.** Una expresión regular legible aprendida de los nombres de la banda. Solo se arma si es estrecha (como mucho 10^9 nombres posibles), porque las anchas daban miles de falsas alarmas al día.
-6. **Los borradores.** Uno por registrador, con las pruebas, para los dominios que siguen registrados. Los caducados, suspendidos, defensivos y vueltos a registrar quedan fuera, cada uno con su motivo.
+6. **Los borradores.** Uno por registrador, con las pruebas, para los dominios que siguen registrados. Los caducados, suspendidos, defensivos y vueltos a registrar quedan fuera, cada uno con su motivo. Los sitios en plataformas de hosting (pages.dev, vercel.app, github.io...) van a la plataforma, con su formulario de abuso cuando Rastro lo conoce. La mayoría de plataformas responden en DNS a cualquier nombre, así que Rastro no puede distinguir un sitio activo de uno retirado sin visitarlo: su borrador lo dice, y `rastro track` no los sigue.
 
 ## Investiga un enlace real
 

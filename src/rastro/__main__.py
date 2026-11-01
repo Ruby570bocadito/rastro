@@ -252,6 +252,7 @@ def cmd_investigate(args) -> int:
         new = track.add(track.connect(args.track), live, inv.when, source="investigate")
         print(f"Following {new} new of {len(live)} live domains in {args.track}: run `rastro track check` "
               "every few hours to see when each registrar acts.")
+        _say_unfollowable(track.unfollowable(live))
     if args.json:
         Path(args.json).write_text(json.dumps(report.case_data(inv, args.lang), ensure_ascii=False, indent=1),
                                    encoding="utf-8")
@@ -284,6 +285,12 @@ def _name_model(path: str | None) -> scorer.Model | None:
     return scorer.loads(Path(path).read_bytes()) if path else scorer.default()
 
 
+def _say_unfollowable(domains: list[str]) -> None:
+    if domains:
+        print(f"Not followed: {', '.join(domains)}. Their platform answers DNS for any name, so a check could never "
+              "see them come down without visiting them, which Rastro never does.")
+
+
 def cmd_track_add(args) -> int:
     conn = track.connect(args.db)
     now = datetime.now(UTC)
@@ -298,6 +305,7 @@ def cmd_track_add(args) -> int:
         except ValueError:
             skipped += 1
     new = track.add(conn, names, since, source="manual", reported=args.reported)
+    _say_unfollowable(track.unfollowable(names))
     for path in args.alerts or []:
         for line in _lines(path):
             alert = json.loads(line)

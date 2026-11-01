@@ -10,6 +10,7 @@ import re
 from collections import Counter
 
 from rastro import brands, calendar_clues, rhythm
+from rastro.domains import PLATFORMS, dns_hides_takedown, platform
 from rastro.investigate import Investigation
 
 KIND_LABELS = {
@@ -193,6 +194,18 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
         else:
             out.append(("fact", "It was registered" + (f" on {when}" if when else "")
                         + (f" through {registrar}." if registrar else ".")))
+    if suffix := platform(inv.seed):
+        host, blind = PLATFORMS[suffix], dns_hides_takedown(inv.seed)
+        if es:
+            out.append(("fact", f"Es un sitio en {host}, que regala subdominios: nadie lo registró en un registro, así "
+                                "que el aviso va a la plataforma."
+                        + (" Esa plataforma responde en DNS a cualquier nombre, así que no puedo saber si sigue en pie "
+                           "sin visitarlo, y nunca visito." if blind else "")))
+        else:
+            out.append(("fact", f"It is a site on {host}, which gives out free subdomains: nobody registered it at a "
+                                "registry, so the abuse report goes to the platform."
+                        + (" That platform answers DNS for any name, so I cannot tell whether it is still up without "
+                           "visiting it, and I never visit." if blind else "")))
 
     crew = inv.crew
     listed = sum(1 for d in crew if "list" in inv.members[d].sources)
@@ -291,15 +304,36 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
                     f"Of the {total} attributed domains, {_list(parts, lang)}."))
     live = sum(len(r.domains) for r in inv.reports)
     n = len(inv.reports)
-    if live == 1:
-        out.append(("action", "Solo queda uno activo: abajo tienes el borrador de aviso a su registrador, para que lo "
+    blind = sum(dns_hides_takedown(d) for r in inv.reports for d in r.domains)
+    hosts = {r.hosted for r in inv.reports}
+    per = {frozenset({False}): ("uno por registrador", "one per registrar"),
+           frozenset({True}): ("uno por plataforma", "one per platform")}.get(
+        frozenset(hosts), ("uno por registrador o plataforma", "one per registrar or platform"))[0 if es else 1]
+    if live == 1 and blind:
+        out.append(("action", "Puede que siga en pie, hasta donde deja ver el DNS: abajo tienes el borrador de aviso a "
+                              "su plataforma, para que lo revises y lo envíes tú." if es else
+                    "It may still be up, as far as DNS can tell: the abuse report draft for its platform is below, "
+                    "for you to review and send."))
+    elif live == 1:
+        who = ("su plataforma" if inv.reports[0].hosted else "su registrador") if es else (
+            "its platform" if inv.reports[0].hosted else "its registrar")
+        out.append(("action", f"Solo queda uno activo: abajo tienes el borrador de aviso a {who}, para que lo "
                               "revises y lo envíes tú." if es else
-                    "Only one is still live: the abuse report draft for its registrar is below, for you to review "
+                    f"Only one is still live: the abuse report draft for {who} is below, for you to review "
                     "and send."))
+    elif live and blind == live:
+        out.append(("action", f"Puede que los {live} sigan en pie, hasta donde deja ver el DNS: abajo tienes {n} "
+                              f"borrador{'es' if n > 1 else ''} de aviso, {per}, para que los revises y envíes tú."
+                    if es else
+                    f"All {live} may still be up, as far as DNS can tell: {n} abuse report draft{'s' if n > 1 else ''} "
+                    f"below, {per}, for you to review and send."))
     elif live:
-        out.append(("action", f"Quedan {live} activos: abajo tienes {n} borrador{'es' if n > 1 else ''} de aviso, uno "
-                              "por registrador, para que los revises y envíes tú." if es else
-                    f"{live} are still live: {n} abuse report draft{'s' if n > 1 else ''} below, one per registrar, "
+        unsure = ((f" o sin forma de comprobarlo ({blind} en plataformas que responden en DNS a cualquier nombre)"
+                   if es else f" or cannot be checked ({blind} on platforms that answer DNS for any name)")
+                  if blind else "")
+        out.append(("action", f"Quedan {live} activos{unsure}: abajo tienes {n} borrador{'es' if n > 1 else ''} de "
+                              f"aviso, {per}, para que los revises y envíes tú." if es else
+                    f"{live} are still live{unsure}: {n} abuse report draft{'s' if n > 1 else ''} below, {per}, "
                     "for you to review and send."))
     else:
         out.append(("caution", "Ninguno sigue activo con un registrador que yo pueda consultar: nada que avisar."

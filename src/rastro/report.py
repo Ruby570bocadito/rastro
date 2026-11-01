@@ -17,6 +17,7 @@ from collections import defaultdict
 from importlib import resources
 
 from rastro import __version__, brands, husmo, pattern, rhythm
+from rastro.domains import dns_hides_takedown, host_label
 from rastro.investigate import NARROW_LOG10, Investigation
 
 MAX_NODES = 160
@@ -41,9 +42,9 @@ def _row(inv: Investigation, d: str) -> dict:
     r = m.registration
     return {
         "id": d, "seed": d == inv.seed, "campaign": d in inv.campaign, "crew": d in inv.crew,
-        "attributed": d in inv.campaign or d in inv.crew, "alive": r is not None, "first": _iso(m.first_seen),
-        "registered": _iso(m.registered), "registrar": r.registrar if r else None, "sources": sorted(m.sources),
-        "score": m.score,
+        "attributed": d in inv.campaign or d in inv.crew, "alive": m.alive, "first": _iso(m.first_seen),
+        "registered": _iso(m.registered), "registrar": r.registrar if r else host_label(d),
+        "sources": sorted(m.sources), "score": m.score,
         "status": inv.left_out.get(d) or ("reported" if any(d in rep.domains for rep in inv.reports) else None),
     }
 
@@ -107,7 +108,8 @@ def case_data(inv: Investigation, lang: str = "en", demo: dict | None = None) ->
         "brand_name": brands.display(inv.brand) if inv.brand else None,
         "counts": {"crew": len(inv.crew), "campaign": len(inv.campaign), "attributed": len(inv.attributed),
                    "registered": len(registered), "checked": len(inv.members) - 1,
-                   "reported": sum(len(r.domains) for r in inv.reports)},
+                   "reported": sum(len(r.domains) for r in inv.reports),
+                   "unchecked": sum(dns_hides_takedown(d) for r in inv.reports for d in r.domains)},
         "narration": [{"kind": k, "text": t, "speech": husmo.spoken(t, lang)} for k, t in husmo.narrate(inv, lang)],
         "graph": _graph(inv),
         "template": inv.crew_pattern.regex if inv.crew_pattern else None,
@@ -120,7 +122,8 @@ def case_data(inv: Investigation, lang: str = "en", demo: dict | None = None) ->
         },
         "patterns": patterns,
         "reports": [{"registrar": r.registrar, "registrar_id": r.registrar_id, "email": r.email, "phone": r.phone,
-                     "domains": r.domains, "subject": r.subject, "body": r.body} for r in inv.reports],
+                     "hosted": r.hosted, "form": r.form, "domains": r.domains, "subject": r.subject, "body": r.body}
+                    for r in inv.reports],
         "left_out": [{"domain": d, "why": why} for d, why in sorted(inv.left_out.items())],
         "notes": [husmo.note(code, values, lang) for code, values in inv.notes], "sources": inv.sources_used,
         "domains": [_row(inv, d) for d in [inv.seed] + sorted(set(inv.members) - {inv.seed})],

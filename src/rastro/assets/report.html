@@ -454,6 +454,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     pasted: "Enlace investigado: ", pathOut: " (sin la ruta, que puede identificar a quien lo recibió)",
     imitates: "Imita a ", noBrand: "No imita a ninguna marca conocida",
     crew: "en su banda", campaign: "en su campaña", live: (n) => n === 1 ? "sigue activo" : "siguen activos", checked: "dominios revisados",
+    unchecked: () => "sin forma de comprobar si siguen",
     step1: "Paso 1", graph: "La campaña", graphSub: "Cada dominio unido a la semilla y por qué. Pasa el ratón o el foco por un punto para ver sus datos.",
     role: "hurón detective de guardia",
     step2: "Paso 2", map: "Dónde trabaja la banda",
@@ -467,17 +468,18 @@ details > summary { cursor: pointer; font-weight: 600; }
     kind_crew: "Plantilla de la banda", kind_campaign: "Patrón de la campaña", kind_guess: "Apuesta desde la semilla",
     names: (b) => `unos 10^${b} nombres posibles`, learned: (n) => `aprendido de ${n} dominios`, guessOnly: "solo una apuesta: no hay hermanos todavía",
     watchIt: "Vigílalo en directo:", copy: "Copiar", copied: "Copiado",
-    step5: "Paso 5", reports: "Avisa al registrador",
+    step5: "Paso 5", reports: "Avisa al registrador o al hosting",
     draftsOnly: "Solo son borradores. Léelos, completa la línea entre corchetes y envíalos tú: Rastro nunca envía nada.",
     noReports: "Nada que avisar: ningún dominio atribuido sigue registrado con un registrador que Rastro pueda consultar.",
     to: "Para", subject: "Asunto", phone: "Teléfono", ianaId: "ID de IANA", copyAddr: "Copiar dirección", copySubj: "Copiar asunto", copyBody: "Copiar texto",
+    form: "Formulario de abuso", copyForm: "Copiar enlace", noForm: "Busca su formulario de abuso: Rastro no ha podido confirmarlo",
     leftOut: (n) => `Fuera de los avisos (${n})`,
     reasons: { unregistered: "no está registrado ahora, o su registro no tiene RDAP", suspended: "ya está suspendido",
       defensive: "lo tiene un registrador de protección de marcas: probablemente defensivo",
       reregistered: "se registró de nuevo después de su etapa de phishing, quizá por otra persona",
       unresolved: "estaba en una plataforma de hosting y ya no resuelve", reported: "en un aviso" },
     step6: "Paso 6", evidence: "Pruebas", evSum: (n) => `Los ${n} dominios revisados`,
-    cols: ["Dominio", "Primer acto (UTC)", "Registrado (UTC)", "Registrador", "Encontrado en", "Estado", "Nombre (0-1)"],
+    cols: ["Dominio", "Primer acto (UTC)", "Registrado (UTC)", "Registrador o hosting", "Encontrado en", "Estado", "Nombre (0-1)"],
     src: { seed: "semilla", list: "lista pública", store: "vigilante", certificate: "certificado" },
     how: "Cómo se ha hecho", sources: "Fuentes: ",
     srcNames: { crtsh: "crt.sh (transparencia de certificados)", rdap: "RDAP (registros de dominios)", dns: "DNS público sobre HTTPS",
@@ -489,7 +491,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     hidden: (n) => `${n} dominios más no caben en el dibujo; están en las pruebas.`,
     weekendV: { "sat-sun": "sáb–dom", "fri-sat": "vie–sáb", sun: "dom", none: "trabaja 7 días", inconclusive: "no concluyente" },
     dstV: { eu: "europeo", us: "EE. UU.", south: "austral", none: "no cambia", inconclusive: "no concluyente" },
-    tip: { first: "Primer acto", reg: "Registrado", registrar: "Registrador", found: "Encontrado en", status: "Estado", score: "Puntuación del nombre" },
+    tip: { first: "Primer acto", reg: "Registrado", registrar: "Registrador o hosting", found: "Encontrado en", status: "Estado", score: "Puntuación del nombre" },
     foot: (v) => `Rastro ${v} · código abierto (Apache-2.0) · contorno de tierra: Natural Earth · este informe no hace ninguna petición de red`,
     mapLabel: "Mapa del mundo con la probabilidad de cada huso horario",
     tlLabel: "Línea de tiempo de los dominios atribuidos", graphLabel: "Grafo de la campaña",
@@ -504,6 +506,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     pasted: "Investigated link: ", pathOut: " (path left out: it can identify whoever received it)",
     imitates: "Imitates ", noBrand: "Imitates no known brand",
     crew: "in its crew", campaign: "in its campaign", live: () => "still live", checked: "domains checked",
+    unchecked: () => "cannot be checked",
     step1: "Step 1", graph: "The campaign", graphSub: "Every domain tied to the seed, and why. Hover or focus a dot to see its data.",
     role: "detective ferret on duty",
     step2: "Step 2", map: "Where the crew works",
@@ -517,17 +520,18 @@ details > summary { cursor: pointer; font-weight: 600; }
     kind_crew: "Crew template", kind_campaign: "Campaign pattern", kind_guess: "Guess from the seed",
     names: (b) => `about 10^${b} possible names`, learned: (n) => `learned from ${n} domains`, guessOnly: "only a guess: no siblings yet",
     watchIt: "Watch it live:", copy: "Copy", copied: "Copied",
-    step5: "Step 5", reports: "Warn the registrar",
+    step5: "Step 5", reports: "Warn the registrar or host",
     draftsOnly: "Drafts only. Read them, fill in the line in brackets and send them yourself: Rastro never sends anything.",
     noReports: "Nothing to report: no attributed domain is still registered with a registrar Rastro can look up.",
     to: "To", subject: "Subject", phone: "Phone", ianaId: "IANA ID", copyAddr: "Copy address", copySubj: "Copy subject", copyBody: "Copy text",
+    form: "Abuse form", copyForm: "Copy link", noForm: "Look up its abuse form: Rastro could not confirm one",
     leftOut: (n) => `Left out of the reports (${n})`,
     reasons: { unregistered: "not registered now, or its registry has no RDAP", suspended: "already suspended",
       defensive: "held by a brand-protection registrar: probably defensive",
       reregistered: "registered again after its phishing days, maybe by somebody else",
       unresolved: "was on a hosting platform and no longer resolves", reported: "in a report" },
     step6: "Step 6", evidence: "Evidence", evSum: (n) => `All ${n} domains checked`,
-    cols: ["Domain", "First act (UTC)", "Registered (UTC)", "Registrar", "Found in", "Status", "Name (0-1)"],
+    cols: ["Domain", "First act (UTC)", "Registered (UTC)", "Registrar or host", "Found in", "Status", "Name (0-1)"],
     src: { seed: "seed", list: "public list", store: "watcher", certificate: "certificate" },
     how: "How this was made", sources: "Sources: ",
     srcNames: { crtsh: "crt.sh (Certificate Transparency)", rdap: "RDAP (domain registries)", dns: "public DNS over HTTPS",
@@ -539,7 +543,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     hidden: (n) => `${n} more domains do not fit in the drawing; they are in the evidence.`,
     weekendV: { "sat-sun": "Sat–Sun", "fri-sat": "Fri–Sat", sun: "Sun", none: "works 7 days", inconclusive: "inconclusive" },
     dstV: { eu: "European", us: "US", south: "southern", none: "none", inconclusive: "inconclusive" },
-    tip: { first: "First act", reg: "Registered", registrar: "Registrar", found: "Found in", status: "Status", score: "Name score" },
+    tip: { first: "First act", reg: "Registered", registrar: "Registrar or host", found: "Found in", status: "Status", score: "Name score" },
     foot: (v) => `Rastro ${v} · open source (Apache-2.0) · land outline: Natural Earth · this report makes no network requests`,
     mapLabel: "World map with the probability of each time zone",
     tlLabel: "Timeline of the attributed domains", graphLabel: "Campaign graph",
@@ -585,7 +589,10 @@ details > summary { cursor: pointer; font-weight: 600; }
     + T.pasted + D.host + T.pathOut + ".";
   const chips = $("chips");
   const chip = (n, label, hot) => { const c = el("span", { class: "chip" + (hot ? " chip-hot" : "") }); c.append(el("b", {}, String(n)), " " + label); chips.append(c); };
-  chip(D.counts.crew, T.crew); chip(D.counts.campaign, T.campaign); chip(D.counts.reported, T.live(D.counts.reported), D.counts.reported > 0);
+  chip(D.counts.crew, T.crew); chip(D.counts.campaign, T.campaign);
+  const known = D.counts.reported - (D.counts.unchecked || 0);    // on wildcard-DNS platforms nobody can tell
+  if (known || !D.counts.unchecked) chip(known, T.live(known), known > 0);
+  if (D.counts.unchecked) chip(D.counts.unchecked, T.unchecked(D.counts.unchecked), true);
   chip(D.counts.checked, T.checked);
   if (D.clock && D.clock.found) { const c = el("span", { class: "chip chip-hot" }, tz(D.clock.offset)); chips.append(c); }
 
@@ -870,10 +877,12 @@ details > summary { cursor: pointer; font-weight: 600; }
       card.append(el("h3", {}, r.registrar));
       const dl = el("dl");
       const row = (k, v) => { if (v) dl.append(el("dt", {}, k), el("dd", {}, v)); };
-      row(T.to, r.email || "—"); row(T.phone, r.phone); row(T.ianaId, r.registrar_id); row(T.subject, r.subject);
+      if (r.hosted) row(T.form, r.form || T.noForm); else row(T.to, r.email || "—");
+      row(T.phone, r.phone); row(T.ianaId, r.registrar_id); row(T.subject, r.subject);
       card.append(dl, el("pre", {}, r.body));
       const btns = el("div", { class: "btns" });
       if (r.email) btns.append(copyButton(T.copyAddr, r.email));
+      if (r.form) btns.append(copyButton(T.copyForm, r.form));
       btns.append(copyButton(T.copySubj, r.subject), copyButton(T.copyBody, r.body));
       card.append(btns);
       box.append(card);
