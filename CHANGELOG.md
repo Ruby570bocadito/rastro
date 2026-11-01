@@ -1,13 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 · 2026-11-01
 
 - Experiment 02: a read-only urlscan.io client (`rastro.sources.urlscan`) expands a domain to the sites that loaded the same kit files, never submitting a scan. It failed its bar (14 of 20 seeds never scanned; the expansions found could not be confirmed), so `rastro investigate` does not use it. It needs a free API key in `URLSCAN_API_KEY`.
 - The demo case file is published on GitHub Pages, in English and Spanish, by a new `pages` workflow; the README links to it.
 - The brands live in a data file, `src/rastro/assets/brands.txt` (`key | Name | official domains`), and `rastro --brands FILE` adds your own to any command.
 - The network clients give up at once on answers that will not change (a 404, a 400) instead of retrying them, and wait as long as a server's Retry-After asks, up to five minutes.
 - Cached DNS answers expire after a day; a stale one is used only when the resolver does not answer.
-- Tests for the crt.sh, CT log, DNS and RDAP clients against scripted servers.
+- Tests for the crt.sh, CT log, DNS and RDAP clients against scripted servers, and for the live watch against a fake log that grows as a fake clock runs.
 - Rastro installs from GitHub, not PyPI: `pipx install git+https://github.com/Ruby570bocadito/rastro`. Each tag publishes a GitHub release with the wheel and the source archive.
 
 ## 0.1.1 · 2026-10-31

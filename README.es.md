@@ -19,7 +19,7 @@ Un SMS de phishing es un enlace. Detrás suele haber una banda que ha registrado
 
 Husmo, un hurón detective, explica cada deducción y cuánta seguridad tiene. Rastro nunca se conecta a los dominios, nunca busca a las personas que hay detrás y nunca envía nada por ti.
 
-> Estado: 0.1, temprano. Cada pieza se validó antes con datos reales, pero habrá asperezas.
+> Estado: 0.2, temprano. Cada pieza se validó antes con datos reales, pero habrá asperezas.
 
 ## Pruébalo en 30 segundos
 

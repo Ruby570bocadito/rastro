@@ -19,7 +19,7 @@ A phishing SMS is one link. Behind it there is usually a crew that registered do
 
 Husmo, a detective ferret, explains every deduction and how sure it is. Rastro never connects to the domains, never looks for the people behind them and never sends anything for you.
 
-> Status: 0.1, early. Every piece was validated on real data first, but expect rough edges.
+> Status: 0.2, early. Every piece was validated on real data first, but expect rough edges.
 
 ## Try it in 30 seconds
 
