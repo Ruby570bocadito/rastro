@@ -101,6 +101,7 @@ rastro watch --learn dominios-campaña.txt --follow --minutes 60 --db data/ct.sq
 Rastro lee los registros de Certificate Transparency directamente, con la API estática de CT, y sigue el ritmo del registro de Let's Encrypt en tiempo real.
 
 - Solo arma patrones estrechos y dice cuáles se salta; `--allow-broad` lo fuerza.
+- No puede ver los sitios de plataformas que los sirven todos con un mismo certificado, como vercel.app, github.io o netlify.app: ningún certificado suyo llega al registro. Los sitios de pages.dev y workers.dev tienen el suyo, así que el vigilante los ve.
 - Los dominios oficiales de las marcas nunca dan alerta, y `--allow FICHERO` añade los tuyos.
 - Cada dominio alerta una sola vez, aunque lleguen al registro su precertificado y su certificado.
 - `--bursts-every` busca, sin semilla, varios dominios nuevos de una misma marca construidos con la misma plantilla, y da el patrón listo para armar.

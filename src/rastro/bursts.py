@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 from rastro import brands, pattern
+from rastro.domains import ending
 
 
 @dataclass(frozen=True)
@@ -50,7 +51,7 @@ def find_bursts(conn: sqlite3.Connection, hours: float = 48, min_domains: int = 
         by_layout[(brand, pattern.shape(domain))].append((domain, first, last))
         word = brands.distinctive_word(domain, brand)
         if word:
-            by_word[(brand, word, domain.rsplit(".", 1)[1])].append((domain, first, last))
+            by_word[(brand, word, ending(domain))].append((domain, first, last))
 
     def burst(brand: str, regex: str, breadth: float | None, items) -> Burst:
         return Burst(brand=brand, regex=regex, breadth_log10=breadth, domains=tuple(sorted(d for d, _, _ in items)),

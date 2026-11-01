@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Tested live on three real seeds (a registry domain, a pages.dev site and a vercel.app site) against crt.sh, RDAP and DNS. What it showed is fixed here:
+  - 16 platforms serve every site under one certificate (crt.sh had none for two listed sites of each), so Rastro no longer asks crt.sh about their sites: the vercel.app case went from 334 to 82 seconds. Husmo says certificates cannot date such a site, and the README says the CT watcher cannot see them.
+  - When there are more candidates than `--max-candidates`, the ones that share most words with the seed go first, instead of the first ones in alphabetical order.
+  - A platform is its own ending: vercel.app and web.app sites no longer count as having the same TLD.
+  - Husmo says one timed action in the singular.
 - `rastro list update` downloads Phishing.Database's list of active phishing domains to where `rastro investigate` looks for siblings. It asks for it again only when it changed (the server's ETag), and a download that is not a list of domains, such as an error page, never replaces a good one. `rastro investigate` says when there is no list, instead of quietly finding fewer siblings.
 - Fixed: `rastro investigate` crashed when it found the crew's template but no domain had a date, as with `--no-crtsh` or when crt.sh did not answer.
 - Fixed, found by running every offline command with odd inputs: `rastro rhythm` crashed on an empty file or a line that is not a time, `rastro track add` on a `--since` that is not ISO 8601 and on alert or case files that are not what Rastro writes, and every command on a path that is missing or is a folder. Each now says what is wrong and exits with code 1 or 2. `rastro track add` also says which domains from alerts and cases it will not follow.

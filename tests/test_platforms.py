@@ -36,6 +36,7 @@ def test_where_dns_tells_a_site_is_gone_it_stays_out_of_the_report():
     assert rep.hosted and rep.form == "https://abuse.cloudflare.com/" and rep.email is None
     assert len(rep.domains) == 3 and set(inv.left_out.values()) == {"unresolved"}
     assert "please check whether" not in rep.body
+    assert "Their first certificates came" in rep.body              # no registrations on a platform
 
 
 def test_where_dns_answers_any_name_nothing_is_ruled_out_and_the_platform_is_asked_to_check():
@@ -44,7 +45,6 @@ def test_where_dns_answers_any_name_nothing_is_ruled_out_and_the_platform_is_ask
     assert rep.registrar == "Vercel (vercel.app)" and rep.form == "https://vercel.com/abuse"
     assert len(rep.domains) == 9 and inv.left_out == {}            # DNS cannot tell which ones came down
     assert "please check whether they are still up" in rep.body
-    assert "Their first certificates came" in rep.body              # no registrations on a platform
     assert all(m.alive for m in inv.members.values())
 
 
@@ -114,3 +114,26 @@ def test_track_add_says_which_domains_it_will_not_follow(tmp_path, capsys):
                  "--db", str(tmp_path / "t.sqlite")]) == 0
     out = capsys.readouterr().out
     assert "1 new domains followed" in out and "Not followed: correos-envio-1.vercel.app" in out
+
+
+def test_sites_that_share_the_platforms_certificate_are_never_looked_up_in_ct():
+    asked = []
+
+    def certificates(d):
+        asked.append(d)
+        return T0, frozenset()
+
+    for suffix in ("vercel.app", "pages.dev"):
+        seed = f"correos-envio-4821.{suffix}"
+        inv = investigate.investigate(f"https://{seed}/", investigate.Sources(certificates), sims=100, now=NOW)
+        said = " ".join(t for _, t in husmo.narrate(inv, "en"))
+        assert ("all its sites share one certificate" in said) == (suffix == "vercel.app")
+    assert asked == ["correos-envio-4821.pages.dev"]       # Vercel's sites have no certificate of their own
+
+
+def test_a_platform_is_its_own_ending():
+    from rastro.domains import ending
+    assert ending("help-ledger-login.vercel.app") == "vercel.app" and ending("correos-envio-1.top") == "top"
+    seed = "help-ledger-login.vercel.app"
+    assert investigate.related(seed, "help-ledger-support.vercel.app") == 0
+    assert investigate.related(seed, "help-ledger-support.web.app") == 1     # same layout, another platform

@@ -10,7 +10,7 @@ import re
 from collections import Counter
 
 from rastro import brands, calendar_clues, rhythm
-from rastro.domains import PLATFORMS, dns_hides_takedown, platform
+from rastro.domains import PLATFORMS, dns_hides_takedown, platform, shares_certificate
 from rastro.investigate import Investigation
 
 KIND_LABELS = {
@@ -195,17 +195,21 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
             out.append(("fact", "It was registered" + (f" on {when}" if when else "")
                         + (f" through {registrar}." if registrar else ".")))
     if suffix := platform(inv.seed):
-        host, blind = PLATFORMS[suffix], dns_hides_takedown(inv.seed)
+        host, blind, shared = PLATFORMS[suffix], dns_hides_takedown(inv.seed), shares_certificate(inv.seed)
         if es:
             out.append(("fact", f"Es un sitio en {host}, que regala subdominios: nadie lo registró en un registro, así "
                                 "que el aviso va a la plataforma."
                         + (" Esa plataforma responde en DNS a cualquier nombre, así que no puedo saber si sigue en pie "
-                           "sin visitarlo, y nunca visito." if blind else "")))
+                           "sin visitarlo, y nunca visito." if blind else "")
+                        + (" Y todos sus sitios comparten un certificado, así que los certificados no dicen cuándo "
+                           "apareció este." if shared else "")))
         else:
             out.append(("fact", f"It is a site on {host}, which gives out free subdomains: nobody registered it at a "
                                 "registry, so the abuse report goes to the platform."
                         + (" That platform answers DNS for any name, so I cannot tell whether it is still up without "
-                           "visiting it, and I never visit." if blind else "")))
+                           "visiting it, and I never visit." if blind else "")
+                        + (" And all its sites share one certificate, so certificates cannot say when this one "
+                           "appeared." if shared else "")))
 
     crew = inv.crew
     listed = sum(1 for d in crew if "list" in inv.members[d].sources)
@@ -278,6 +282,9 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
                                    "semanas)." if es else
                         f"Their days off need more sessions to tell (about {calendar_clues.WEEKEND_MIN_SESSIONS} "
                         f"over {calendar_clues.WEEKEND_MIN_WEEKS} weeks)."))
+    elif c and inv.clock_events == 1:
+        out.append(("caution", "Solo tengo un acto con hora, y uno solo no dibuja una jornada laboral: no me atrevo "
+                               "con el mapa." if es else "One timed action alone cannot draw a working day: no map."))
     elif c:
         p = f"p {_p(c.p_value)}" if c.p_value is not None else ""
         out.append(("caution", f"Sus {inv.clock_events} actos con hora aún no dibujan una jornada laboral ({p}): "

@@ -101,6 +101,7 @@ rastro watch --learn campaign-domains.txt --follow --minutes 60 --db data/ct.sql
 Rastro reads Certificate Transparency logs directly, through the static CT API, and keeps up with Let's Encrypt's log in real time.
 
 - It arms only narrow patterns and says which ones it skips; `--allow-broad` overrides.
+- It cannot see sites on platforms that serve all of them under one certificate, such as vercel.app, github.io or netlify.app: no certificate of theirs ever reaches the log. Sites on pages.dev and workers.dev get their own, so the watcher sees them.
 - The brands' official domains never alert, and `--allow FILE` adds your own.
 - Each domain alerts once, although its pre-certificate and certificate both reach the log.
 - `--bursts-every` looks, with no seed at all, for several new lookalikes of one brand built from the same template, and prints the pattern ready to arm.

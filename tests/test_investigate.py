@@ -121,3 +121,21 @@ def test_a_crew_without_any_dates_is_still_told():
         template = next(t for _, t in husmo.narrate(inv, lang) if "plantilla" in t or "template" in t)
         assert template.endswith(("share it.", "domains share it, 60 of them on the public phishing list.",
                                   "lista pública de phishing."))
+
+
+def test_a_capped_search_keeps_the_candidates_that_share_most_words_with_the_seed():
+    seed = "help-ledger-login.vercel.app"
+    others = [f"{w}-ledger-wallet.vercel.app" for w in ("aa", "ab", "ac", "ad", "ae", "af")]
+    inv = investigate.investigate(f"https://{seed}/", investigate.Sources(),
+                                  list_lines=[*others, "help-ledger-support.vercel.app"], max_candidates=3, sims=100)
+    assert "help-ledger-support.vercel.app" in inv.members       # alphabetically last, but closest to the seed
+    assert ("capped", {"n": 7, "max": 3}) in inv.notes
+
+
+def test_one_timed_action_is_said_in_the_singular():
+    from rastro import husmo
+    sources = investigate.Sources(lambda d: (FIRST[SEED], frozenset()) if d == SEED else (None, frozenset()))
+    inv = investigate.investigate(f"https://{SEED}/", sources, sims=100)
+    assert inv.clock_events == 1
+    assert any(t == "One timed action alone cannot draw a working day: no map." for _, t in husmo.narrate(inv, "en"))
+    assert any(t.startswith("Solo tengo un acto con hora") for _, t in husmo.narrate(inv, "es"))

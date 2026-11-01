@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 from rastro import brands, pattern, rhythm
+from rastro.domains import ending
 
 WEIGHTS = {"certificate": 1.0, "word": 1.0, "template": 0.5, "session": 0.5, "burst": 0.5, "ip": 1.2,
            "nameserver": 0.8}
@@ -97,7 +98,7 @@ def link(domains: list[Domain]) -> _Links:
             templates[(d.brand, pattern.shape(d.name))].append(d.name)
             word = brands.distinctive_word(d.name, d.brand)
             if word:
-                words[(d.brand, word, d.name.rsplit(".", 1)[1])].append(d.name)
+                words[(d.brand, word, ending(d.name))].append(d.name)
             if d.first_seen:
                 by_brand[d.brand].append(d)
         for ip in d.ips:

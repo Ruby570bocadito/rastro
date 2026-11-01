@@ -48,6 +48,16 @@ WILDCARD_DNS = {
     "netlify.app", "ngrok-free.app", "onrender.com", "r2.dev", "surge.sh", "vercel.app", "web.app", "webflow.io",
     "weebly.com", "wixsite.com",
 }
+# Platforms that serve every site under one wildcard certificate of their own, so Certificate Transparency has no
+# certificate for any single site: crt.sh had none for two listed sites of each (checked on 2026-11-01), while
+# pages.dev, workers.dev and repl.co sites each had theirs. web.app, webflow.io and duckdns.org stay out until
+# crt.sh answers for them. Asking crt.sh about these sites costs minutes and says nothing, and the CT watcher never
+# sees them.
+SHARED_CERTIFICATE = {
+    "appspot.com", "azurewebsites.net", "blogspot.com", "firebaseapp.com", "github.io", "glitch.me", "herokuapp.com",
+    "myshopify.com", "netlify.app", "ngrok-free.app", "onrender.com", "r2.dev", "surge.sh", "vercel.app",
+    "weebly.com", "wixsite.com",
+}
 # Link shorteners: the host says nothing about the campaign, the page it leads to does.
 SHORTENERS = {
     "bit.ly", "bitly.com", "tinyurl.com", "t.co", "goo.gl", "is.gd", "v.gd", "cutt.ly", "rebrand.ly", "ow.ly",
@@ -71,6 +81,17 @@ def host_label(name: str) -> str | None:
 def dns_hides_takedown(name: str) -> bool:
     """Whether `name` sits on a platform that answers DNS for any name, so DNS cannot tell if it is still up."""
     return platform(name) in WILDCARD_DNS
+
+
+def ending(name: str) -> str:
+    """What a crew picks at the end of a name: the TLD (top), or the platform for one of its sites (vercel.app, not
+    app, which web.app ends in too)."""
+    return platform(name) or name.rstrip(".").rsplit(".", 1)[-1]
+
+
+def shares_certificate(name: str) -> bool:
+    """Whether `name` sits on a platform whose sites all share its wildcard certificate, so CT has none of its own."""
+    return platform(name) in SHARED_CERTIFICATE
 
 
 def is_ip(host: str) -> bool:
