@@ -172,6 +172,22 @@ A filtered watch read 10,240 fresh certificates from Sycamore 2027h1 and kept 18
 
 The seed's name and the case files stay in `data/raw/`, out of the repository.
 
+## Live trial · the watcher after the lookalike readings, 2026-11-01
+
+**Why.** Version 0.1.1 taught `brands.brand_of` to read homographs, a lone digit for a letter and rn/vv pairs. That was measured on made-up names only, and the watcher runs every name of the log through it.
+
+**Run.** `rastro watch --follow --minutes 2 --db data/raw/watch-live.sqlite --bursts-every 1` against Let's Encrypt's Sycamore log.
+
+**Result.**
+
+- It kept up: 22,016 certificates in two minutes, never more than one tile behind at the end of a round.
+- It kept 88 certificates (0.40 %, the top of the 0.2 to 0.4 % measured before), with 69 registrable names.
+- **No name was kept only through a reading.** The readings added no noise here, and caught nothing either.
+- The plain rule, a long brand anywhere in the name, keeps obvious innocents: "chase" inside *purchase* and a surname, "apple" inside *pineapple*, "poste" across *grupo stefanini*, "amazon" inside *amazonia*, "icloud" ending unrelated cloud names. They cost storage only, since alerts need an armed narrow pattern, but how many there are is unmeasured.
+- Official domains with no entry in the brands file were kept as lookalikes (vodafone.com, amazonwebservices.com). 30 brands, most of them Spanish, had no official domain at all; 58 of 61 have one now, each checked in DNS, the less obvious ones through their corporate registrar in RDAP.
+
+**Next.** Measure the plain rule's precision on a day of the log before changing it: for example, require the brand to stand as its own word unless the name also has a throwaway shape.
+
 ## 07 · A model of the name alone
 
 **Question.** Can a small machine-learning model, looking only at a domain's name, rank fresh certificate names by how much they look like phishing, so the watcher could find lookalikes without a seed, a brand or a pattern?

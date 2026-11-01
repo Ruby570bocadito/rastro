@@ -13,36 +13,36 @@ aeat | AEAT
 bbva | BBVA | bbva.es bbva.com bbva.mx
 santander |  | santander.com bancosantander.es santander.co.uk santander.com.br
 caixabank | CaixaBank | caixabank.es caixabank.com
-bankinter
-sabadell
-unicaja
-ibercaja
-kutxabank
-bizum
-endesa
-iberdrola
-naturgy
-movistar
-vodafone
+bankinter |  | bankinter.com
+sabadell |  | bancsabadell.com
+unicaja |  | unicajabanco.es
+ibercaja |  | ibercaja.es
+kutxabank |  | kutxabank.es
+bizum |  | bizum.es
+endesa |  | endesa.com
+iberdrola |  | iberdrola.es iberdrola.com
+naturgy |  | naturgy.es naturgy.com
+movistar |  | movistar.es movistar.com
+vodafone |  | vodafone.com vodafone.es vodafone.co.uk vodafone.de
 usps | USPS | usps.com
 dhl | DHL | dhl.com dhl.de dhl.es dhl.fr dhl.it dhl.co.uk dhl.nl dhlparcel.nl dhlparcel.es
 fedex | FedEx | fedex.com
 ups | UPS | ups.com
-evri
+evri |  | evri.com
 royalmail | Royal Mail | royalmail.com
-auspost | Australia Post
-canadapost | Canada Post
-postnl | PostNL
-laposte | La Poste
-poste | Poste Italiane
+auspost | Australia Post | auspost.com.au
+canadapost | Canada Post | canadapost.ca canadapost-postescanada.ca
+postnl | PostNL | postnl.nl
+laposte | La Poste | laposte.fr laposte.net
+poste | Poste Italiane | poste.it posteitaliane.it
 paypal | PayPal | paypal.com paypal.me paypalobjects.com
 netflix |  | netflix.com nflxvideo.net
-amazon |  | amazon.com amazon.es amazon.co.uk amazon.de amazon.fr amazon.it amazon.co.jp amazon.ca amazon.com.mx amazon.com.br amazon.in amazon.com.au amazonaws.com primevideo.com
+amazon |  | amazon.com amazon.es amazon.co.uk amazon.de amazon.fr amazon.it amazon.co.jp amazon.ca amazon.com.mx amazon.com.br amazon.in amazon.com.au amazonaws.com primevideo.com amazonaws.com.cn amazonwebservices.com
 apple |  | apple.com icloud.com me.com mac.com
-icloud | iCloud
+icloud | iCloud | icloud.com
 microsoft |  | microsoft.com microsoftonline.com live.com outlook.com office.com office365.com azure.com windows.net bing.com msn.com sharepoint.com onmicrosoft.com
-office365 | Office 365
-outlook
+office365 | Office 365 | office365.com office.com
+outlook |  | outlook.com live.com
 facebook |  | facebook.com fb.com fbcdn.net meta.com messenger.com
 instagram |  | instagram.com cdninstagram.com
 whatsapp | WhatsApp | whatsapp.com whatsapp.net wa.me
@@ -51,19 +51,19 @@ binance |  | binance.com
 coinbase |  | coinbase.com
 metamask | MetaMask | metamask.io
 ledger |  | ledger.com
-trezor
+trezor |  | trezor.io
 chase |  | chase.com chaseonline.com jpmorganchase.com
-wellsfargo | Wells Fargo
-bankofamerica | Bank of America
+wellsfargo | Wells Fargo | wellsfargo.com
+bankofamerica | Bank of America | bankofamerica.com
 docusign | DocuSign | docusign.com docusign.net
 adobe |  | adobe.com
 dropbox |  | dropbox.com
 steam |  | steampowered.com steamcommunity.com steamstatic.com
-roblox
-att | AT&T
-verizon
-tmobile | T-Mobile
+roblox |  | roblox.com
+att | AT&T | att.com att.net
+verizon |  | verizon.com verizonwireless.com
+tmobile | T-Mobile | t-mobile.com
 ezpass | E-ZPass
-sunpass | SunPass
-fastrak | FasTrak
+sunpass | SunPass | sunpass.com
+fastrak | FasTrak | bayareafastrak.org
 toll

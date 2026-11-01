@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Official domains for 30 brands that had none, most of them Spanish (Movistar, Vodafone, Iberdrola, Endesa, Naturgy, Bizum, Bankinter, Sabadell...), and for AWS: 58 of 61 brands have them now, so the watcher no longer stores the brands' own sites as lookalikes. Each was checked in DNS, the less obvious ones through RDAP.
+- A live run of the watcher (experiments: live trial) found the lookalike readings added no noise; the plain substring rule's innocents (purchase, pineapple) are documented for a future experiment.
 - Sinkholes. A domain whose address has reverse DNS saying "sinkhole" is already neutralized: it stays out of the abuse drafts (`sinkholed`), counts as down, and its address never ties two domains into one campaign, since a sinkhole holds names from many unrelated crews. On 2026-11-01, 22 of 28 listed duckdns.org names that resolved pointed at one security company's sinkhole.
 - Duck DNS is dynamic DNS, not hosting: its name points at its owner's own server, so that address counts as a clue again, unlike a hosting platform's shared addresses. Husmo explains it.
 - `dns.reverse` asks the public resolver for an address's reverse DNS name, never the address itself.
