@@ -18,7 +18,8 @@ body:
     id: version
     attributes:
       label: Rastro version, Python version and operating system
-      placeholder: rastro-osint 0.1.0, Python 3.12, Windows 11
+      description: What `rastro --version` prints.
+      placeholder: rastro-osint 0.2.3, Python 3.12.7, Windows 11
   - type: checkboxes
     id: privacy
     attributes:

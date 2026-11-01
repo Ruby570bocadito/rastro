@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import sys
 import time
 import webbrowser
@@ -12,6 +13,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from rastro import (
+    __version__,
     brands,
     bursts,
     calendar_clues,
@@ -442,6 +444,9 @@ def main(argv: list[str] | None = None) -> int:
     except (AttributeError, ValueError):
         pass
     ap = argparse.ArgumentParser(prog="rastro", description="Paste a phishing link. Watch the whole campaign unfold.")
+    ap.add_argument("--version", action="version", help="show Rastro's, Python's and the system's versions, as a bug "
+                    "report asks for them", version=f"rastro-osint {__version__}, Python {platform.python_version()}, "
+                    f"{platform.system()} {platform.release()}")
     ap.add_argument("--brands", metavar="FILE",
                     help="more brands to recognise, one per line as `key | Name | official.com` (see the built-in "
                          "list in rastro/assets/brands.txt)")
