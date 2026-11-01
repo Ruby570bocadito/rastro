@@ -181,3 +181,14 @@ def test_watch_command_needs_something_to_watch(capsys):
     from rastro.__main__ import main
     assert main(["watch"]) == 1
     assert "Nothing to watch" in capsys.readouterr().out
+
+
+def test_a_store_alone_is_enough_to_collect_brand_lookalikes(monkeypatch, tmp_path, capsys):
+    from rastro.__main__ import main
+    tiles = [[entry(n, "my-blog.net")] for n in range(3)] + [[entry(3, "paypal-verify-4821.top")]]
+    FakeLog(tiles, size=4).install(monkeypatch)
+    db = tmp_path / "brands.sqlite"
+    assert main(["watch", "--log", "https://log.example", "--tiles", "4", "--db", str(db)]) == 0
+    out = capsys.readouterr().out
+    assert "storing the brand lookalikes only" in out and "4 certificates read · 1 kept" in out
+    assert [r for (r,) in store.connect(db).execute("SELECT registrable FROM names")] == ["paypal-verify-4821.top"]
