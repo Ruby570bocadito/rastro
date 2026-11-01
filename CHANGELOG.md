@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 · 2026-11-01
 
 - Sites on hosting platforms, end to end. 17 of the 22 known platforms answer DNS for any name (checked with random names), so for their sites an address proves nothing: they are no longer left out as gone, their draft asks the platform to check whether they are still up, and `rastro track` does not follow them, since it could never see them come down without visiting them.
 - A platform's shared addresses no longer tie two of its sites into one campaign. Before, two unrelated sites on the same platform could be joined by address alone.
