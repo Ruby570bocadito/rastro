@@ -97,3 +97,14 @@ def test_a_missing_file_is_named_instead_of_a_traceback(tmp_path, capsys):
                  ["investigate", "x.test", "--list", missing, "--offline", "--no-crtsh", "--no-rdap", "--no-dns"]):
         assert main(argv) == 2
         assert "no-such-file.txt: No such file or directory" in capsys.readouterr().out
+
+
+def test_version_says_what_a_bug_report_asks_for(capsys):
+    import pytest
+
+    from rastro import __version__
+    with pytest.raises(SystemExit) as done:
+        main(["--version"])
+    assert done.value.code == 0
+    out = capsys.readouterr().out
+    assert out.startswith(f"rastro-osint {__version__}, Python 3.") and out.count(",") == 2

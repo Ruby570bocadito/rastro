@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `rastro --version` prints Rastro's, Python's and the system's versions, which the bug report template now asks for.
 - Experiment 08: three stricter brand rules, measured on the 13,614 listed names where the plain rule finds a long brand. None kept the 97 % set before the run (the mildest, 94.3 %), so the plain rule stays; its innocents (purchase, pineapple) cost storage only.
 
 ## 0.2.3 · 2026-11-01
