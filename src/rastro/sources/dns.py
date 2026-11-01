@@ -7,6 +7,7 @@ servers on its own.
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import time
 import urllib.error
@@ -18,7 +19,7 @@ from rastro.domains import registrable
 from rastro.sources import NETWORK_ERRORS, USER_AGENT, retryable, wait
 
 RESOLVER = "https://cloudflare-dns.com/dns-query"
-TYPES = {"A": 1, "NS": 2}
+TYPES = {"A": 1, "NS": 2, "PTR": 12}
 # Phishing domains move and die within days, so a day-old answer is old news: asked again after this.
 MAX_AGE_HOURS = 24.0
 
@@ -72,6 +73,16 @@ def resolve(domain: str, cache_dir: Path, fresh: bool = False) -> tuple[str | No
 
 def addresses(domain: str, cache_dir: Path) -> frozenset[str]:
     return frozenset(answers(query(domain, "A", cache_dir), "A"))
+
+
+def reverse(ip: str, cache_dir: Path) -> frozenset[str]:
+    """The names an address's owner gives it in reverse DNS (PTR), e.g. 192.169.69.26 -> sinkhole.hyas.com. The
+    question goes to the resolver, which asks whoever runs the address's reverse zone, never the address itself."""
+    try:
+        arpa = ipaddress.ip_address(ip).reverse_pointer
+    except ValueError:
+        return frozenset()
+    return frozenset(answers(query(arpa, "PTR", cache_dir), "PTR"))
 
 
 def nameservers(domain: str, cache_dir: Path) -> frozenset[str]:

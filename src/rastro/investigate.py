@@ -35,6 +35,7 @@ from rastro.domains import (
     ABUSE_FORMS,
     SHORTENERS,
     dns_hides_takedown,
+    dynamic_dns,
     ending,
     host_label,
     is_ip,
@@ -52,12 +53,14 @@ MAX_CO_CERTIFIED = 25              # more names on the seed's certificates means
 MIN_WORD = 5                       # shortest shared word that relates two names without a brand
 RHYTHM_P = 0.01
 SUSPENDED = ("hold", "pending delete", "redemption")
+SINKHOLE = "sinkhole"              # in an address's reverse DNS: a security team took the name over
 REASONS = {
     "unregistered": "not registered now, or its registry has no RDAP",
     "suspended": "already suspended",
     "defensive": "held by a brand-protection registrar, probably a defensive registration",
     "reregistered": "registered again after its phishing days, maybe by somebody else",
     "unresolved": "on a hosting platform and no longer resolves",
+    "sinkholed": "already points at a sinkhole: someone neutralized it",
 }
 # Registrars that hold names for brand-protection programmes; a lookalike there is probably defensive.
 BRAND_PROTECTION = ("markmonitor", "csc corporate domains", "corporation service company", "com laude",
@@ -131,6 +134,7 @@ class Member:
     nameservers: frozenset[str] = frozenset()
     co_certified: frozenset[str] = frozenset()
     dns_checked: bool = False                             # its addresses were asked for, so empty means none
+    sinkhole: str | None = None                           # the reverse DNS name that says its address is a sinkhole
     score: float | None = None                            # the name scorer's 0-1, when a model is shipped
 
     @property
@@ -157,18 +161,27 @@ class Member:
     def alive(self) -> bool:
         """Still there as far as public data can tell: registered, or for a platform's site still in DNS. On a
         platform that answers DNS for any name nothing can tell without visiting it, so it counts as alive."""
+        if self.sinkhole:
+            return False
         if platform(self.name):
             return dns_hides_takedown(self.name) or not (self.dns_checked and not self.ips)
         return self.registration is not None
 
     @property
     def infrastructure(self) -> tuple[frozenset[str], frozenset[str]]:
-        """Addresses and name servers that can tie it to another domain. A platform's site has none of its own:
-        it shares the platform's addresses with every other site there."""
+        """Addresses and name servers that can tie it to another domain. A platform's site has none of its own: it
+        shares the platform's addresses with every other site there. A dynamic DNS name keeps its address, its
+        owner's server, but not the service's name servers. A sinkhole ties together everything it took over."""
+        if self.sinkhole:
+            return frozenset(), frozenset()
+        if dynamic_dns(self.name):
+            return self.ips, frozenset()
         return (frozenset(), frozenset()) if platform(self.name) else (self.ips, self.nameservers)
 
     def reportable(self) -> str | None:
         """Why this domain stays out of an abuse report (a key of REASONS), or None when it belongs in one."""
+        if self.sinkhole:
+            return "sinkholed"
         if platform(self.name):
             return None if self.alive else "unresolved"
         r = self.registration
@@ -236,6 +249,7 @@ class Sources:
     registration: Callable[[str], rdap.Registration | None] | None = None
     addresses: Callable[[str], frozenset[str]] | None = None
     nameservers: Callable[[str], frozenset[str]] | None = None
+    reverse: Callable[[str], frozenset[str]] | None = None        # an address's reverse DNS names
 
     @classmethod
     def public(cls, cache_dir: Path, offline: bool = False, crt: bool = True, rdap_: bool = True,
@@ -254,8 +268,11 @@ class Sources:
         def nameservers(d: str):
             return frozenset() if offline else dns.nameservers(d, cache_dir / "dns")
 
+        def reverse(ip: str):
+            return frozenset() if offline else dns.reverse(ip, cache_dir / "dns")
+
         return cls(certificates if crt else None, registration if rdap_ else None,
-                   addresses if dns_ else None, nameservers if dns_ else None)
+                   addresses if dns_ else None, nameservers if dns_ else None, reverse if dns_ else None)
 
     def names(self) -> list[str]:
         return [name for name, used in [("crtsh", self.certificates), ("rdap", self.registration),
@@ -300,6 +317,9 @@ def _profile(m: Member, sources: Sources) -> Member:
     if sources.addresses:
         m.ips = sources.addresses(m.name)
         m.dns_checked = True
+        if sources.reverse and m.ips:
+            names = sorted({n for ip in m.ips for n in sources.reverse(ip)})
+            m.sinkhole = next((n for n in names if SINKHOLE in n), None)
     if sources.nameservers:
         m.nameservers = sources.nameservers(m.name)
     return m
