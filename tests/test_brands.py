@@ -63,3 +63,10 @@ def test_a_bad_brand_key_is_refused_with_its_line(tmp_path):
     import pytest
     with pytest.raises(ValueError, match="line 2"):
         brands.parse("ok\nnot ok | Name\n")
+
+
+def test_official_domains_are_registrable_names_and_the_brands_own_never_count_as_lookalikes():
+    official = brands.official_domains()
+    assert all(registrable(d) == d for d in official), [d for d in official if registrable(d) != d]
+    # seen stored as lookalikes by a live watch on 2026-11-01, before they were listed
+    assert {"vodafone.com", "amazonwebservices.com", "movistar.es", "bizum.es"} <= official
