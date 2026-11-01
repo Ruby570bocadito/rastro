@@ -210,4 +210,12 @@ On the later sample, every threshold strict enough to keep false alarms under ab
 
 ## 02 · Expansion from one URL
 
-Pending. Does one URL expand to at least 10 sibling domains in 2 minutes with the free urlscan quota plus crt.sh?
+**Question.** Does one phishing domain expand to at least 10 sibling domains in 2 minutes through urlscan.io, for campaigns whose names change but whose pages do not?
+
+**Method.** `exp02_urlscan.py` takes, for each seed, its newest existing scan on urlscan.io, the files its page loaded (their SHA-256), leaves out shared libraries (files loaded by more than 200 scans) and searches for the other domains whose pages loaded the rest (`rastro.sources.urlscan`). It only searches scans that already exist: it never submits one, so urlscan never visits a site on Rastro's behalf and no page with a victim's token gets published. The key comes from `URLSCAN_API_KEY` and is never written to disk.
+
+**Kill criterion, set before the run.** Among the seeds urlscan has seen, the median must find at least 10 siblings within 2 minutes, and at least half of all siblings must be on the public list or carry the seed's brand. Otherwise the expansion stays out of `rastro investigate`.
+
+**Run.** `python -I experiments/exp02_urlscan.py --seeds 20` (seeds sampled from the public list, spread over brands) or `--seeds-file FILE`.
+
+**Status.** Code and tests ready (`tests/test_urlscan.py`, scripted urlscan); not run yet, it needs a free account.
