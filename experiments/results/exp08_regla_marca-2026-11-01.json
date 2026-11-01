@@ -1,0 +1,50 @@
+[
+  {
+    "rule": "edge",
+    "kept": 12838,
+    "share": 0.943,
+    "passes": false,
+    "dropped_by_brand": {
+      "whatsapp": 244,
+      "amazon": 127,
+      "chase": 58,
+      "trezor": 46,
+      "apple": 38,
+      "ledger": 38,
+      "facebook": 37,
+      "poste": 21
+    }
+  },
+  {
+    "rule": "word",
+    "kept": 7094,
+    "share": 0.5211,
+    "passes": false,
+    "dropped_by_brand": {
+      "whatsapp": 753,
+      "apple": 707,
+      "amazon": 699,
+      "trezor": 612,
+      "ledger": 561,
+      "metamask": 484,
+      "facebook": 441,
+      "instagram": 340
+    }
+  },
+  {
+    "rule": "word or shape",
+    "kept": 11838,
+    "share": 0.8695,
+    "passes": false,
+    "dropped_by_brand": {
+      "apple": 353,
+      "amazon": 207,
+      "steam": 195,
+      "whatsapp": 121,
+      "metamask": 92,
+      "ledger": 89,
+      "instagram": 81,
+      "chase": 69
+    }
+  }
+]

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Experiment 08: three stricter brand rules, measured on the 13,614 listed names where the plain rule finds a long brand. None kept the 97 % set before the run (the mildest, 94.3 %), so the plain rule stays; its innocents (purchase, pineapple) cost storage only.
+
 ## 0.2.3 · 2026-11-01
 
 - Official domains for 30 brands that had none, most of them Spanish (Movistar, Vodafone, Iberdrola, Endesa, Naturgy, Bizum, Bankinter, Sabadell...), and for AWS: 58 of 61 brands have them now, so the watcher no longer stores the brands' own sites as lookalikes. Each was checked in DNS, the less obvious ones through RDAP.

@@ -186,7 +186,7 @@ The seed's name and the case files stay in `data/raw/`, out of the repository.
 - The plain rule, a long brand anywhere in the name, keeps obvious innocents: "chase" inside *purchase* and a surname, "apple" inside *pineapple*, "poste" across *grupo stefanini*, "amazon" inside *amazonia*, "icloud" ending unrelated cloud names. They cost storage only, since alerts need an armed narrow pattern, but how many there are is unmeasured.
 - Official domains with no entry in the brands file were kept as lookalikes (vodafone.com, amazonwebservices.com). 30 brands, most of them Spanish, had no official domain at all; 58 of 61 have one now, each checked in DNS, the less obvious ones through their corporate registrar in RDAP.
 
-**Next.** Measure the plain rule's precision on a day of the log before changing it: for example, require the brand to stand as its own word unless the name also has a throwaway shape.
+**Next.** Measure whether a stricter rule could drop them without losing phishing names: experiment 08.
 
 ## 07 · A model of the name alone
 
@@ -251,3 +251,21 @@ On the later sample, every threshold strict enough to keep false alarms under ab
 - **Speed is not the problem.** A seen seed took 7 to 44 seconds, within the free quota.
 
 **Next, if it is tried again.** Fresh seeds, from the watcher or from a link received that day, which urlscan users are likelier to have scanned while live. A sibling needs at least two shared files, which removes the single-asset noise. Precision needs a better check than list-or-brand, for example whether the siblings' first certificates fall in the seed's work sessions (experiment 05).
+
+## 08 · A stricter brand rule
+
+**Question.** The watcher keeps every name in which a long brand appears anywhere, so it also keeps purchase (chase), pineapple (apple) or grupostefanini (poste). Can a stricter rule drop them without losing phishing names?
+
+**Method.** `exp08_regla_marca.py` takes the 13,614 names of the public list (261,740 registrable names) in which the plain rule finds a long brand, and counts how many each stricter rule keeps: the brand starts or ends a word (edge); the brand is a whole word (word); a whole word, or anywhere when the name has a throwaway shape (word or shape). Short brands already have to be a whole word.
+
+**Kill criterion, set before the run.** A stricter rule replaces the plain one only if it keeps at least 97 % of those listed names. Only a rule that passed would have been tried on fresh Certificate Transparency names, to count the innocents it drops.
+
+**Results, 2026-11-01.**
+
+| Rule | Listed names kept | Share |
+|---|---:|---:|
+| edge | 12,838 | 94.3 % |
+| word | 7,094 | 52.1 % |
+| word or shape | 11,838 | 87.0 % |
+
+**Verdict: no stricter rule passes, so the plain rule stays.** Phishing names glue the brand inside other words far more often than innocents do: the edge rule alone would lose names such as checkjpamazonaccount, loginmicrosoftonline or enteramazonup, and it would not even drop purchase or pineapple, whose brand ends the word. The innocents cost storage only, since an alert needs an armed narrow pattern. A rule that tells them apart would have to know words, not shapes.

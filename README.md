@@ -157,6 +157,7 @@ Each piece was tested on real campaigns before it went into the product. The det
 | How much data do the calendar clues need? | The weekend, about 50 sessions over 8 weeks. Daylight saving, hundreds |
 | Does one link unfold end to end? | A Coinbase lookalike caught live, and missing from the public list, unfolded into a crew of 95 domains. Only it was still live, and the clock gave UTC−7 again |
 | Can a model of the name alone spot phishing among fresh certificates? | Not yet. With raw log names as benign examples (07), live campaigns hid among them; with year-old names checked through RDAP (07b), 3,600 benign names were too few and it called almost every fresh name phishing. No name model ships |
+| Can a stricter brand rule drop innocents like purchase (chase) without losing phishing names? | No. The mildest one kept 94.3 % of the listed phishing names, below the 97 % bar, and would not even drop purchase. The plain rule stays |
 | Does one URL expand to its siblings through urlscan? | Not yet. urlscan had never seen 14 of 20 listed domains, and the newest scan is usually of the dead page. Using the live page, two seeds reached 27 and 95 domains, but almost none could be confirmed, so no expansion ships |
 
 ## What Rastro will never do
