@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- `rastro list update` downloads Phishing.Database's list of active phishing domains to where `rastro investigate` looks for siblings. It asks for it again only when it changed (the server's ETag), and a download that is not a list of domains, such as an error page, never replaces a good one. `rastro investigate` says when there is no list, instead of quietly finding fewer siblings.
+- Fixed: `rastro investigate` crashed when it found the crew's template but no domain had a date, as with `--no-crtsh` or when crt.sh did not answer.
+
 ## 0.2.1 · 2026-11-01
 
 - Sites on hosting platforms, end to end. 17 of the 22 known platforms answer DNS for any name (checked with random names), so for their sites an address proves nothing: they are no longer left out as gone, their draft asks the platform to check whether they are still up, and `rastro track` does not follow them, since it could never see them come down without visiting them.
