@@ -13,6 +13,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Iterable
 from pathlib import Path
 
 from rastro.domains import registrable
@@ -22,6 +23,8 @@ RESOLVER = "https://cloudflare-dns.com/dns-query"
 TYPES = {"A": 1, "NS": 2, "PTR": 12}
 # Phishing domains move and die within days, so a day-old answer is old news: asked again after this.
 MAX_AGE_HOURS = 24.0
+# In an address's reverse DNS name (sinkhole.hyas.com): a security team has taken the name over.
+SINKHOLE = "sinkhole"
 
 
 def answers(payload: dict, rtype: str) -> list[str]:
@@ -83,6 +86,11 @@ def reverse(ip: str, cache_dir: Path) -> frozenset[str]:
     except ValueError:
         return frozenset()
     return frozenset(answers(query(arpa, "PTR", cache_dir), "PTR"))
+
+
+def sinkhole_name(names: Iterable[str]) -> str | None:
+    """The first reverse DNS name that says its address is a sinkhole, if any."""
+    return next((n for n in sorted(names) if SINKHOLE in n), None)
 
 
 def nameservers(domain: str, cache_dir: Path) -> frozenset[str]:

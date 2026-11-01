@@ -126,7 +126,7 @@ rastro track check --every 6
 rastro track report --html data/raw/scoreboard.html --from-report
 ```
 
-Rastro follows the live domains of an investigation (`--track`), every domain the watcher alerts on (`rastro watch --track`) and any you add by hand. Each check asks the registry (RDAP) and a public resolver about every domain still up, never the domain itself, and records whether it is live, offline, suspended, being deleted or gone. A domain is taken down the first time it shows up suspended, being deleted or out of its zone before it expired.
+Rastro follows the live domains of an investigation (`--track`), every domain the watcher alerts on (`rastro watch --track`) and any you add by hand. Each check asks the registry (RDAP) and a public resolver about every domain still up, never the domain itself, and records whether it is live, offline, suspended, being deleted, gone or sinkholed (its address's reverse DNS says sinkhole). A domain is taken down the first time it shows up suspended, being deleted, out of its zone or sinkholed before it expired.
 
 `--reported` stamps when you sent the abuse report, and `--from-report` times each registrar from that moment. The scoreboard is a Kaplan-Meier estimate: a domain still up counts as up until its last check instead of being dropped, so a registrar that never acts cannot look fast. It fills with time, so run the check every few hours for a couple of weeks.
 

@@ -53,7 +53,6 @@ MAX_CO_CERTIFIED = 25              # more names on the seed's certificates means
 MIN_WORD = 5                       # shortest shared word that relates two names without a brand
 RHYTHM_P = 0.01
 SUSPENDED = ("hold", "pending delete", "redemption")
-SINKHOLE = "sinkhole"              # in an address's reverse DNS: a security team took the name over
 REASONS = {
     "unregistered": "not registered now, or its registry has no RDAP",
     "suspended": "already suspended",
@@ -318,8 +317,7 @@ def _profile(m: Member, sources: Sources) -> Member:
         m.ips = sources.addresses(m.name)
         m.dns_checked = True
         if sources.reverse and m.ips:
-            names = sorted({n for ip in m.ips for n in sources.reverse(ip)})
-            m.sinkhole = next((n for n in names if SINKHOLE in n), None)
+            m.sinkhole = dns.sinkhole_name({n for ip in m.ips for n in sources.reverse(ip)})
     if sources.nameservers:
         m.nameservers = sources.nameservers(m.name)
     return m
