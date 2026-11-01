@@ -31,7 +31,17 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from rastro import brands, calendar_clues, campaigns, pattern, rhythm, scorer
-from rastro.domains import ABUSE_FORMS, SHORTENERS, dns_hides_takedown, host_label, is_ip, platform, registrable
+from rastro.domains import (
+    ABUSE_FORMS,
+    SHORTENERS,
+    dns_hides_takedown,
+    ending,
+    host_label,
+    is_ip,
+    platform,
+    registrable,
+    shares_certificate,
+)
 from rastro.sources import crtsh, dns, rdap
 
 HOSTNAME = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
@@ -82,7 +92,7 @@ def seed_domain(link: str) -> str:
 
 
 def _tld(domain: str) -> str:
-    return domain.rsplit(".", 1)[-1]
+    return ending(domain)
 
 
 def _words(domain: str) -> set[str]:
@@ -282,7 +292,7 @@ def _from_store(seed: str, conn: sqlite3.Connection) -> tuple[dict[str, datetime
 
 
 def _profile(m: Member, sources: Sources) -> Member:
-    if sources.certificates:
+    if sources.certificates and not shares_certificate(m.name):     # CT has nothing of its own to tell
         first, co = sources.certificates(m.name)
         m.first_cert, m.co_certified = first, m.co_certified | co
     if sources.registration:
@@ -435,7 +445,11 @@ def investigate(link: str, sources: Sources, list_lines: Iterable[str] = (), con
     else:
         for d in co:
             ranks[d] = -2
-    chosen = sorted((d for d in ranks if d != seed), key=lambda d: (ranks[d], d))
+    # closest first: how it relates to the seed, then how many of the seed's words it shares (help-ledger-support
+    # before abc-ledger-xyz for help-ledger-login), so a capped list keeps the likeliest siblings
+    words = set(pattern.tokens(seed)) - {"-", "."}
+    chosen = sorted((d for d in ranks if d != seed),
+                    key=lambda d: (ranks[d], -len(words & set(pattern.tokens(d))), d))
     if len(chosen) > max_candidates:
         notes.append(("capped", {"n": len(chosen), "max": max_candidates}))
         chosen = chosen[:max_candidates]
