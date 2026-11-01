@@ -4,6 +4,7 @@
 
 - `rastro list update` downloads Phishing.Database's list of active phishing domains to where `rastro investigate` looks for siblings. It asks for it again only when it changed (the server's ETag), and a download that is not a list of domains, such as an error page, never replaces a good one. `rastro investigate` says when there is no list, instead of quietly finding fewer siblings.
 - Fixed: `rastro investigate` crashed when it found the crew's template but no domain had a date, as with `--no-crtsh` or when crt.sh did not answer.
+- Fixed, found by running every offline command with odd inputs: `rastro rhythm` crashed on an empty file or a line that is not a time, `rastro track add` on a `--since` that is not ISO 8601 and on alert or case files that are not what Rastro writes, and every command on a path that is missing or is a folder. Each now says what is wrong and exits with code 1 or 2. `rastro track add` also says which domains from alerts and cases it will not follow.
 
 ## 0.2.1 · 2026-11-01
 
