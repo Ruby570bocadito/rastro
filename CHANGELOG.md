@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.2 · 2026-11-01
 
 - Tested live on three real seeds (a registry domain, a pages.dev site and a vercel.app site) against crt.sh, RDAP and DNS. What it showed is fixed here:
   - 16 platforms serve every site under one certificate (crt.sh had none for two listed sites of each), so Rastro no longer asks crt.sh about their sites: the vercel.app case went from 334 to 82 seconds. Husmo says certificates cannot date such a site, and the README says the CT watcher cannot see them.
