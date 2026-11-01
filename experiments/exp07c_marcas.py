@@ -68,6 +68,7 @@ def main() -> int:
     ap.add_argument("--epochs", type=int, default=4)
     ap.add_argument("--save", help="write the final model to this file")
     args = ap.parse_args()
+    exp07.PRIVATE.mkdir(parents=True, exist_ok=True)      # where experiment 07's tile cache lives
     t0 = time.time()
 
     _, _, listed, whole = exp07.phishing_list()
