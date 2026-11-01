@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.3 · 2026-11-01
 
 - Official domains for 30 brands that had none, most of them Spanish (Movistar, Vodafone, Iberdrola, Endesa, Naturgy, Bizum, Bankinter, Sabadell...), and for AWS: 58 of 61 brands have them now, so the watcher no longer stores the brands' own sites as lookalikes. Each was checked in DNS, the less obvious ones through RDAP.
 - A live run of the watcher (experiments: live trial) found the lookalike readings added no noise; the plain substring rule's innocents (purchase, pineapple) are documented for a future experiment.
