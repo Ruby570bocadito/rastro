@@ -15,7 +15,7 @@ A phishing SMS is one link. Behind it there is usually a crew that registered do
 - **the crew and the campaign**: every domain built from the same naming template, and the ones tied to your link by clues that add up (a shared certificate, the same server, the same work session);
 - **where the crew works**: the time zone of its working day, read from the moments it registered domains and asked for certificates, with an honest "inconclusive" when the data is not enough;
 - **its next domain**: a narrow pattern to watch on Certificate Transparency, which catches the next lookalike the moment it gets a certificate;
-- **who to warn**: one abuse report draft per registrar for the domains still live.
+- **who to warn**: one abuse report draft per registrar, or per hosting platform for sites on free subdomains, for the domains still live.
 
 Husmo, a detective ferret, explains every deduction and how sure it is. Rastro never connects to the domains, never looks for the people behind them and never sends anything for you.
 
@@ -72,7 +72,7 @@ flowchart LR
    Pairs that reach 1.0 join the same campaign. A template alone never joins two domains.
 4. **The clock.** Registrations and first certificates are the crew's own acts, so they follow its working day. Rastro groups them into work sessions, scores the 24 nominal UTC offsets against a typical day (allowing for bots, and for crews that start early or late) and tests them against round-the-clock activity. With enough sessions it also reads the weekend and daylight saving. Below the amounts the experiments found necessary, each clue answers "inconclusive".
 5. **The next domain.** A readable regular expression learned from the crew's names. It is armed only when narrow (at most 10^9 possible names), because broad ones raised thousands of false alarms a day.
-6. **The drafts.** One per registrar, with the evidence, for the domains still registered. Expired, suspended, defensive and re-registered domains stay out, each with its reason.
+6. **The drafts.** One per registrar, with the evidence, for the domains still registered. Expired, suspended, defensive and re-registered domains stay out, each with its reason. Sites on hosting platforms (pages.dev, vercel.app, github.io...) go to the platform, with its abuse form when Rastro knows it. Most platforms answer DNS for any name, so for their sites Rastro cannot tell a live one from a removed one without visiting it: their draft says so, and `rastro track` does not follow them.
 
 ## Investigate a real link
 

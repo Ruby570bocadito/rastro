@@ -31,7 +31,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from rastro import brands, calendar_clues, campaigns, pattern, rhythm, scorer
-from rastro.domains import PLATFORMS, SHORTENERS, is_ip, platform, registrable
+from rastro.domains import ABUSE_FORMS, SHORTENERS, dns_hides_takedown, host_label, is_ip, platform, registrable
 from rastro.sources import crtsh, dns, rdap
 
 HOSTNAME = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
@@ -143,10 +143,24 @@ class Member:
         times = self.clock()
         return times[0] if times else None
 
+    @property
+    def alive(self) -> bool:
+        """Still there as far as public data can tell: registered, or for a platform's site still in DNS. On a
+        platform that answers DNS for any name nothing can tell without visiting it, so it counts as alive."""
+        if platform(self.name):
+            return dns_hides_takedown(self.name) or not (self.dns_checked and not self.ips)
+        return self.registration is not None
+
+    @property
+    def infrastructure(self) -> tuple[frozenset[str], frozenset[str]]:
+        """Addresses and name servers that can tie it to another domain. A platform's site has none of its own:
+        it shares the platform's addresses with every other site there."""
+        return (frozenset(), frozenset()) if platform(self.name) else (self.ips, self.nameservers)
+
     def reportable(self) -> str | None:
         """Why this domain stays out of an abuse report (a key of REASONS), or None when it belongs in one."""
         if platform(self.name):
-            return "unresolved" if self.dns_checked and not self.ips else None
+            return None if self.alive else "unresolved"
         r = self.registration
         if r is None:
             return "unregistered"
@@ -161,13 +175,15 @@ class Member:
 
 @dataclass
 class AbuseReport:
-    registrar: str
+    registrar: str                    # or the hosting platform, as host_label names it
     registrar_id: str | None
     email: str | None
     phone: str | None
     domains: list[str]
     subject: str
     body: str
+    hosted: bool = False              # addressed to a hosting platform, not a registrar
+    form: str | None = None           # the platform's abuse form, when one is known
 
 
 @dataclass
@@ -327,7 +343,8 @@ def _together(ms: list[Member], crew_pattern: pattern.Pattern | None, crew_liste
         lines.append(f"- {whose}, {crew_pattern.regex}{listed}.")
     kinds = {k for a, b, _, ks in edges if a in names or b in names for k in ks}
     if kinds & {"session", "burst"}:
-        lines.append("- Their registrations and first certificates came in the same work sessions or launches.")
+        acts = "first certificates" if all(platform(n) for n in names) else "registrations and first certificates"
+        lines.append(f"- Their {acts} came in the same work sessions or launches.")
     if "word" in kinds:
         lines.append("- They share the same long, unusual word around the brand.")
     return lines
@@ -345,8 +362,8 @@ def abuse_reports(seed: str, brand: str | None, members: dict[str, Member], doma
         if why:
             left_out[d] = why
             continue
-        if suffix := platform(d):
-            groups[(f"{PLATFORMS[suffix]} ({suffix})", None)].append(m)
+        if label := host_label(d):
+            groups[(label, None)].append(m)
             continue
         r = m.registration
         groups[(r.registrar or "Unknown registrar", r.abuse_email)].append(m)
@@ -355,7 +372,8 @@ def abuse_reports(seed: str, brand: str | None, members: dict[str, Member], doma
     for (registrar, email), ms in sorted(groups.items(), key=lambda kv: -len(kv[1])):
         ms.sort(key=lambda m: (m.name != seed, m.name))
         many = len(ms) > 1
-        where = "hosted on your platform" if platform(ms[0].name) else "registered through you"
+        hosted = platform(ms[0].name)
+        where = "hosted on your platform" if hosted else "registered through you"
         lines = [f"Hello {registrar} abuse team,", "",
                  f"{'These domains' if many else 'This domain'}, {where}, "
                  f"{'appear' if many else 'appears'} to be part of one phishing operation {who}:", ""]
@@ -372,6 +390,9 @@ def abuse_reports(seed: str, brand: str | None, members: dict[str, Member], doma
         together = _together(ms, crew_pattern, crew_listed, edges)
         if together:
             lines += ["", "Why they belong together:" if many else "Why it looks like phishing:", *together]
+        if hosted and dns_hides_takedown(ms[0].name):
+            lines += ["", f"Your platform answers DNS for any name and nobody visited the sites, so please check "
+                          f"whether {'they are' if many else 'it is'} still up."]
         lines += ["", f"Please review {'them' if many else 'it'} and suspend {'them' if many else 'it'} if "
                       f"{'they break' if many else 'it breaks'} your abuse policy.", "",
                   "This was gathered from public sources only (Certificate Transparency logs, RDAP and public DNS);"
@@ -381,7 +402,8 @@ def abuse_reports(seed: str, brand: str | None, members: dict[str, Member], doma
             f" and {len(ms) - 3} more" if len(ms) > 3 else "")
         first = ms[0].registration
         reports.append(AbuseReport(registrar, first and first.registrar_id, email, first and first.abuse_phone,
-                                   [m.name for m in ms], subject, "\n".join(lines)))
+                                   [m.name for m in ms], subject, "\n".join(lines),
+                                   hosted is not None, ABUSE_FORMS.get(hosted) if hosted else None))
     return reports, left_out
 
 
@@ -436,7 +458,7 @@ def investigate(link: str, sources: Sources, list_lines: Iterable[str] = (), con
             if done % 10 == 0:
                 on_status(f"  {done}/{len(chosen)} profiled")
 
-    domains = [campaigns.Domain(m.name, m.brand, m.first_seen, m.co_certified, m.ips, m.nameservers)
+    domains = [campaigns.Domain(m.name, m.brand, m.first_seen, m.co_certified, *m.infrastructure)
                for m in members.values()]
     groups = campaigns.cluster(domains, max_breadth=NARROW_LOG10)
     campaign = next((c.domains for c in groups if seed in c.domains), [seed])

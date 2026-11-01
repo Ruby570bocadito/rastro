@@ -27,6 +27,27 @@ PLATFORMS = {
     "myshopify.com": "Shopify", "surge.sh": "Surge", "repl.co": "Replit", "ngrok-free.app": "ngrok",
     "duckdns.org": "Duck DNS",
 }
+# Where each platform takes abuse reports: its own form, each checked by hand on 2026-11-01. Platforms whose form
+# could not be confirmed have none, rather than a guess.
+ABUSE_FORMS = {
+    "pages.dev": "https://abuse.cloudflare.com/", "workers.dev": "https://abuse.cloudflare.com/",
+    "r2.dev": "https://abuse.cloudflare.com/",
+    "appspot.com": "https://support.google.com/code/contact/cloud_platform_report",
+    "blogspot.com": "https://support.google.com/blogger/answer/76315",
+    "github.io": "https://github.com/contact/report-abuse", "vercel.app": "https://vercel.com/abuse",
+    "azurewebsites.net": "https://msrc.microsoft.com/report/abuse",
+    "myshopify.com": "https://www.shopify.com/legal/tools/report-an-issue", "ngrok-free.app": "https://ngrok.com/abuse",
+    "wixsite.com": "https://www.wix.com/abuse", "weebly.com": "https://www.weebly.com/abuse",
+}
+# Platforms that answer DNS for any name, even one nobody made (checked on 2026-11-01 with random names through the
+# public resolver). On them an address says nothing: a site taken down still resolves, and every site shares the
+# platform's addresses. Only the others (pages.dev, workers.dev, azurewebsites.net, duckdns.org, repl.co) answer
+# NXDOMAIN once a site is gone.
+WILDCARD_DNS = {
+    "appspot.com", "blogspot.com", "firebaseapp.com", "github.io", "glitch.me", "herokuapp.com", "myshopify.com",
+    "netlify.app", "ngrok-free.app", "onrender.com", "r2.dev", "surge.sh", "vercel.app", "web.app", "webflow.io",
+    "weebly.com", "wixsite.com",
+}
 # Link shorteners: the host says nothing about the campaign, the page it leads to does.
 SHORTENERS = {
     "bit.ly", "bitly.com", "tinyurl.com", "t.co", "goo.gl", "is.gd", "v.gd", "cutt.ly", "rebrand.ly", "ow.ly",
@@ -39,6 +60,17 @@ def platform(name: str) -> str | None:
     parts = name.strip(".").lower().split(".")
     suffix = ".".join(parts[-2:])
     return suffix if len(parts) >= 3 and suffix in PLATFORMS else None
+
+
+def host_label(name: str) -> str | None:
+    """Who to warn about a platform subdomain, as Rastro names it (Cloudflare Pages (pages.dev)), else None."""
+    suffix = platform(name)
+    return f"{PLATFORMS[suffix]} ({suffix})" if suffix else None
+
+
+def dns_hides_takedown(name: str) -> bool:
+    """Whether `name` sits on a platform that answers DNS for any name, so DNS cannot tell if it is still up."""
+    return platform(name) in WILDCARD_DNS
 
 
 def is_ip(host: str) -> bool:

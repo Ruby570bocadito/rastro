@@ -28,7 +28,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from rastro import __version__
-from rastro.domains import registrable
+from rastro.domains import dns_hides_takedown, host_label, registrable
 from rastro.sources import dns, rdap
 
 DOWN = {"held", "deleting", "gone"}
@@ -56,12 +56,21 @@ def connect(path: Path | str) -> sqlite3.Connection:
     return conn
 
 
+def unfollowable(domains: Iterable[str]) -> list[str]:
+    """The domains a check could never see come down: sites on platforms that answer DNS for any name, which no
+    registry knows either. Only visiting them would tell, and Rastro never visits."""
+    names = {registrable(d.strip().lower()) for d in domains if d.strip()}
+    return sorted(d for d in names if dns_hides_takedown(d))
+
+
 def add(conn: sqlite3.Connection, domains: Iterable[str], since: datetime, source: str = "",
         reported: bool = False) -> int:
     """Start following domains; a domain already followed keeps its first `since`. With `reported`, the abuse
-    report went out at `since`: new domains get that time, and followed ones without one get it too.
-    Returns how many domains are new."""
-    names = sorted({registrable(d.strip().lower()) for d in domains if d.strip()})
+    report went out at `since`: new domains get that time, and followed ones without one get it too. Domains
+    `unfollowable` leaves out are skipped. Returns how many domains are new."""
+    domains = list(domains)
+    skip = set(unfollowable(domains))
+    names = sorted({registrable(d.strip().lower()) for d in domains if d.strip()} - skip)
     at = since.isoformat()
     before = conn.total_changes
     with conn:
@@ -115,7 +124,8 @@ class Sources:
 def look(domain: str, sources: Sources) -> Seen:
     outcome, reg = sources.registry(domain)
     verdict, ips = sources.resolver(domain)
-    return Seen(classify(outcome, reg, verdict, ips), reg.registrar if reg else None, reg.status if reg else (),
+    return Seen(classify(outcome, reg, verdict, ips), reg.registrar if reg else host_label(domain),
+                reg.status if reg else (),
                 reg.expires if reg else None, tuple(sorted(ips)))
 
 
