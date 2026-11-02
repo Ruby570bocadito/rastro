@@ -3,7 +3,9 @@
 ## Unreleased
 
 - `rastro --version` prints Rastro's, Python's and the system's versions, which the bug report template now asks for.
+- `rastro watch --db FILE` works with nothing armed: it stores the brand lookalikes it reads, which is how experiment 07c collected its names. Before, it refused with "Nothing to watch" unless a pattern, an alert score or `--bursts-every` was given.
 - Experiment 08: three stricter brand rules, measured on the 13,614 listed names where the plain rule finds a long brand. None kept the 97 % set before the run (the mildest, 94.3 %), so the plain rule stays; its innocents (purchase, pineapple) cost storage only.
+- Experiment 07c: the name model with 1,017 benign names that carry a brand, collected from four hours of the log by the watcher and checked by age through RDAP (07b had 131). Every measure improved (AUC 0.72 to 0.84), but long names run off the top of the scale, benign or not, so at the threshold that lets 0.1 % of benign names through it would raise 17 times the plain rule's alarms on fresh certificates. Still no name model ships; `exp07c_saturacion.py` measures why.
 
 ## 0.2.3 · 2026-11-01
 

@@ -224,6 +224,48 @@ On the later sample, every threshold strict enough to keep false alarms under ab
 
 **Next.** Collect before training: a week of `rastro watch --db` keeps only the names that carry a brand, which should give thousands of them, and RDAP can then sort them by age into clean benign examples and fresh suspects. Until a model beats the plain rule on such data, none ships.
 
+## 07c · A thousand benign names that carry a brand
+
+**Question.** 07b's model learned that any brand means phishing because only 131 of its benign names carried one. With a thousand of them, collected by the watcher and checked by age through RDAP, does it beat the plain rule (a brand plus a throwaway shape) on fresh certificates?
+
+**Method.** `rastro watch --tiles 10000 --db data/raw/ct/brands.sqlite` read 10,000 tiles of Let's Encrypt's Sycamore log (2,560,000 certificates, four hours of the log on 2026-11-01) in 14 minutes and stored the 7,075 whose names carry a brand: 4,984 registrable names, 3,657 of them with a brand and not a brand's own domain. `experiments/exp07c_marcas.py` looked up through RDAP every name with a brand from the store and from 160 training tiles picked as in experiment 07 (2,574, from TLDs with an RDAP server, neither listed nor official) and a random 6,000 of the rest, as 07b did: 6,914 answered, 1,430 were sites on hosting platforms, which no registry knows, 224 got no answer and 6 were not registered. The benign examples are the names registered at least a year before they were seen and not on hold, plus the brands' official domains: 4,153, 1,017 of them with a brand. The positives are the 206,787 domains the public list holds whole today (07b's older copy had 116,474). Same model and folds as 07b. The later sample is new: 60 tiles from 20:40 to 21:52 UTC that day, chosen when 07c first ran; it overlaps the store's last hour, but none of its names was trained on. Results in `results/exp07c_marcas-2026-11-02.json`.
+
+**Kill criterion, set before the run.** The model ships only if, on the later sample, at the threshold that lets 0.1 % of benign names through in cross-validation, it raises fewer alarms a day than the plain rule and catches at least as many of the sample's names that the public list holds whole.
+
+**Result.**
+
+| | 07b | 07c |
+|---|---:|---:|
+| Benign names (with a brand) | 3,602 (131) | 4,153 (1,017) |
+| AUC, all names, grouped cross-validation | 0.72 | 0.84 |
+| AUC, names with a brand | 0.83 | 0.91 |
+| Recall at 1 % false positives | 10 % | 30 % |
+| Recall at 0.1 % | 0 % | 0 % |
+
+On the later sample (12,132 names), the threshold that lets 0.1 % of benign names through is 1.0, the top of the scale. At that score the model flagged 336 names, about 330,000 a day, where the plain rule flagged 20, about 19,600 a day: 17 times as many alarms. The sample held no name the public list holds whole, as in experiment 07, so the catch half of the bar could not decide; the alarms half did.
+
+**Verdict: fails. No name model ships.**
+
+**What it showed.**
+
+- **The benign names with a brand did their job.** Made-up ordinary businesses with a brand inside their name went from the top of the scale to the bottom: applevalleyplumbing.com from 1.0 in 07b to 0.0, chasepointdental.com from 0.96 to 0.003.
+- **Long names run off the top of the scale.** The model adds one weight per feature of the name, and a long name has more of them (a median of 68 for the names at 1.0, 35 for the whole later sample), so its sum can grow until the score is exactly 1.0, benign or not. `exp07c_saturacion.py` replayed the run from its caches. In cross-validation, 12 benign names reached exactly 1.0, every one longer than 25 characters, and so did 38,209 phishing ones. On the later sample 336 names did: their median length is 22 characters against 11 for the whole sample, and 73 of the 80 names longer than 30 reached it, while none of 12 characters or fewer did. The made-up smith-garden-design.co.uk scored 1.0, as the made-up lookalikes did. With a dozen benign names at the very top, no threshold lets just 0.1 % of them through: at 1.0 the model flags every name that reached it, above it nothing. Results in `results/exp07c_saturacion-2026-11-02.json`.
+- **4,153 benign names cannot place the 0.1 % point well**: it rests on the four highest benign scores.
+
+Names at exactly 1.0, by the length of the part of the name its owner chose:
+
+| Length | Benign, cross-validation | Phishing, cross-validation | Later sample |
+|---|---:|---:|---:|
+| 1-8 | 0 of 1,130 | 0 of 35,907 | 0 of 3,822 |
+| 9-12 | 0 of 1,356 | 46 of 53,613 | 0 of 3,811 |
+| 13-16 | 0 of 995 | 1,164 of 43,273 | 2 of 2,568 |
+| 17-20 | 0 of 461 | 4,238 of 29,854 | 155 of 1,271 |
+| 21-25 | 0 of 164 | 10,655 of 20,818 | 52 of 454 |
+| 26-30 | 4 of 33 | 8,478 of 9,605 | 54 of 126 |
+| 31+ | 8 of 14 | 13,628 of 13,717 | 73 of 80 |
+
+**Next, if it is tried again.** A score that does not grow with the name's length, its features normalized for example, so long names stay apart at the top and the strict end can be measured at all; and tens of thousands of benign names, so that 0.1 % rests on dozens of them rather than four. The bar stays the same.
+
 ## 02 · Expansion from one URL
 
 **Question.** Does one phishing domain expand to at least 10 sibling domains in 2 minutes through urlscan.io, for campaigns whose names change but whose pages do not?

@@ -1,0 +1,140 @@
+{
+  "at_1.0": {
+    "benign": 12,
+    "of_benign": 4153,
+    "benign_with_brand": 6,
+    "of_benign_with_brand": 1017,
+    "phishing": 38209,
+    "of_phishing": 206787,
+    "later_sample": 336,
+    "of_later_sample": 12132,
+    "plain_rule_in_later_sample": 20,
+    "plain_rule_at_1.0": 9
+  },
+  "cuts_unrounded": {
+    "fpr_0.01": 0.9999999999985827,
+    "fpr_0.001": 1.0
+  },
+  "later_sample_at_1.0": {
+    "names": 336,
+    "median_label_length": 22.0,
+    "median_features": 68.0,
+    "with_hyphen": 0.411,
+    "with_digit": 0.735
+  },
+  "later_sample_all": {
+    "names": 12132,
+    "median_label_length": 11.0,
+    "median_features": 35.0,
+    "with_hyphen": 0.139,
+    "with_digit": 0.148
+  },
+  "by_label_length": [
+    {
+      "label_length": "1-8",
+      "benign": {
+        "at_1.0": 0,
+        "names": 1130
+      },
+      "phishing": {
+        "at_1.0": 0,
+        "names": 35907
+      },
+      "later_sample": {
+        "at_1.0": 0,
+        "names": 3822
+      }
+    },
+    {
+      "label_length": "9-12",
+      "benign": {
+        "at_1.0": 0,
+        "names": 1356
+      },
+      "phishing": {
+        "at_1.0": 46,
+        "names": 53613
+      },
+      "later_sample": {
+        "at_1.0": 0,
+        "names": 3811
+      }
+    },
+    {
+      "label_length": "13-16",
+      "benign": {
+        "at_1.0": 0,
+        "names": 995
+      },
+      "phishing": {
+        "at_1.0": 1164,
+        "names": 43273
+      },
+      "later_sample": {
+        "at_1.0": 2,
+        "names": 2568
+      }
+    },
+    {
+      "label_length": "17-20",
+      "benign": {
+        "at_1.0": 0,
+        "names": 461
+      },
+      "phishing": {
+        "at_1.0": 4238,
+        "names": 29854
+      },
+      "later_sample": {
+        "at_1.0": 155,
+        "names": 1271
+      }
+    },
+    {
+      "label_length": "21-25",
+      "benign": {
+        "at_1.0": 0,
+        "names": 164
+      },
+      "phishing": {
+        "at_1.0": 10655,
+        "names": 20818
+      },
+      "later_sample": {
+        "at_1.0": 52,
+        "names": 454
+      }
+    },
+    {
+      "label_length": "26-30",
+      "benign": {
+        "at_1.0": 4,
+        "names": 33
+      },
+      "phishing": {
+        "at_1.0": 8478,
+        "names": 9605
+      },
+      "later_sample": {
+        "at_1.0": 54,
+        "names": 126
+      }
+    },
+    {
+      "label_length": "31+",
+      "benign": {
+        "at_1.0": 8,
+        "names": 14
+      },
+      "phishing": {
+        "at_1.0": 13628,
+        "names": 13717
+      },
+      "later_sample": {
+        "at_1.0": 73,
+        "names": 80
+      }
+    }
+  ],
+  "seconds": 246
+}

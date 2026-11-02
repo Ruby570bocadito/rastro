@@ -46,9 +46,10 @@ PROBES = ["paypal-verify-4821.top", "facebook--signup-zsignupzzzzq7.ph", "amazon
           "chasepointdental.com", "smith-garden-design.co.uk"]
 
 
-def aged(domain: str, seen: str) -> tuple[str, bool]:
-    """The registry's outcome, and whether the name is an old, unsuspended registration when it was seen."""
-    outcome, reg = rdap.check(domain, CACHE, pause=0.1)
+def aged(domain: str, seen: str, offline: bool = False) -> tuple[str, bool]:
+    """The registry's outcome, and whether the name is an old, unsuspended registration when it was seen.
+    `offline` reads cached answers only."""
+    outcome, reg = rdap.check(domain, CACHE, offline=offline, pause=0.1)
     if outcome != "found" or reg.registered_day is None:
         return outcome, False
     held = any(word in s.lower() for s in reg.status for word in ("hold", "pending delete", "redemption"))
