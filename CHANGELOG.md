@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The case file comes alive, still as one file that reaches nothing and with no library added. Husmo sniffs while the board fills, hops when he has found the crew or tilts his head when he has not, nods while he speaks, and the glints in his eyes follow the pointer. The red string is drawn from pin to pin in the order the domains appeared, the pins drop like push pins, and the stamps (Demo, Human rhythm, Inconclusive) land with inked edges when they come into view. A trail of paw prints crosses the masthead, the seed is marked with a highlighter, the cork board has a frame and Husmo's notes hang from a strip of tape.
+- Each of Husmo's lines points at the part of the case file it is about: pass over one and that panel lights up, click it and the page goes there; while he reads aloud, the panel he is talking about is lit. The case's JSON carries it as `narration[].about` (`seed`, `graph`, `map`, `next`, `reports` or `how`).
+- With "reduce motion" on, in print and in screenshots nothing moves and everything is visible, as before.
 - The case file says why there is no map. Its verdict was "Inconclusive" for everything; now it tells a scheduled job's hours from hours that show no working day. The case's JSON carries `clock.verdict` (`found`, `regular` or `flat`).
 - Husmo says what the map takes for granted: that the crew works by day. Experiment 10 placed a simulated crew that only works from 17:00 to midnight about eight hours west of where it was, every time, with a band that never held the truth. More sessions do not help, so the answer is a caution next to every map, not a bar.
 - Experiment 10 also answered the question it was run for: a minimum number of work sessions for the map is not needed. With few sessions the band widens (about 8 offsets at 5 sessions, 4 at 50) and still held a working-day crew's offset 89 to 100 % of the time, so no minimum was added.

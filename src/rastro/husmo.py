@@ -174,9 +174,25 @@ def spoken(text: str, lang: str = "en") -> str:
     return said
 
 
+class Said(str):
+    """A line of Husmo's. It is its text, and it also knows which part of the case file it is about
+    (`about`: seed, graph, map, next, reports or how), so the page can point at it."""
+    about: str = ""
+
+
+def _tagged(out: list[tuple[str, str]], parts: list[tuple[int, str]]) -> list[tuple[str, str]]:
+    tagged = []
+    for i, (kind, text) in enumerate(out):
+        said = Said(text)
+        said.about = next(about for start, about in reversed(parts) if start <= i)
+        tagged.append((kind, said))
+    return tagged
+
+
 def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
     es = lang == "es"
     out: list[tuple[str, str]] = []
+    sections: list[tuple[int, str]] = [(0, "seed")]      # (first line, the part of the case file it talks about)
     seed = inv.members[inv.seed]
     brand = brands.display(inv.brand) if inv.brand else None
     if es:
@@ -233,6 +249,7 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
                     f"Its address is already a sinkhole ({seed.sinkhole}): someone has neutralized it, and it needs "
                     "no report."))
 
+    sections.append((len(out), "graph"))
     crew = inv.crew
     listed = sum(1 for d in crew if "list" in inv.members[d].sources)
     if inv.crew_pattern:
@@ -275,6 +292,7 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
         out.append(("caution", "Ninguna pista lo une con fuerza a otro dominio todavía." if es
                     else "No clue ties it strongly to another domain yet."))
 
+    sections.append((len(out), "map"))
     c = inv.clues
     if c and inv.rhythm_found:
         tz, west, east = rhythm.tz_name(c.offset), rhythm.tz_name(c.band[0]), rhythm.tz_name(c.band[-1])
@@ -326,6 +344,7 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
     else:
         out.append(("caution", "No tengo actos con hora: sin mapa." if es else "No timed actions: no map."))
 
+    sections.append((len(out), "next"))
     if inv.crew_pattern:
         b = inv.crew_pattern.breadth_log10
         out.append(("action", f"Para cazar el siguiente, vigila {inv.crew_pattern.regex}: unos 10^{b:.1f} nombres "
@@ -336,6 +355,7 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
         out.append(("action", f"Una apuesta a partir de su nombre: vigila {inv.guess}." if es else
                     f"A guess from its name alone: watch {inv.guess}."))
 
+    sections.append((len(out), "reports"))
     gone = Counter(inv.left_out.values())
     if gone:
         parts = [GONE[code][1 if es else 0][gone[code] > 1].format(n=gone[code]) for code in GONE if gone[code]]
@@ -382,7 +402,8 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
     else:
         out.append(("caution", "Ninguno sigue activo con un registrador que yo pueda consultar: nada que avisar."
                     if es else "None is still live with a registrar I can look up: nothing to report."))
+    sections.append((len(out), "how"))
     out.append(("caution", "No he visitado ningún dominio: me lo han contado los certificados, los registros y el DNS "
                            "público." if es else
                 "I never visited the domains: certificates, registries and public DNS told me all this."))
-    return out
+    return _tagged(out, sections)
