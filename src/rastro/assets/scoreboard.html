@@ -74,6 +74,9 @@ td.mono { font-family: var(--font-mono); overflow-wrap: anywhere; }
 .state-held, .state-deleting, .state-gone, .state-sinkholed { color: var(--ok); border-color: var(--ok); }
 details > summary { cursor: pointer; font-weight: 600; }
 .notes { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+.ci { display: block; font: 400 11.5px var(--font-mono); color: var(--muted); white-space: nowrap; }
+tr.few td { color: var(--muted); }
+tr.few-head td { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding-top: 14px; }
 .empty { margin: 0; padding: 14px; background: var(--note); color: var(--on-note); border-radius: 4px; }
 .foot { color: var(--muted); font-size: 12.5px; text-align: center; }
 </style>
@@ -140,7 +143,9 @@ details > summary { cursor: pointer; font-weight: 600; }
     notes: ["Kaplan-Meier: un dominio que sigue en pie cuenta como en pie hasta su última revisión, en vez de descartarse.",
       "El reloj empieza cuando el dominio entra en el seguimiento, que puede ser antes o después del aviso de abuso.",
       "Un dominio que desaparece después de su fecha de caducidad no cuenta como retirado.",
-      "Con pocos dominios por registrador, la clasificación dice poco: mira la columna de dominios."],
+      "Bajo cada mediana va su intervalo al 95 %: entre qué tiempos puede estar de verdad. Un ? significa que los datos aún no la acotan por ese lado.",
+      "Un registrador con menos de 5 dominios aparece al final, sin puesto: con tan pocos, el orden sería ruido."],
+    few: (n) => `Menos de ${n} dominios: listados, sin puesto`, ci: (a, b) => `95 %: ${a} a ${b}`,
     empty: "Todavía no hay revisiones: añade dominios con `rastro track add` y ejecuta `rastro track check`.",
     foot: (v) => `Rastro ${v} · código abierto (Apache-2.0) · esta página no hace ninguna petición de red`,
     chartLabel: "Curvas de supervivencia de los dominios por registrador", x: "tiempo desde que se siguen", y: "en pie",
@@ -160,7 +165,9 @@ details > summary { cursor: pointer; font-weight: 600; }
     notes: ["Kaplan-Meier: a domain still up counts as up until its last check, instead of being dropped.",
       "The clock starts when a domain enters the tracker, which may be before or after its abuse report.",
       "A domain that disappears after its expiry date does not count as taken down.",
-      "With few domains per registrar, the ranking says little: look at the domains column."],
+      "Under each median is its 95 % interval: the times it can really lie between. A ? means the data cannot bound it on that side yet.",
+      "A registrar with fewer than 5 domains is listed last, without a place: with so few, the order would be noise."],
+    few: (n) => `Fewer than ${n} domains: listed, not ranked`, ci: (a, b) => `95 %: ${a} to ${b}`,
     empty: "No checks yet: add domains with `rastro track add` and run `rastro track check`.",
     foot: (v) => `Rastro ${v} · open source (Apache-2.0) · this page makes no network requests`,
     chartLabel: "Survival curves of the domains, by registrar", x: "time since followed", y: "still up",
@@ -224,10 +231,17 @@ details > summary { cursor: pointer; font-weight: 600; }
   const head = el("tr"); T.cols.forEach((c) => head.append(el("th", { scope: "col" }, c)));
   const thead = el("thead"); thead.append(head); table.append(thead);
   const body = el("tbody");
+  let few = false;
   D.rows.forEach((r) => {
-    const tr = el("tr");
+    if (r.ranked === false && !few) {
+      few = true;
+      const note = el("tr", { class: "few-head" }); note.append(el("td", { colspan: String(T.cols.length) }, T.few(D.min_ranked))); body.append(note);
+    }
+    const tr = el("tr", r.ranked === false ? { class: "few" } : {});
+    const median = el("td", {}, span(r.median_hours));
+    if (r.median_low !== undefined) median.append(el("small", { class: "ci" }, T.ci(r.median_low == null ? "?" : span(r.median_low), r.median_high == null ? "?" : span(r.median_high))));
     tr.append(el("td", {}, r.registrar), el("td", { class: "num" }, String(r.domains)), el("td", { class: "num" }, String(r.taken_down)),
-      el("td", {}, span(r.median_hours)));
+      median);
     D.marks.forEach((m) => {
       const td = el("td"); const box = el("div", { class: "share" }); const bar = el("div", { class: "bar" }); const fill = el("i");
       fill.style.width = Math.round(r.after[String(m)] * 100) + "%"; bar.append(fill);

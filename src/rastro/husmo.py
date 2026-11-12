@@ -90,6 +90,10 @@ NOTES = {
                            "siblings are looked for by the name of {seed}.",
                            "El enlace imita a {brand} solo en un subdominio, que la banda puede cambiar a su antojo; "
                            "sus hermanos se buscan por el nombre de {seed}."),
+    "too_many": ("{n} domains share one clue ({kind}), more than the {max} I count as one crew's: that clue was "
+                 "left out, so a launch that large may show here in pieces.",
+                 "{n} dominios comparten una misma pista ({kind}), más de los {max} que cuento como de una sola banda: "
+                 "esa pista se ha dejado fuera, así que un lanzamiento tan grande puede salir aquí en trozos."),
     "lonely": ("No sibling joined the seed yet: the pattern to watch is a guess from its name alone.",
                "Ningún hermano se ha unido aún a la semilla: el patrón que vigilar es una apuesta a partir de su "
                "nombre."),
@@ -97,6 +101,8 @@ NOTES = {
 
 
 def note(code: str, values: dict, lang: str = "en") -> str:
+    if code == "too_many" and values.get("kind") in KIND_LABELS:
+        values = {**values, "kind": KIND_LABELS[values["kind"]][1 if lang == "es" else 0]}
     return NOTES[code][1 if lang == "es" else 0].format(**values)
 
 
@@ -280,6 +286,11 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
             out.append(("deduction", f"Their {inv.clock_events} timed actions fall into a working day: most likely "
                                      f"{tz}, between {west} and {east} with {c.band_mass:.0%} probability "
                                      f"(rhythm test p {_p(c.p_value)})."))
+        out.append(("caution", "El mapa supone que trabajan de día. Una banda que solo trabaje de tarde y de noche "
+                               "estaría unas ocho horas más al este de donde la pongo, y sus horas no me lo dirían."
+                    if es else
+                    "The map takes it that they work by day. A crew that only works evenings and nights would be "
+                    "about eight hours east of where I put it, and their hours would not tell me."))
         if c.weekend in WEEKENDS:
             out.append(("deduction", WEEKENDS[c.weekend][1 if es else 0]))
         if c.dst in DST:

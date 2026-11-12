@@ -16,11 +16,15 @@ Time runs from when the domain entered the tracker or, with `from_report`, from 
 abuse report went out (`rastro track add --reported`). Domains still standing are censored,
 not dropped, so each registrar's curve is a Kaplan-Meier estimate of how many of its domains
 are still up after a given time, not an average over the ones already taken down.
+
+A handful of domains says little about a registrar. Each median comes with a 95 % interval, and a
+registrar with fewer than `MIN_RANKED` domains is listed after the others, without a place.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import sqlite3
 from collections import defaultdict
 from collections.abc import Callable, Iterable
@@ -34,6 +38,8 @@ from rastro.sources import dns, rdap
 
 DOWN = {"held", "deleting", "gone", "sinkholed"}
 UNKNOWN_REGISTRAR = "Unknown registrar"
+MIN_RANKED = 5      # fewer domains than this and a registrar is listed, not ranked
+Z95 = 1.96
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS tracked (
     domain TEXT PRIMARY KEY, since TEXT NOT NULL, reported_at TEXT, source TEXT, registrar TEXT
@@ -227,6 +233,32 @@ def kaplan_meier(durations: Iterable[tuple[float, bool]]) -> list[tuple[float, f
     return curve
 
 
+def kaplan_meier_band(durations: Iterable[tuple[float, bool]]) -> list[tuple[float, float, float, float]]:
+    """(hours, share still standing, low, high) at each takedown time: the Kaplan-Meier curve with its 95 %
+    band, from Greenwood's variance on the log-log scale, which keeps the band between 0 and 1."""
+    data = list(durations)
+    band, alive, var = [(0.0, 1.0, 1.0, 1.0)], 1.0, 0.0
+    for t in sorted({h for h, event in data if event}):
+        at_risk = sum(1 for h, _ in data if h >= t)
+        events = sum(1 for h, event in data if event and h == t)
+        alive *= 1 - events / at_risk
+        if events == at_risk:                     # nobody left standing: the estimate is 0 and has no band
+            band.append((t, 0.0, 0.0, 0.0))
+            break
+        var += events / (at_risk * (at_risk - events))
+        spread = math.exp(Z95 * math.sqrt(var) / abs(math.log(alive)))
+        band.append((t, alive, alive ** spread, alive ** (1 / spread)))
+    return band
+
+
+def median_interval(band: list[tuple[float, float, float, float]]) -> tuple[float | None, float | None]:
+    """95 % interval of the median: from when the band's low edge reaches a half to when its high edge does.
+    None on a side means the data cannot bound it yet."""
+    low = next((t for t, _, lo, _ in band if lo <= 0.5), None)
+    high = next((t for t, _, _, hi in band if hi <= 0.5), None)
+    return low, high
+
+
 def standing_after(curve: list[tuple[float, float]], hours: float) -> float:
     return next((s for t, s in reversed(curve) if t <= hours), 1.0)
 
@@ -245,31 +277,46 @@ class Row:
     median_hours: float | None
     after: dict[int, float] = field(default_factory=dict)      # hours -> share still standing
     curve: list[tuple[float, float]] = field(default_factory=list)
+    median_low: float | None = None                            # 95 % interval of the median; None: not bounded yet
+    median_high: float | None = None
+
+    @property
+    def ranked(self) -> bool:
+        return self.domains >= MIN_RANKED
 
 
 MARKS = (24, 72, 168)
 
 
 def scoreboard(conn: sqlite3.Connection, from_report: bool = False) -> list[Row]:
-    """One row per registrar: fastest median first, registrars that have not got there yet last. With
-    `from_report`, only reported domains count, timed from their report."""
+    """One row per registrar: fastest median first, registrars that have not got there yet last, and after
+    them the registrars with too few domains to rank. With `from_report`, only reported domains count, timed
+    from their report."""
     groups: dict[str, list[Course]] = defaultdict(list)
     for c in courses(conn):
         if c.checks and (c.reported or not from_report):
             groups[c.registrar].append(c)
     rows = []
     for registrar, cs in groups.items():
-        curve = kaplan_meier((c.hours_after(c.reported_at if from_report else c.since), c.taken_down) for c in cs)
+        durations = [(c.hours_after(c.reported_at if from_report else c.since), c.taken_down) for c in cs]
+        curve = kaplan_meier(durations)
+        low, high = median_interval(kaplan_meier_band(durations))
         rows.append(Row(registrar, len(cs), sum(c.taken_down for c in cs),
                         sum(1 for c in cs if c.down_at is None), median_hours(curve),
-                        {m: standing_after(curve, m) for m in MARKS}, curve))
-    return sorted(rows, key=lambda r: (r.median_hours is None, r.median_hours or 0, r.after[72], -r.domains))
+                        {m: standing_after(curve, m) for m in MARKS}, curve, low, high))
+    return sorted(rows, key=lambda r: (not r.ranked, r.median_hours is None, r.median_hours or 0, r.after[72],
+                                       -r.domains))
 
 
 def hours_text(h: float | None) -> str:
     if h is None:
         return "not yet"
     return f"{h:.0f} h" if h < 48 else f"{h / 24:.1f} days"
+
+
+def interval_text(low: float | None, high: float | None) -> str:
+    """The median's 95 % interval in words; an open side is a question mark."""
+    return f"{hours_text(low) if low is not None else '?'} to {hours_text(high) if high is not None else '?'}"
 
 
 def page_data(conn: sqlite3.Connection, lang: str = "en", now: datetime | None = None,
@@ -288,10 +335,11 @@ def page_data(conn: sqlite3.Connection, lang: str = "en", now: datetime | None =
         "counts": {"domains": len(seen), "taken_down": sum(c.taken_down for c in seen),
                    "still_up": sum(1 for c in seen if c.down_at is None), "registrars": len(rows),
                    "waiting": len(all_courses) - len(seen)},
-        "marks": list(MARKS),
+        "marks": list(MARKS), "min_ranked": MIN_RANKED,
         "horizon": max([hours(c) for c in seen] + [MARKS[-1]]),
         "rows": [{"registrar": r.registrar, "domains": r.domains, "taken_down": r.taken_down, "still_up": r.still_up,
-                  "median_hours": r.median_hours, "after": {str(k): round(v, 4) for k, v in r.after.items()},
+                  "median_hours": r.median_hours, "median_low": r.median_low, "median_high": r.median_high,
+                  "ranked": r.ranked, "after": {str(k): round(v, 4) for k, v in r.after.items()},
                   "curve": [[round(h, 3), round(s, 4)] for h, s in r.curve]} for r in rows],
         "domains": [{"domain": c.domain, "registrar": c.registrar, "since": c.since.strftime("%Y-%m-%dT%H:%M:%SZ"),
                      "state": c.state, "hours": round(hours(c), 1), "taken_down": c.taken_down, "expired": c.expired,

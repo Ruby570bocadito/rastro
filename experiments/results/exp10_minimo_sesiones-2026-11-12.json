@@ -1,0 +1,284 @@
+{
+  "simulated": [
+    {
+      "kind": "working day",
+      "sessions": 5,
+      "maps": 0.1,
+      "offset_within_1h": 0.8,
+      "band_holds_truth": 0.9,
+      "band_width": 8.2
+    },
+    {
+      "kind": "working day",
+      "sessions": 8,
+      "maps": 0.045,
+      "offset_within_1h": 0.778,
+      "band_holds_truth": 0.889,
+      "band_width": 6.8
+    },
+    {
+      "kind": "working day",
+      "sessions": 10,
+      "maps": 0.155,
+      "offset_within_1h": 0.806,
+      "band_holds_truth": 1.0,
+      "band_width": 5.8
+    },
+    {
+      "kind": "working day",
+      "sessions": 15,
+      "maps": 0.395,
+      "offset_within_1h": 0.861,
+      "band_holds_truth": 0.975,
+      "band_width": 5.0
+    },
+    {
+      "kind": "working day",
+      "sessions": 20,
+      "maps": 0.515,
+      "offset_within_1h": 0.893,
+      "band_holds_truth": 0.971,
+      "band_width": 4.5
+    },
+    {
+      "kind": "working day",
+      "sessions": 30,
+      "maps": 0.85,
+      "offset_within_1h": 0.941,
+      "band_holds_truth": 0.982,
+      "band_width": 4.2
+    },
+    {
+      "kind": "working day",
+      "sessions": 50,
+      "maps": 0.995,
+      "offset_within_1h": 1.0,
+      "band_holds_truth": 1.0,
+      "band_width": 4.0
+    },
+    {
+      "kind": "working day, starts 2 h late",
+      "sessions": 5,
+      "maps": 0.045,
+      "offset_within_1h": 0.333,
+      "band_holds_truth": 0.778,
+      "band_width": 8.3
+    },
+    {
+      "kind": "working day, starts 2 h late",
+      "sessions": 8,
+      "maps": 0.095,
+      "offset_within_1h": 0.526,
+      "band_holds_truth": 1.0,
+      "band_width": 6.6
+    },
+    {
+      "kind": "working day, starts 2 h late",
+      "sessions": 10,
+      "maps": 0.18,
+      "offset_within_1h": 0.333,
+      "band_holds_truth": 0.75,
+      "band_width": 5.5
+    },
+    {
+      "kind": "working day, starts 2 h late",
+      "sessions": 15,
+      "maps": 0.405,
+      "offset_within_1h": 0.272,
+      "band_holds_truth": 0.728,
+      "band_width": 5.0
+    },
+    {
+      "kind": "working day, starts 2 h late",
+      "sessions": 20,
+      "maps": 0.605,
+      "offset_within_1h": 0.331,
+      "band_holds_truth": 0.851,
+      "band_width": 4.6
+    },
+    {
+      "kind": "working day, starts 2 h late",
+      "sessions": 30,
+      "maps": 0.87,
+      "offset_within_1h": 0.247,
+      "band_holds_truth": 0.805,
+      "band_width": 4.2
+    },
+    {
+      "kind": "working day, starts 2 h late",
+      "sessions": 50,
+      "maps": 1.0,
+      "offset_within_1h": 0.175,
+      "band_holds_truth": 0.85,
+      "band_width": 4.0
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 5,
+      "maps": 0.035,
+      "offset_within_1h": 0.571,
+      "band_holds_truth": 0.857,
+      "band_width": 8.3
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 8,
+      "maps": 0.03,
+      "offset_within_1h": 0.833,
+      "band_holds_truth": 0.833,
+      "band_width": 5.8
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 10,
+      "maps": 0.03,
+      "offset_within_1h": 0.5,
+      "band_holds_truth": 1.0,
+      "band_width": 5.8
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 15,
+      "maps": 0.055,
+      "offset_within_1h": 0.909,
+      "band_holds_truth": 1.0,
+      "band_width": 4.7
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 20,
+      "maps": 0.1,
+      "offset_within_1h": 0.8,
+      "band_holds_truth": 0.85,
+      "band_width": 4.5
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 30,
+      "maps": 0.17,
+      "offset_within_1h": 0.824,
+      "band_holds_truth": 0.853,
+      "band_width": 4.3
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 50,
+      "maps": 0.31,
+      "offset_within_1h": 0.919,
+      "band_holds_truth": 0.984,
+      "band_width": 4.5
+    },
+    {
+      "kind": "flat 7-hour shift, 9 to 16",
+      "sessions": 5,
+      "maps": 0.31,
+      "offset_within_1h": 0.532,
+      "band_holds_truth": 1.0,
+      "band_width": 8.6
+    },
+    {
+      "kind": "flat 7-hour shift, 9 to 16",
+      "sessions": 8,
+      "maps": 0.94,
+      "offset_within_1h": 0.633,
+      "band_holds_truth": 1.0,
+      "band_width": 7.5
+    },
+    {
+      "kind": "flat 7-hour shift, 9 to 16",
+      "sessions": 10,
+      "maps": 0.995,
+      "offset_within_1h": 0.638,
+      "band_holds_truth": 1.0,
+      "band_width": 6.9
+    },
+    {
+      "kind": "flat 7-hour shift, 9 to 16",
+      "sessions": 15,
+      "maps": 1.0,
+      "offset_within_1h": 0.715,
+      "band_holds_truth": 1.0,
+      "band_width": 5.9
+    },
+    {
+      "kind": "flat 7-hour shift, 9 to 16",
+      "sessions": 20,
+      "maps": 1.0,
+      "offset_within_1h": 0.67,
+      "band_holds_truth": 0.99,
+      "band_width": 5.4
+    },
+    {
+      "kind": "flat 7-hour shift, 9 to 16",
+      "sessions": 30,
+      "maps": 1.0,
+      "offset_within_1h": 0.695,
+      "band_holds_truth": 0.965,
+      "band_width": 4.7
+    },
+    {
+      "kind": "flat 7-hour shift, 9 to 16",
+      "sessions": 50,
+      "maps": 1.0,
+      "offset_within_1h": 0.865,
+      "band_holds_truth": 0.95,
+      "band_width": 4.2
+    },
+    {
+      "kind": "flat 7-hour shift, 17 to 24",
+      "sessions": 5,
+      "maps": 0.31,
+      "offset_within_1h": 0.0,
+      "band_holds_truth": 0.065,
+      "band_width": 8.5
+    },
+    {
+      "kind": "flat 7-hour shift, 17 to 24",
+      "sessions": 8,
+      "maps": 0.89,
+      "offset_within_1h": 0.0,
+      "band_holds_truth": 0.0,
+      "band_width": 7.4
+    },
+    {
+      "kind": "flat 7-hour shift, 17 to 24",
+      "sessions": 10,
+      "maps": 0.995,
+      "offset_within_1h": 0.0,
+      "band_holds_truth": 0.0,
+      "band_width": 6.9
+    },
+    {
+      "kind": "flat 7-hour shift, 17 to 24",
+      "sessions": 15,
+      "maps": 0.99,
+      "offset_within_1h": 0.0,
+      "band_holds_truth": 0.0,
+      "band_width": 6.1
+    },
+    {
+      "kind": "flat 7-hour shift, 17 to 24",
+      "sessions": 20,
+      "maps": 1.0,
+      "offset_within_1h": 0.0,
+      "band_holds_truth": 0.0,
+      "band_width": 5.4
+    },
+    {
+      "kind": "flat 7-hour shift, 17 to 24",
+      "sessions": 30,
+      "maps": 1.0,
+      "offset_within_1h": 0.0,
+      "band_holds_truth": 0.0,
+      "band_width": 4.6
+    },
+    {
+      "kind": "flat 7-hour shift, 17 to 24",
+      "sessions": 50,
+      "maps": 1.0,
+      "offset_within_1h": 0.0,
+      "band_holds_truth": 0.0,
+      "band_width": 4.2
+    }
+  ]
+}

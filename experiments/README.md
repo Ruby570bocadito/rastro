@@ -304,3 +304,29 @@ On the later sample, every threshold strict enough to keep false alarms under ab
 - Each estimate used 300 simulations and each cell 100 trials, so the shares are good to a few points.
 
 **Earlier experiments.** 01, 01b, 01c and 05 read the rhythm test alone. Their real families pass the new test, so their verdicts stand.
+
+## 10 · How many sessions the map needs
+
+**Question.** Experiment 09 saw a flat seven-hour shift pass the rhythm test with only 10 sessions. Does the map need a minimum number of work sessions before its band, which claims to hold the crew's offset 90 % of the time, can be trusted?
+
+**Method.** `exp10_minimo_sesiones.py` simulates five kinds of crew, 200 of each at 5 to 50 work sessions and at a random offset, and counts how many get a map and, among those, how often the band holds the true offset. No bar was set before the run; the plan was to put the minimum where the band reached its 90 %.
+
+**Results, 2026-11-12.** Band holds the truth, over the crews that got a map (share that got one in brackets).
+
+| Kind | 5 sessions | 10 | 20 | 50 |
+|---|---:|---:|---:|---:|
+| working day | 90 % (10 %) | 100 % (16 %) | 97 % (52 %) | 100 % (100 %) |
+| working day, 40 % bots | 86 % (4 %) | 100 % (3 %) | 85 % (10 %) | 98 % (31 %) |
+| flat 7-hour shift, 9 to 16 | 100 % (31 %) | 100 % (100 %) | 99 % (100 %) | 95 % (100 %) |
+| working day, starts 2 h late | 78 % (4 %) | 75 % (18 %) | 85 % (60 %) | 85 % (100 %) |
+| flat 7-hour shift, 17 to 24 | 6 % (31 %) | 0 % (100 %) | 0 % (100 %) | 0 % (100 %) |
+
+**Verdict: no minimum.** The idea fails. With few sessions the band is wide (8 of the 24 offsets at 5 sessions, 4 at 50), and it held the offset of the crews the model fits as often with 5 sessions as with 50. A bar would hide honest, wide maps and fix nothing.
+
+**What the run found instead.**
+
+- **An evening crew is placed about eight hours west, every time.** The map fits a daytime working day to the hours, so people who only work from 17:00 to midnight look like a daytime crew far to the west. More sessions make it worse: the band narrows around the wrong place. Nothing in the hours can tell the two apart, so Husmo now says it next to every map.
+- **A crew that starts two hours late is under-covered.** Its band held the truth 73 to 85 % of the time, not the 90 % it claims, at every size. The schedule prior (`rhythm.SCHEDULE_SHIFTS`) gives a two-hour delay a weight of 0.15, and that is not enough. Widening it would widen every band, the real families' too, so it is left for an experiment of its own.
+- **The best offset is rougher than the band.** For the 9-to-16 shift it was within an hour 64 to 86 % of the time, while the band held it almost always. The band is the answer to read, not the single offset.
+
+**Limits.** Cells with few maps are noisy: 10 % of 200 crews is 20 maps. The crews are simulated from the same profile the model fits, which flatters it; the evening shift shows what happens when they are not. Each estimate used 300 simulations.

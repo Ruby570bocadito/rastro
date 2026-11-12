@@ -460,6 +460,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     step2: "Paso 2", map: "Dónde trabaja la banda",
     mapCap: "Cada punto es tierra; cuanto más rojo, más probable que el huso horario nominal de la banda pase por ahí. Los husos son franjas de 15°, no países.",
     yes: "Ritmo humano", no: "No concluyente", none: "Sin datos",
+    why: { regular: "No concluyente: parece una tarea programada", flat: "No concluyente: no se ve una jornada" },
     events: "Actos con hora", sessions: "Sesiones", likely: "Lo más probable", band: "Franja", test: "Test de ritmo",
     weekend: "Fin de semana", dst: "Horario de verano",
     clockMid: "UTC", clockLabel: "Inicio de cada sesión de trabajo en UTC; sombreado, la noche de la banda",
@@ -513,6 +514,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     step2: "Step 2", map: "Where the crew works",
     mapCap: "Each dot is land; the redder it is, the likelier the crew's nominal time zone runs through it. Zones are 15° bands, not countries.",
     yes: "Human rhythm", no: "Inconclusive", none: "No data",
+    why: { regular: "Inconclusive: looks like a scheduled job", flat: "Inconclusive: no working day shows" },
     events: "Timed actions", sessions: "Sessions", likely: "Most probable", band: "Band", test: "Rhythm test",
     weekend: "Weekend", dst: "Summer time",
     clockMid: "UTC", clockLabel: "Start of each work session in UTC; shaded, the crew's night",
@@ -728,7 +730,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     const C = D.clock, canvas = $("map"), verdict = $("verdict");
     canvas.setAttribute("aria-label", T.mapLabel);
     const found = C && C.found;
-    verdict.textContent = !C ? T.none : found ? T.yes : T.no;
+    verdict.textContent = !C ? T.none : found ? T.yes : (T.why[C.verdict] || T.no);
     if (found) verdict.classList.add("verdict-yes");
     const post = {}; let top = 0;
     if (found) for (const k in C.posterior) { post[k] = C.posterior[k]; top = Math.max(top, post[k]); }

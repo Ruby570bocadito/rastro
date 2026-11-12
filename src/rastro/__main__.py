@@ -237,7 +237,8 @@ def cmd_campaigns(args) -> int:
         domains = [campaigns.Domain(d.name, d.brand, d.first_seen, d.co_certified,
                                     dns.addresses(d.name, cache / "dns"), dns.nameservers(d.name, cache / "dns"))
                    for d in domains]
-    found = campaigns.cluster(domains)
+    links = campaigns.link(domains)
+    found = campaigns.cluster(domains, links=links)
     for k, c in enumerate(found, 1):
         span = f"{c.first_seen:%Y-%m-%d} to {c.last_seen:%Y-%m-%d}" if c.first_seen else "dates unknown"
         brand_list = ", ".join(f"{b} {n}" for b, n in c.brands.items()) or "no brand"
@@ -248,6 +249,9 @@ def cmd_campaigns(args) -> int:
         print(f"    e.g. {', '.join(c.domains[:4])}")
     alone = len(domains) - sum(c.size for c in found)
     print(f"{len(found)} campaigns · {alone} of {len(domains)} domains on their own")
+    for kind, n in sorted(set(links.skipped), key=lambda s: -s[1]):
+        print(f"left out: a {kind} clue shared by {n} domains, more than the {campaigns.MAX_GROUP} counted as one "
+              "crew's. A launch that large may show above in pieces.")
     return 0
 
 
@@ -400,12 +404,19 @@ def cmd_track_report(args) -> int:
     clock = "from each abuse report" if args.from_report else "from when each domain was followed"
     print(f"TAKEDOWN SCOREBOARD · {total} domain{'s' if total != 1 else ''}, {done} taken down, "
           f"{sum(r.still_up for r in rows)} still up · timed {clock}")
-    print(f"{'Registrar':<42} {'Domains':>7} {'Down':>5}  {'Median':<10} Still up after 1 day · 3 days · 7 days")
+    print(f"{'Registrar':<42} {'Domains':>7} {'Down':>5}  {'Median':<10} {'95 % interval':<22} "
+          "Still up after 1 day · 3 days · 7 days")
+    few = False
     for r in rows:
+        if not r.ranked and not few:
+            few = True
+            print(f"-- fewer than {track.MIN_RANKED} domains: listed, not ranked --")
         after = " · ".join(f"{r.after[m]:.0%}" for m in track.MARKS)
         median = track.hours_text(r.median_hours)
-        print(f"{r.registrar[:42]:<42} {r.domains:>7} {r.taken_down:>5}  {median:<10} {after}")
-    print("Kaplan-Meier estimate: a domain still up counts as up until its last check.")
+        interval = track.interval_text(r.median_low, r.median_high)
+        print(f"{r.registrar[:42]:<42} {r.domains:>7} {r.taken_down:>5}  {median:<10} {interval:<22} {after}")
+    print("Kaplan-Meier estimate: a domain still up counts as up until its last check. A ? in the interval means "
+          "the data cannot bound the median on that side yet.")
     if args.html:
         page = report.fill("scoreboard.html", "Rastro · takedown scoreboard", args.lang,
                            {"/*BOARD*/": report.safe_json(track.page_data(conn, args.lang,
