@@ -16,6 +16,7 @@
   --ear-in: #e7a9a1; --nose-pink: #c4747a; --whisker: rgba(70, 45, 30, .55); --mouth: #3b1a14;
   --hat-a: #8d6c47; --hat-b: #66492f; --lens: rgba(160, 205, 255, .38); --tongue: #e0717b;
   --shadow: 0 1px 0 rgba(70, 50, 20, .08), 0 10px 26px -14px rgba(70, 50, 20, .45);
+  --wood: #7d5c3c; --tape: rgba(255, 243, 186, .78); --pin-shadow: rgba(45, 28, 6, .3);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", "Helvetica Neue", sans-serif;
   --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -28,6 +29,7 @@
     --string: #ff5e52; --marker: #ffd23f; --pin: #84a8ff; --ok: #4fca8c; --note: #3a3418; --on-note: #f5ecc9;
     --dot: #3a4453; --night: rgba(255, 255, 255, .06);
     --shadow: 0 1px 0 rgba(0, 0, 0, .45), 0 12px 30px -14px rgba(0, 0, 0, .85);
+    --wood: #0c1015; --tape: rgba(255, 232, 150, .2); --pin-shadow: rgba(0, 0, 0, .5);
     color-scheme: dark;
   }
 }
@@ -53,13 +55,38 @@ button { font: inherit; }
 .wordmark { font: 800 32px/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; }
 .tag { font: 500 12px/1.3 var(--font-mono); color: var(--muted); letter-spacing: .04em; }
 .stamp-file {
+  --tilt: -2deg;
   font: 700 14px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--string);
-  border: 2px solid var(--string); padding: 6px 10px; transform: rotate(-2deg); border-radius: 3px;
+  border: 2px solid var(--string); padding: 6px 10px; transform: rotate(var(--tilt)); border-radius: 3px;
+}
+/* a trail of paw prints walks across the masthead once */
+.trail { flex: 1 1 120px; max-width: 230px; height: 34px; margin-left: auto; }
+.tp { fill: var(--string); opacity: .3; }
+.motion .tp { animation: step .7s ease both; }
+.tp:nth-child(1) { animation-delay: .2s; } .tp:nth-child(2) { animation-delay: .45s; } .tp:nth-child(3) { animation-delay: .7s; }
+.tp:nth-child(4) { animation-delay: .95s; } .tp:nth-child(5) { animation-delay: 1.2s; }
+@keyframes step { from { opacity: 0; } 35% { opacity: .7; } }
+/* stamps land with a thump and rough, inked edges; .live is set only when motion is welcome */
+.stampable { filter: url(#ink); }
+.live .stampable:not(.inked) { opacity: 0; }
+.live .stampable.inked { animation: stamp .55s cubic-bezier(.2, 1.2, .4, 1) .3s both; }
+@keyframes stamp {
+  0% { opacity: 0; transform: rotate(calc(var(--tilt) - 9deg)) scale(2.3); }
+  55% { opacity: 1; transform: rotate(var(--tilt)) scale(.93); }
+  100% { opacity: 1; transform: rotate(var(--tilt)) scale(1); }
 }
 
 .hero { display: grid; gap: 10px; }
 .eyebrow { margin: 0; font: 500 12px/1.3 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); letter-spacing: .01em; overflow-wrap: anywhere; }
+/* the seed is marked with a highlighter */
+.hl {
+  background: linear-gradient(transparent 62%, color-mix(in srgb, var(--marker) 62%, transparent) 62% 92%, transparent 92%) no-repeat 0 0 / 100% 100%;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.motion .hl { animation: sweep .9s ease-out .25s both; }
+@keyframes sweep { from { background-size: 0% 100%; } }
+h1.lit { color: var(--string); }
 .lede { margin: 0; max-width: 72ch; color: var(--muted); font-size: 16px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
@@ -73,7 +100,13 @@ h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); lette
 .row2 { display: grid; gap: 18px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
 .panel {
   min-width: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 16px;
-  box-shadow: var(--shadow); display: grid; gap: 12px; align-content: start;
+  box-shadow: var(--shadow); display: grid; gap: 12px; align-content: start; transition: box-shadow .25s ease;
+}
+.panel.lit { box-shadow: 0 0 0 3px var(--marker), var(--shadow); }
+.note-card { position: relative; }
+.note-card::before {
+  content: ""; position: absolute; top: -10px; left: 50%; width: 96px; height: 22px; transform: translateX(-50%) rotate(-2deg);
+  background: var(--tape); box-shadow: 0 1px 2px rgba(0, 0, 0, .16);
 }
 .panel-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 8px 12px; }
 .panel-head h2 { margin: 0; display: grid; gap: 2px; }
@@ -84,7 +117,8 @@ h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); lette
 .graph-panel { grid-template-rows: auto auto minmax(420px, 1fr) auto; }
 .cork {
   position: relative; min-height: 420px; background-color: var(--cork); background-image: var(--grain);
-  border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line), inset 0 8px 20px -12px rgba(0, 0, 0, .4); overflow: hidden;
+  border-radius: 4px; border: 7px solid var(--wood); overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25), inset 0 10px 22px -12px rgba(0, 0, 0, .5), 0 1px 0 rgba(255, 255, 255, .25);
 }
 #graph { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .e { stroke-linecap: round; fill: none; }
@@ -97,6 +131,9 @@ h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); lette
 .nd-campaign circle.pin { fill: var(--string); stroke: color-mix(in srgb, var(--string) 60%, black); }
 .nd-other circle.pin { fill: var(--dot); stroke: var(--muted); }
 .nd-dead circle.pin { fill: var(--paper); stroke-width: 1.6; }
+.pin-sh { fill: var(--pin-shadow); }
+.pin-hi { fill: var(--glint); opacity: .5; pointer-events: none; }
+.nd-dead .pin-hi { display: none; }
 .nd-crew.nd-dead circle.pin { stroke: var(--pin); }
 .nd-campaign.nd-dead circle.pin { stroke: var(--string); }
 .nd-seed circle.pin { fill: var(--marker); stroke: var(--string); stroke-width: 2.4; }
@@ -112,6 +149,10 @@ h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); lette
 .pop { transform-box: fill-box; transform-origin: center; }
 .motion .pop { animation: pop .42s cubic-bezier(.2, 1.4, .4, 1) both; }
 @keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.motion .nd .pop { animation: pin .5s cubic-bezier(.3, 1.5, .5, 1) both; }
+@keyframes pin { from { transform: translateY(-16px) scale(1.5); opacity: 0; } 70% { opacity: 1; } }
+.motion .draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .6s ease-out forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
 .motion .fade { animation: fade .5s ease both; }
 @keyframes fade { from { opacity: 0; } }
 .tip {
@@ -124,7 +165,31 @@ h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); lette
 .legend svg { width: 26px; height: 14px; flex: none; }
 
 .det-wrap { display: flex; align-items: center; gap: 14px; }
-#ferret { width: 112px; height: 112px; flex: none; overflow: visible; }
+#ferret { width: 112px; height: 112px; flex: none; overflow: visible; cursor: pointer; }
+/* Husmo's rig: his neck leans, his ears and lens move, the glints in his eyes follow what you point at.
+   data-mood on the svg picks the pose: sniff (while the board fills), eureka, doubt. */
+.neck { transform-origin: 80px 122px; transition: transform .45s cubic-bezier(.3, 1.4, .5, 1); }
+.ear { transform-box: fill-box; transform-origin: 50% 90%; transition: transform .3s ease; }
+.gaze { transform: translate(var(--lx, 0px), var(--ly, 0px)); transition: transform .14s ease-out; }
+.snout { transform-box: fill-box; transform-origin: 50% 20%; }
+.lens { transform-origin: 137px 146px; transition: transform .5s cubic-bezier(.3, 1.4, .5, 1); animation: sway 5s ease-in-out infinite; }
+@keyframes sway { 50% { transform: rotate(-3deg); } }
+.spark { fill: var(--marker); stroke: var(--paper); stroke-width: .8; transform-box: fill-box; transform-origin: center; transform: scale(0); }
+[data-mood="sniff"] .neck { transform: rotate(-5deg) translateY(2px); }
+[data-mood="sniff"] .snout { animation: sniff .34s ease-in-out infinite; }
+[data-mood="sniff"] .ear-l { transform: rotate(-9deg); }
+@keyframes sniff { 50% { transform: translateY(-1.4px) scale(1.06); } }
+[data-mood="eureka"] .neck { animation: hop .6s cubic-bezier(.3, 1.5, .5, 1); }
+[data-mood="eureka"] .ear { transform: scale(1.12) translateY(-1px); }
+[data-mood="eureka"] .lens { animation: none; transform: translate(-6px, -12px) rotate(-12deg); }
+[data-mood="eureka"] .spark { animation: spark .9s ease-out both; }
+@keyframes hop { 30% { transform: translateY(-9px) rotate(2deg); } 60% { transform: translateY(1px); } }
+@keyframes spark { 0% { transform: scale(0); } 40% { transform: scale(1.25) rotate(40deg); } 100% { transform: scale(0) rotate(90deg); } }
+[data-mood="doubt"] .neck { transform: rotate(7deg); }
+[data-mood="doubt"] .lid-r { animation: none; transform: translateY(-8px); }
+[data-mood="doubt"] .ear-r { transform: rotate(10deg); }
+[data-talking] .neck { animation: nod 1.3s ease-in-out infinite; }
+@keyframes nod { 50% { transform: rotate(1.6deg) translateY(.8px); } }
 .det-name { font: 800 28px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
 .det-role { font: 500 12px/1.3 var(--font-mono); color: var(--muted); }
 .head { animation: bob 3.4s ease-in-out infinite; }
@@ -158,6 +223,8 @@ h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); lette
   color: var(--on-marker); font: 700 13px/1 var(--font-display); clip-path: polygon(16% 0, 84% 0, 100% 100%, 0 100%);
 }
 .motion .log li { animation: rise .45s ease both; }
+.log li[data-about] { cursor: pointer; border-radius: 3px; transition: background-color .15s ease, box-shadow .15s ease; }
+.log li[data-about]:hover { background: color-mix(in srgb, var(--marker) 24%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--marker) 24%, transparent); }
 .log li.k-caution::before { background: var(--line); color: var(--ink); }
 .log li.k-action::before { background: var(--string); color: var(--on-string); }
 .log li.k-caution { color: var(--muted); }
@@ -173,7 +240,8 @@ h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); lette
 .strip .truth-t { fill: var(--pin); font-weight: 700; }
 .verdict {
   justify-self: start; font: 700 15px/1 var(--font-display); letter-spacing: .1em; text-transform: uppercase;
-  padding: 7px 11px; border: 2px solid var(--muted); color: var(--muted); border-radius: 3px; transform: rotate(-1.5deg);
+  padding: 7px 11px; border: 2px solid var(--muted); color: var(--muted); border-radius: 3px;
+  --tilt: -1.5deg; transform: rotate(var(--tilt));
 }
 .verdict-yes { border-color: var(--string); color: var(--string); }
 .map-foot { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 16px; align-items: center; }
@@ -225,7 +293,10 @@ h1 { margin: 0; font: 800 clamp(30px, 5vw, 56px)/1.02 var(--font-display); lette
   background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 10px;
 }
 .rep .btns { display: flex; flex-wrap: wrap; gap: 8px; }
-.warn { margin: 0; padding: 10px 12px; background: var(--note); color: var(--on-note); border-radius: 3px; font-size: 13.5px; }
+.warn {
+  margin: 0; padding: 10px 12px; background: var(--note); color: var(--on-note); border-radius: 3px; font-size: 13.5px;
+  transform: rotate(-.3deg); box-shadow: 2px 3px 0 rgba(0, 0, 0, .07);
+}
 
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -243,6 +314,7 @@ details > summary { cursor: pointer; font-weight: 600; }
   .cork { aspect-ratio: 7 / 9; min-height: 0; }
 }
 @media (max-width: 520px) {
+  .trail { display: none; }
   .map-foot { grid-template-columns: minmax(0, 1fr); justify-items: center; }
   .ptitle { font-size: 21px; }
 }
@@ -252,6 +324,7 @@ details > summary { cursor: pointer; font-weight: 600; }
 @media print {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   body { background: #fff; }
+  .stampable { opacity: 1 !important; filter: none; }
   .btn { display: none; }
   .panel { break-inside: avoid; box-shadow: none; }
   .rep pre { max-height: none; }
@@ -259,6 +332,21 @@ details > summary { cursor: pointer; font-weight: 600; }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="ink" x="-6%" y="-12%" width="112%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.7"/>
+    </filter>
+    <symbol id="paw-sym" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="26" rx="8.5" ry="7.5"/>
+      <ellipse cx="9" cy="16" rx="3.6" ry="4.6" transform="rotate(-20 9 16)"/>
+      <ellipse cx="16" cy="10" rx="3.6" ry="4.8" transform="rotate(-6 16 10)"/>
+      <ellipse cx="24" cy="10" rx="3.6" ry="4.8" transform="rotate(6 24 10)"/>
+      <ellipse cx="31" cy="16" rx="3.6" ry="4.6" transform="rotate(20 31 16)"/>
+    </symbol>
+  </defs>
+</svg>
 <div class="page">
   <header class="masthead">
     <div class="brand">
@@ -274,7 +362,14 @@ details > summary { cursor: pointer; font-weight: 600; }
         <div class="tag" id="tag"></div>
       </div>
     </div>
-    <div class="stamp-file" id="stamp"></div>
+    <svg class="trail" viewBox="0 0 200 34" preserveAspectRatio="xMaxYMid meet" aria-hidden="true">
+      <use class="tp" href="#paw-sym" x="4" y="0" width="19" height="19" transform="rotate(90 13.5 9.5)"/>
+      <use class="tp" href="#paw-sym" x="44" y="15" width="19" height="19" transform="rotate(90 53.5 24.5)"/>
+      <use class="tp" href="#paw-sym" x="84" y="0" width="19" height="19" transform="rotate(90 93.5 9.5)"/>
+      <use class="tp" href="#paw-sym" x="124" y="15" width="19" height="19" transform="rotate(90 133.5 24.5)"/>
+      <use class="tp" href="#paw-sym" x="164" y="0" width="19" height="19" transform="rotate(90 173.5 9.5)"/>
+    </svg>
+    <div class="stamp-file stampable" id="stamp"></div>
   </header>
 
   <section class="hero" aria-labelledby="seed">
@@ -294,7 +389,7 @@ details > summary { cursor: pointer; font-weight: 600; }
       <ul class="legend" id="legend"></ul>
     </article>
 
-    <article class="panel" aria-labelledby="h-det">
+    <article class="panel note-card" aria-labelledby="h-det">
       <div class="det-wrap">
         <svg id="ferret" viewBox="0 0 160 160" aria-hidden="true">
           <defs>
@@ -307,11 +402,15 @@ details > summary { cursor: pointer; font-weight: 600; }
           </defs>
           <path class="fur" d="M47 160 C46 137 60 123 80 123 C100 123 114 137 113 160 Z"/>
           <ellipse class="fur-light" cx="80" cy="148" rx="17" ry="15"/>
-          <g class="head">
-            <circle class="fur" cx="41" cy="74" r="11.5"/>
-            <circle class="ear-in" cx="41" cy="75" r="6.5"/>
-            <circle class="fur" cx="119" cy="74" r="11.5"/>
-            <circle class="ear-in" cx="119" cy="75" r="6.5"/>
+          <g class="neck"><g class="head">
+            <g class="ear ear-l">
+              <circle class="fur" cx="41" cy="74" r="11.5"/>
+              <circle class="ear-in" cx="41" cy="75" r="6.5"/>
+            </g>
+            <g class="ear ear-r">
+              <circle class="fur" cx="119" cy="74" r="11.5"/>
+              <circle class="ear-in" cx="119" cy="75" r="6.5"/>
+            </g>
             <path class="fur" d="M80 52 C108 52 121 70 120 90 C119 110 102 124 80 124 C58 124 41 110 40 90 C39 70 52 52 80 52 Z"/>
             <ellipse class="fur-hi" cx="64" cy="70" rx="14" ry="7"/>
             <path class="fur-light" d="M76 58 Q80 56 84 58 L86 93 Q80 97 74 93 Z"/>
@@ -320,19 +419,19 @@ details > summary { cursor: pointer; font-weight: 600; }
             <path class="fur-light" d="M52 105 C56 97 70 97 80 102 C90 97 104 97 108 105 C110 117 96 124 80 124 C64 124 50 117 52 105 Z"/>
             <g clip-path="url(#clipEyeL)">
               <ellipse class="eye-dark" cx="63" cy="88" rx="6.2" ry="6.8"/>
-              <circle class="glint" cx="65" cy="85.8" r="2"/>
-              <circle class="glint" cx="61.2" cy="90.6" r=".9"/>
-              <rect class="lid" x="56" y="81" width="14" height="14"/>
+              <g class="gaze"><circle class="glint" cx="65" cy="85.8" r="2"/><circle class="glint" cx="61.2" cy="90.6" r=".9"/></g>
+              <rect class="lid lid-l" x="56" y="81" width="14" height="14"/>
             </g>
             <g clip-path="url(#clipEyeR)">
               <ellipse class="eye-dark" cx="97" cy="88" rx="6.2" ry="6.8"/>
-              <circle class="glint" cx="99" cy="85.8" r="2"/>
-              <circle class="glint" cx="95.2" cy="90.6" r=".9"/>
-              <rect class="lid" x="90" y="81" width="14" height="14"/>
+              <g class="gaze"><circle class="glint" cx="99" cy="85.8" r="2"/><circle class="glint" cx="95.2" cy="90.6" r=".9"/></g>
+              <rect class="lid lid-r" x="90" y="81" width="14" height="14"/>
             </g>
-            <path class="nose-pink" d="M74 102 Q80 98.5 86 102 Q84 107.5 80 109 Q76 107.5 74 102 Z"/>
-            <ellipse class="glint" cx="77.8" cy="101.6" rx="2" ry="1"/>
-            <path class="whisker" d="M60 109 L31 104 M60 112 L30 113 M61 115 L33 122 M100 109 L129 104 M100 112 L130 113 M99 115 L127 122"/>
+            <g class="snout">
+              <path class="nose-pink" d="M74 102 Q80 98.5 86 102 Q84 107.5 80 109 Q76 107.5 74 102 Z"/>
+              <ellipse class="glint" cx="77.8" cy="101.6" rx="2" ry="1"/>
+              <path class="whisker" d="M60 109 L31 104 M60 112 L30 113 M61 115 L33 122 M100 109 L129 104 M100 112 L130 113 M99 115 L127 122"/>
+            </g>
             <path d="M40 64 C42 28 118 28 120 64 Z" fill="url(#tweed)"/>
             <path class="hat-brim" d="M30 64 Q80 78 130 64 Q80 55 30 64 Z"/>
             <circle class="hat-knot" cx="80" cy="34" r="4"/>
@@ -347,10 +446,13 @@ details > summary { cursor: pointer; font-weight: 600; }
               </g>
               <ellipse id="m-O" class="m-fill" cx="80" cy="116" rx="3.6" ry="3.9" visibility="hidden"/>
             </g>
+          </g></g>
+          <g class="lens">
+            <line class="lens-handle" x1="133" y1="141" x2="146" y2="155"/>
+            <circle class="lens-glass" cx="125" cy="132" r="12.5"/>
+            <ellipse class="paw" cx="137" cy="146" rx="7" ry="5.5" transform="rotate(-35 137 146)"/>
+            <path class="spark" d="M110 106 l2.4 6.2 6.2 2.4 -6.2 2.4 -2.4 6.2 -2.4 -6.2 -6.2 -2.4 6.2 -2.4 Z"/>
           </g>
-          <line class="lens-handle" x1="133" y1="141" x2="146" y2="155"/>
-          <circle class="lens-glass" cx="125" cy="132" r="12.5"/>
-          <ellipse class="paw" cx="137" cy="146" rx="7" ry="5.5" transform="rotate(-35 137 146)"/>
         </svg>
         <div>
           <div class="det-name" id="h-det">Husmo</div>
@@ -369,7 +471,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     <article class="panel" aria-labelledby="h-map">
       <header class="panel-head">
         <h2 id="h-map"><span class="stepno" data-t="step2"></span><span class="ptitle" data-t="map"></span></h2>
-        <span class="verdict" id="verdict"></span>
+        <span class="verdict stampable" id="verdict"></span>
       </header>
       <canvas id="map" role="img"></canvas>
       <svg class="strip" id="strip" viewBox="0 0 800 46" preserveAspectRatio="none" aria-hidden="true"></svg>
@@ -445,7 +547,7 @@ details > summary { cursor: pointer; font-weight: 600; }
   const ES = D.lang === "es";
   const T = ES ? {
     tag: "Expediente generado el ", stamp: "Expediente", eyebrow: "Investigación de phishing",
-    listen: "▶ Escuchar a Husmo", stop: "■ Parar", voiceLooking: "Buscando una voz del sistema…",
+    jump: "Ver en el expediente", listen: "▶ Escuchar a Husmo", stop: "■ Parar", voiceLooking: "Buscando una voz del sistema…",
     voiceName: (n) => `Voz del sistema, sin conexión: ${n}`, noSpeech: "Este navegador no puede leer en voz alta.",
     noVoice: "No hay ninguna voz en español instalada que funcione sin conexión. Husmo no usa voces en la nube: mandarían el texto del caso a un servicio externo.",
     demoStamp: "Demo", eyebrowDemo: "Investigación de phishing · demostración con datos inventados",
@@ -499,7 +601,7 @@ details > summary { cursor: pointer; font-weight: 600; }
     tlLabel: "Línea de tiempo de los dominios atribuidos", graphLabel: "Grafo de la campaña",
   } : {
     tag: "Case file generated on ", stamp: "Case file", eyebrow: "Phishing investigation",
-    listen: "▶ Listen to Husmo", stop: "■ Stop", voiceLooking: "Looking for a system voice…",
+    jump: "Show in the case file", listen: "▶ Listen to Husmo", stop: "■ Stop", voiceLooking: "Looking for a system voice…",
     voiceName: (n) => `Offline system voice: ${n}`, noSpeech: "This browser cannot read aloud.",
     noVoice: "No offline English voice is installed. Husmo never uses cloud voices: they would send the case's text to an outside service.",
     demoStamp: "Demo", eyebrowDemo: "Phishing investigation · demo with made-up data",
@@ -588,7 +690,7 @@ details > summary { cursor: pointer; font-weight: 600; }
   $("tag").textContent = T.tag + minute(D.generated) + " UTC";
   $("stamp").textContent = D.demo ? T.demoStamp : T.stamp;
   $("eyebrow").textContent = D.demo ? T.eyebrowDemo : T.eyebrow;
-  $("seed").textContent = D.seed;
+  $("seed").append(el("span", { class: "hl" }, D.seed));
   $("lede").textContent = (D.brand ? T.imitates + D.brand_name : T.noBrand) + ". "
     + T.pasted + D.host + T.pathOut + ".";
   const chips = $("chips");
@@ -600,12 +702,75 @@ details > summary { cursor: pointer; font-weight: 600; }
   chip(D.counts.checked, T.checked);
   if (D.clock && D.clock.found) { const c = el("span", { class: "chip chip-hot" }, tz(D.clock.offset)); chips.append(c); }
 
+  /* ---------- Husmo: he sniffs while the board fills, reacts to what he found, and his eyes follow the pointer ---------- */
+  const ferret = $("ferret");
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let moodTimer = 0;
+  function mood(m, ms) {
+    if (calm) return;
+    clearTimeout(moodTimer);
+    delete ferret.dataset.mood;
+    if (!m) return;
+    void ferret.getBoundingClientRect();          // so the same mood twice in a row plays again
+    ferret.dataset.mood = m;
+    if (ms) moodTimer = setTimeout(() => mood(null), ms);
+  }
+  function lookAt(x, y) {
+    const b = ferret.getBoundingClientRect();
+    const dx = x - (b.left + b.width / 2), dy = y - (b.top + b.height * 0.55), d = Math.hypot(dx, dy) || 1, r = Math.min(1.7, d / 60);
+    ferret.style.setProperty("--lx", (dx / d * r).toFixed(2) + "px");
+    ferret.style.setProperty("--ly", (dy / d * r).toFixed(2) + "px");
+  }
+  if (!calm) {
+    const solved = D.counts.crew > 1 || D.counts.campaign > 1;
+    mood("sniff");
+    setTimeout(() => mood(solved ? "eureka" : "doubt", solved ? 1500 : 2600), 3100);
+    ferret.addEventListener("click", () => mood("eureka", 1300));
+    let frame = 0;
+    window.addEventListener("pointermove", (e) => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => { frame = 0; lookAt(e.clientX, e.clientY); });
+    }, { passive: true });
+    document.addEventListener("focusin", (e) => {
+      const b = e.target.getBoundingClientRect ? e.target.getBoundingClientRect() : null;
+      if (b) lookAt(b.left + b.width / 2, b.top + b.height / 2);
+    });
+  }
+
+  /* ---------- each deduction points at the part of the case file it is about ---------- */
+  const ABOUT = { seed: "seed", graph: "h-graph", map: "h-map", next: "h-next", reports: "h-rep", how: "h-how" };
+  const part = (about) => { const n = ABOUT[about] && $(ABOUT[about]); return n ? (n.closest(".panel") || n) : null; };
+  let lit = null;
+  function light(about) {
+    if (lit) lit.classList.remove("lit");
+    lit = about ? part(about) : null;
+    if (lit) lit.classList.add("lit");
+  }
   const log = $("log");
   D.narration.forEach((line, i) => {
     const li = el("li", { class: "k-" + line.kind }, line.text);
     li.style.animationDelay = (0.25 + i * 0.22) + "s";
+    if (part(line.about)) {
+      li.dataset.about = line.about;
+      li.title = T.jump;
+      li.addEventListener("pointerenter", () => light(line.about));
+      li.addEventListener("pointerleave", () => light(null));
+      li.addEventListener("click", () => {
+        if (String(window.getSelection())) return;      // selecting the text is not asking to go there
+        part(line.about).scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "center" });
+        light(line.about);
+        setTimeout(() => light(null), 1800);
+      });
+    }
     log.append(li);
   });
+  if (!calm && "IntersectionObserver" in window) {
+    root.classList.add("live");
+    const io = new IntersectionObserver((seen) => seen.forEach((s) => {
+      if (s.isIntersecting) { s.target.classList.add("inked"); io.unobserve(s.target); }
+    }), { threshold: 0.6 });
+    document.querySelectorAll(".stampable").forEach((n) => io.observe(n));
+  }
 
   /* ---------- graph ---------- */
   (function graph() {
@@ -659,7 +824,11 @@ details > summary { cursor: pointer; font-weight: 600; }
     links.forEach((l) => {
       const cls = l.spoke ? "e e-spoke" : l.strong ? "e e-strong" : "e e-weak";
       const mx = (l.s.x + l.t.x) / 2, my = (l.s.y + l.t.y) / 2 + (l.spoke ? 0 : 10);
-      const path = sv("path", { d: `M${l.s.x.toFixed(1)} ${l.s.y.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${l.t.x.toFixed(1)} ${l.t.y.toFixed(1)}`, class: cls + " fade" });
+      // a strong string is drawn from the pin that landed first to the one that landed later
+      const drawn = l.strong && !l.spoke;
+      const [a, b] = (delay.get(l.s) || 0) <= (delay.get(l.t) || 0) ? [l.s, l.t] : [l.t, l.s];
+      const path = sv("path", { d: `M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`, class: cls + (drawn ? " draw" : " fade") });
+      if (drawn) path.setAttribute("pathLength", "1");
       path.style.animationDelay = Math.max(delay.get(l.s) || 0, delay.get(l.t) || 0) + "s";
       gE.append(path);
     });
@@ -694,7 +863,9 @@ details > summary { cursor: pointer; font-weight: 600; }
       const g = sv("g", { class: `nd ${kind}${n.alive ? "" : " nd-dead"}`, tabindex: "0", "aria-label": n.id, transform: `translate(${n.x.toFixed(1)} ${n.y.toFixed(1)})` });
       const inner = sv("g", { class: "pop" }); inner.style.animationDelay = delay.get(n) + "s";
       if (n.seed) inner.append(sv("circle", { r: 13, class: "seed-ring" }));
-      inner.append(sv("circle", { r: n.seed ? 9 : n.campaign ? 6.5 : 5, class: "pin" }));
+      const r = n.seed ? 9 : n.campaign ? 6.5 : 5;
+      inner.append(sv("ellipse", { cx: r * 0.35, cy: r * 0.6, rx: r, ry: r * 0.8, class: "pin-sh" }), sv("circle", { r, class: "pin" }),
+        sv("circle", { cx: -r * 0.32, cy: -r * 0.32, r: r * 0.26, class: "pin-hi" }));
       g.append(inner);
       g.addEventListener("pointerenter", () => show(n)); g.addEventListener("pointerleave", hide);
       g.addEventListener("focus", () => show(n)); g.addEventListener("blur", hide);
@@ -1016,6 +1187,8 @@ details > summary { cursor: pointer; font-weight: 600; }
       try { synth.cancel(); } catch (e) { /* nothing was speaking */ }
       items.forEach((li) => li.classList.remove("speaking"));
       mouth("rest");
+      light(null);
+      delete ferret.dataset.talking;
       btn.textContent = T.listen;
       btn.setAttribute("aria-pressed", "false");
     }
@@ -1024,9 +1197,11 @@ details > summary { cursor: pointer; font-weight: 600; }
       const my = ++run;
       btn.textContent = T.stop;
       btn.setAttribute("aria-pressed", "true");
+      if (!calm) ferret.dataset.talking = "";
       for (let i = 0; i < D.narration.length && my === run; i++) {
         items.forEach((li) => li.classList.remove("speaking"));
         items[i].classList.add("speaking");
+        light(D.narration[i].about);
         await say(D.narration[i].speech || D.narration[i].text, my);
         if (my === run) await new Promise((r) => setTimeout(r, 250));
       }

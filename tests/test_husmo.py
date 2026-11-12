@@ -30,3 +30,16 @@ def test_the_case_file_speaks_with_offline_voices_only():
     assert 'id="listen"' in page and all(f'id="m-{k}"' in page for k in ("rest", "M", "S", "E", "A", "O"))
     script = re.search(r"<script>(.*?)</script>", page, re.S).group(1)
     assert "v.localService" in script          # a cloud voice would send the case's text to an outside service
+
+
+def test_each_line_knows_which_part_of_the_case_file_it_is_about():
+    from rastro import brands, demo
+    with brands.extra(demo.BRANDS):
+        inv = demo.investigation(sims=200)
+        lines = husmo.narrate(inv, "en")
+        told = report.case_data(inv, "en")["narration"]
+    about = [text.about for _, text in lines]
+    parts = [a for k, a in enumerate(about) if k == 0 or about[k - 1] != a]
+    assert parts == ["seed", "graph", "map", "next", "reports", "how"]     # in the order the page shows them
+    assert all(type(text + "") is str for _, text in lines)                # still plain text to every other caller
+    assert [n["about"] for n in told] == about
