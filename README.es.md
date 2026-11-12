@@ -132,6 +132,25 @@ Rastro sigue los dominios vivos de una investigación (`--track`), cada dominio 
 
 ![Un marcador de retiradas con registradores inventados: curvas de supervivencia y clasificación](https://raw.githubusercontent.com/Ruby570bocadito/rastro/main/docs/demo-scoreboard.png)
 
+## Caza en tus propios registros
+
+```bash
+rastro investigate "hxxps://dominio-falso[.]example/ruta" --json caso.json --lang es
+```
+
+```bash
+rastro hunt caso.json --out paquete-caza
+```
+
+`rastro hunt` trabaja sin conexión a partir del caso guardado, y escribe dos clases de archivo.
+
+- **Búsquedas para tus registros**, que buscan los dominios del caso y cualquier nombre que la plantilla de la banda pueda construir, así que también cazan su próximo dominio: `sigma.yml` (una regla Sigma para registros DNS), `hunt.kql` (Microsoft Sentinel y Defender for Endpoint) y `hunt.spl` (Splunk).
+- **Indicadores para tu plataforma**: `iocs.csv`, `stix.json` (un paquete STIX 2.1), `misp.json` (un evento MISP) y `blocklist.txt` (solo los dominios vivos).
+
+Cada indicador dice cuánta seguridad tiene: la semilla y su campaña van por encima de los dominios unidos solo por la plantilla. Un dominio que ahora tiene un registrador de protección de marca, o que se ha vuelto a registrar quizá por otra persona, nunca se exporta. Las direcciones van como contexto, marcadas como no aptas para detección, y nunca entran en la lista de bloqueo ni en las búsquedas: una dirección suele estar compartida con sitios inocentes.
+
+`--format sigma` (o `kql`, `spl`, `csv`, `stix`, `misp`, `blocklist`) imprime uno solo, y `--days` fija cuánto tiempo atrás miran las búsquedas. Las búsquedas no se han ejecutado dentro de Sentinel, Defender ni Splunk: comprueba los nombres de los campos con tus propios registros antes de fiarte de una respuesta vacía. Para probarlo sin un caso real: `rastro demo --json caso.json`.
+
 ## Otros comandos
 
 | Comando | Qué hace |
@@ -173,6 +192,13 @@ Cada pieza se probó con campañas reales antes de entrar en el producto. Los de
 
 - Expansión desde una URL con urlscan, para campañas que cambian de nombres pero no de página: el experimento 02 falló con semillas viejas; el siguiente intento, con semillas frescas y al menos dos archivos compartidos.
 - Un modelo de nombres que merezca la pena incluir: los experimentos 07 y 07b mostraron que necesita miles de nombres benignos limpios con marca; una semana de vigilante los reúne y RDAP los ordena por edad.
+- Para threat hunters:
+  - A dónde van los datos robados. Una página de phishing escaneada muestra los hosts con los que habló, entre ellos el servidor, servicio de formularios o bot de Telegram que recibe lo que escriben las víctimas. urlscan los tiene de las páginas que visitó, así que el caso podría nombrar ese destino y unir dos dominios que envían al mismo, sin visitar nada. Antes, un experimento con el listón fijado de antemano, porque el experimento 02 vio que urlscan conocía pocos dominios de la lista.
+  - Dominios de mando y control de malware como semilla, desde listas públicas. Los pasos que no necesitan marca ya sirven (certificados compartidos, servidores de nombres, direcciones raras, el reloj); antes, un experimento para ver si esas familias muestran las mismas señales que las de phishing. Rastro seguirá sin conectarse nunca a ellos.
+- Para equipos:
+  - Alertas del vigilante a un canal propio (un webhook de Slack, de Teams o genérico), apagadas salvo que las configures. Los avisos de abuso siguen siendo borradores.
+  - Un índice de casos sobre la misma base SQLite, para que una semilla nueva diga al momento que un compañero ya investigó a su banda, y un marcador de retiradas que alimenten todos.
+  - Sin planes: usuarios, permisos ni servidor web. Rastro sigue siendo una herramienta de línea de comandos.
 
 ## Desarrollo
 
