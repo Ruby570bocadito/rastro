@@ -70,3 +70,14 @@ def test_a_rare_server_joins_a_template_but_a_common_one_does_not():
     assert c.size == 3 and c.links["nameserver"] == 3
     common = [Domain(d.name, d.brand, d.first_seen, nameservers=CF) for d in crew]
     assert cluster(common + background()) == []
+
+
+def test_a_clue_shared_by_too_many_domains_is_left_out_and_said():
+    from rastro import campaigns
+    n = campaigns.MAX_GROUP + 1
+    crowd = [Domain(f"usps-redelivery-{1000 + k}.top", "usps", at(60 * 24 * 30 * k)) for k in range(n)]
+    links = campaigns.link(crowd)
+    assert ("template", n) in links.skipped
+    assert cluster(crowd, links=links) == []                 # months apart: nothing else ties them
+    small = campaigns.link(crowd[:10])
+    assert small.skipped == []

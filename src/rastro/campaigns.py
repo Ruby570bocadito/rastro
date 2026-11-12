@@ -14,6 +14,12 @@ whose evidence reaches 1.0 end up in the same campaign:
 
 A template alone never joins two domains; a template seen in the same work
 session, or on the same rare server, does.
+
+A clue shared by more than `MAX_GROUP` domains is left out: among that many
+names it is usually something common (every innocent name with "apple" in a busy
+hour of the log), not one crew. It is never left out quietly: `link()` records
+each such group in `skipped`, and the commands and Husmo say so, because a real
+launch of that size would be split by it.
 """
 
 from __future__ import annotations
@@ -65,6 +71,7 @@ class _Links:
     def __init__(self) -> None:
         self.weight: dict[tuple[str, str], float] = defaultdict(float)
         self.kinds: dict[tuple[str, str], set[str]] = defaultdict(set)
+        self.skipped: list[tuple[str, int]] = []      # (clue, size) of each group too big to count
 
     def add(self, a: str, b: str, w: float, kind: str) -> None:
         if a == b or w <= 0:
@@ -76,6 +83,8 @@ class _Links:
     def add_groups(self, groups: dict, kind: str, weight) -> None:
         for members in groups.values():
             members = sorted(set(members))
+            if len(members) > MAX_GROUP:
+                self.skipped.append((kind, len(members)))
             if not 2 <= len(members) <= MAX_GROUP:
                 continue
             w = weight(len(members))
@@ -133,10 +142,11 @@ def _runs(by_brand: dict[str, list[Domain]], key, gap: timedelta) -> dict:
     return runs
 
 
-def cluster(domains: list[Domain], threshold: float = THRESHOLD, max_breadth: float = 9.0) -> list[Campaign]:
-    """Campaigns of two or more domains, largest first."""
+def cluster(domains: list[Domain], threshold: float = THRESHOLD, max_breadth: float = 9.0,
+            links: _Links | None = None) -> list[Campaign]:
+    """Campaigns of two or more domains, largest first. Pass the `links` of `link(domains)` to reuse them."""
     by_name = {d.name: d for d in domains}
-    links = link(domains)
+    links = links or link(domains)
     parent = {name: name for name in by_name}
 
     def find(x: str) -> str:

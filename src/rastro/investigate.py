@@ -497,9 +497,11 @@ def investigate(link: str, sources: Sources, list_lines: Iterable[str] = (), con
 
     domains = [campaigns.Domain(m.name, m.brand, m.first_seen, m.co_certified, *m.infrastructure)
                for m in members.values()]
-    groups = campaigns.cluster(domains, max_breadth=NARROW_LOG10)
-    campaign = next((c.domains for c in groups if seed in c.domains), [seed])
     links = campaigns.link(domains)
+    groups = campaigns.cluster(domains, max_breadth=NARROW_LOG10, links=links)
+    campaign = next((c.domains for c in groups if seed in c.domains), [seed])
+    for kind, n in sorted(set(links.skipped), key=lambda s: -s[1]):
+        notes.append(("too_many", {"kind": kind, "n": n, "max": campaigns.MAX_GROUP}))
     edges = sorted((a, b, round(w, 3), tuple(sorted(links.kinds[(a, b)])))
                    for (a, b), w in links.weight.items() if links.kinds[(a, b)] != {"template"})
 

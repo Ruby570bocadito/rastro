@@ -100,13 +100,18 @@ class Clues:
     regular_p: float | None = None     # near zero when the hours are too few for a working day (a scheduled job)
 
     @property
+    def verdict(self) -> str:
+        """"found", or why there is no map: "regular" or "flat" (see `rhythm.verdict`)."""
+        return rhythm.verdict(self.p_value, self.regular_p)
+
+    @property
     def too_regular(self) -> bool:
-        return self.regular_p is not None and self.regular_p < rhythm.REGULAR_P
+        return self.verdict == "regular"
 
     @property
     def human(self) -> bool:
         """A working day: not flat, and not packed into a scheduled job's few hours."""
-        return self.p_value is not None and self.p_value < rhythm.RHYTHM_P and not self.too_regular
+        return self.verdict == "found"
 
 
 def _normalise(logs: dict[str, float]) -> dict[str, float]:

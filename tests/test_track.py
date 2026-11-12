@@ -143,3 +143,38 @@ def test_a_sinkhole_is_a_takedown_found_through_reverse_dns(tmp_path):
     [course] = track.courses(conn)
     assert course.taken_down and course.down_at == T0 + timedelta(hours=30)
     assert course.registrar == "Duck DNS (duckdns.org)" and track.standing(conn) == []
+
+
+def test_the_median_comes_with_an_interval_that_few_domains_leave_open():
+    few = track.kaplan_meier_band([(10, True), (20, True), (30, True)])
+    assert track.median_interval(few) == (10, 30)            # three domains: anywhere from first to last
+    many = [(h, True) for h in range(10, 410, 10)]           # forty takedowns, ten hours apart
+    low, high = track.median_interval(track.kaplan_meier_band(many))
+    assert low < track.median_hours(track.kaplan_meier(many)) < high and high - low < 200
+    low, high = track.median_interval(track.kaplan_meier_band([(5, True)] + [(50, False)] * 9))
+    assert high is None                                      # one takedown in ten: no upper bound yet
+    assert track.median_interval(track.kaplan_meier_band([(50, False)] * 10)) == (None, None)   # none: no bound
+    for _, share, lo, hi in track.kaplan_meier_band(many):
+        assert 0 <= lo <= share <= hi <= 1
+
+
+def test_a_registrar_with_few_domains_is_listed_after_the_ranked_ones(tmp_path, capsys):
+    db = tmp_path / "track.sqlite"
+    conn = track.connect(db)
+    big = [f"big-{k}.test" for k in range(track.MIN_RANKED)]
+    track.add(conn, big + ["tiny-1.test"], T0)
+    with conn:
+        for d in big + ["tiny-1.test"]:
+            registrar = "Big Names, Inc." if d in big else "Tiny Names Ltd."
+            hours = 2 if d == "tiny-1.test" else 30 + 10 * big.index(d)        # the tiny one was fastest
+            conn.execute("UPDATE tracked SET registrar = ? WHERE domain = ?", (registrar, d))
+            conn.execute("INSERT INTO checks VALUES (?, ?, 'held', ?, '[]', NULL, '[]')",
+                         (d, (T0 + timedelta(hours=hours)).isoformat(), registrar))
+    rows = track.scoreboard(conn)
+    assert [(r.registrar, r.ranked) for r in rows] == [("Big Names, Inc.", True), ("Tiny Names Ltd.", False)]
+    assert rows[0].median_low is not None and rows[0].median_low <= rows[0].median_hours
+    data = track.page_data(conn)
+    assert data["min_ranked"] == track.MIN_RANKED and [r["ranked"] for r in data["rows"]] == [True, False]
+    assert main(["track", "report", "--db", str(db)]) == 0
+    out = capsys.readouterr().out
+    assert "listed, not ranked" in out and out.index("Big Names") < out.index("listed, not ranked") < out.index("Tiny")

@@ -111,3 +111,10 @@ def test_a_few_actions_are_never_too_regular():
     # two sittings at the same hour happen to people too
     assert rhythm.regularity_p_value(rhythm.hour_counts([9, 9]), sims=300) > 0.01
     assert rhythm.regularity_p_value(rhythm.hour_counts([9]), sims=300) == 1.0
+
+
+def test_the_verdict_says_why_there_is_no_map():
+    assert rhythm.estimate(synth(3, 200), sims=300).verdict == "found"
+    assert rhythm.estimate([3.0] * 40, sims=300).verdict == "regular"
+    rng = random.Random(5)
+    assert rhythm.estimate([rng.uniform(0, 24) for _ in range(200)], sims=300).verdict == "flat"

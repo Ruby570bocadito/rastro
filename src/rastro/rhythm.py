@@ -41,6 +41,14 @@ RHYTHM_P = 0.01     # below it, the hours are not a flat day
 REGULAR_P = 0.01    # below it, the hours are packed tighter than any working day (experiment 09)
 NARROWEST_DAY = 6   # hours of the shortest shift a crew may work and still be read as people
 
+
+def verdict(p_value: float | None, regular_p: float | None) -> str:
+    """What the hours say: "found" (a working day, so a map), or why not. "regular": packed into a scheduled
+    job's few hours. "flat": no working day shows, or not yet."""
+    if regular_p is not None and regular_p < REGULAR_P:
+        return "regular"
+    return "found" if p_value is not None and p_value < RHYTHM_P else "flat"
+
 _P = tuple(w / sum(PROFILE) for w in PROFILE)
 
 
@@ -57,13 +65,17 @@ class Estimate:
     regular_p: float                 # chance that a flat six-hour shift packs its hours this tight
 
     @property
+    def verdict(self) -> str:
+        return verdict(self.p_value, self.regular_p)
+
+    @property
     def too_regular(self) -> bool:
-        return self.regular_p < REGULAR_P
+        return self.verdict == "regular"
 
     @property
     def human(self) -> bool:
         """A working day: not flat, and not packed into a scheduled job's few hours."""
-        return self.p_value < RHYTHM_P and not self.too_regular
+        return self.verdict == "found"
 
 
 SESSION_GAP = timedelta(minutes=30)

@@ -154,3 +154,12 @@ def test_a_crew_on_a_scheduled_job_gets_no_map():
     from rastro import husmo
     assert any("scheduled job" in text for _, text in husmo.narrate(inv, "en"))
     assert any("tarea programada" in text for _, text in husmo.narrate(inv, "es"))
+
+
+def test_the_case_says_why_there_is_no_map_and_what_the_map_takes_for_granted():
+    from rastro import husmo, report
+    inv = investigate.investigate(SEED, fake_sources(), list_lines=CREW + NOISE, sims=500,
+                                  now=datetime(2026, 10, 30, tzinfo=UTC))
+    assert report.case_data(inv, "en")["clock"]["verdict"] == "found"
+    assert any("work by day" in text for kind, text in husmo.narrate(inv, "en") if kind == "caution")
+    assert any("trabajan de día" in text for kind, text in husmo.narrate(inv, "es") if kind == "caution")
