@@ -44,7 +44,7 @@ def _row(inv: Investigation, d: str) -> dict:
         "id": d, "seed": d == inv.seed, "campaign": d in inv.campaign, "crew": d in inv.crew,
         "attributed": d in inv.campaign or d in inv.crew, "alive": m.alive, "first": _iso(m.first_seen),
         "registered": _iso(m.registered), "registrar": r.registrar if r else host_label(d),
-        "sources": sorted(m.sources), "score": m.score,
+        "sources": sorted(m.sources), "score": m.score, "ips": sorted(m.ips),
         "status": inv.left_out.get(d) or ("reported" if any(d in rep.domains for rep in inv.reports) else None),
     }
 

@@ -19,6 +19,7 @@ from rastro import (
     calendar_clues,
     campaigns,
     demo,
+    hunt,
     husmo,
     investigate,
     pattern,
@@ -309,9 +310,54 @@ def cmd_demo(args) -> int:
         out = Path(args.report or "rastro-demo.html")
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(report.render(inv, args.lang, demo=demo.TRUTH), encoding="utf-8")
+        if args.json:
+            Path(args.json).parent.mkdir(parents=True, exist_ok=True)
+            Path(args.json).write_text(json.dumps(report.case_data(inv, args.lang, demo=demo.TRUTH), ensure_ascii=False,
+                                                  indent=1), encoding="utf-8")
     print(f"\n{'Expediente' if es else 'Case file'}: {out.resolve()}")
+    if args.json:
+        print(f"{'Datos' if es else 'Data'}: {Path(args.json).resolve()}")
     if args.open:
         webbrowser.open(out.resolve().as_uri())
+    return 0
+
+
+def cmd_hunt(args) -> int:
+    try:
+        case = json.loads(Path(args.case).read_text(encoding="utf-8"))
+        case["seed"], case["domains"], case["generated"], case["version"]
+    except (ValueError, KeyError, TypeError):
+        print(f"{args.case} is not case data written by `rastro investigate --json`.")
+        return 2
+    if not hunt.indicators(case):
+        print("This case has no domain to hunt for.")
+        return 1
+    if args.format != "all":
+        text = hunt.build(case, args.format, args.days)
+        if args.out:
+            Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+            Path(args.out).write_text(text, encoding="utf-8", newline="\n")
+            print(f"{args.format}: {Path(args.out).resolve()}")
+        else:
+            sys.stdout.write(text)
+        return 0
+    folder = Path(args.out or Path(args.case).with_suffix("").name + "-hunt")
+    folder.mkdir(parents=True, exist_ok=True)
+    found = hunt.indicators(case)
+    domains = [i for i in found if i.kind == "domain"]
+    print(f"HUNT PACK · {hunt._line(case['seed'], 253)} · {len(domains)} domains "
+          f"({sum(i.alive for i in domains)} live), "
+          f"{len(hunt.searches(case))} naming pattern(s), {len({i.value for i in found if i.kind == 'ip'})} "
+          "addresses for context")
+    for fmt, name in hunt.FORMATS.items():
+        (folder / name).write_text(hunt.build(case, fmt, args.days), encoding="utf-8", newline="\n")
+        print(f"  {fmt:<10} {(folder / name).resolve()}")
+    left = {what: n for what, n in hunt.dropped(case).items() if n}
+    if left:
+        print("Left out, for not being what a case holds (was the file changed by hand?): "
+              + ", ".join(f"{n} {what}" for what, n in left.items()) + ".")
+    print("The searches are a starting point: check the field names against your own logs before trusting an empty "
+          "answer.")
     return 0
 
 
@@ -500,7 +546,16 @@ def main(argv: list[str] | None = None) -> int:
     de.add_argument("--report", help="where to write the case file (default: rastro-demo.html)")
     de.add_argument("--sims", type=int, default=5000, help="simulations for the rhythm test")
     de.add_argument("--open", action="store_true", help="open the case file in your browser")
+    de.add_argument("--json", help="also write the case data as JSON, e.g. to try `rastro hunt` on it")
     de.set_defaults(run=cmd_demo)
+    hu = sub.add_parser("hunt", help="take a case to your own tools: indicators (CSV, STIX, MISP, blocklist) and "
+                                     "log searches (Sigma, KQL, SPL)")
+    hu.add_argument("case", help="case data written by `rastro investigate --json` or `rastro demo --json`")
+    hu.add_argument("--format", choices=["all", *hunt.FORMATS], default="all",
+                    help="one format, printed unless --out names a file; all (default) writes every file to a folder")
+    hu.add_argument("--out", help="file for one format, or folder for all (default: <case>-hunt)")
+    hu.add_argument("--days", type=int, default=30, help="how far back the searches look (default: 30)")
+    hu.set_defaults(run=cmd_hunt)
     tr = sub.add_parser("track", help="follow domains after they are found and score registrars by how fast they act")
     tsub = tr.add_subparsers(dest="track_command", required=True)
     ta = tsub.add_parser("add", help="start following domains")

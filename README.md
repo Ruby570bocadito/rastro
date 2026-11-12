@@ -132,6 +132,25 @@ Rastro follows the live domains of an investigation (`--track`), every domain th
 
 ![A takedown scoreboard with made-up registrars: survival curves and the ranking](https://raw.githubusercontent.com/Ruby570bocadito/rastro/main/docs/demo-scoreboard.png)
 
+## Hunt in your own logs
+
+```bash
+rastro investigate "hxxps://fake-domain[.]example/path" --json case.json
+```
+
+```bash
+rastro hunt case.json --out hunt-pack
+```
+
+`rastro hunt` works offline from the saved case, and writes two kinds of file.
+
+- **Searches for your logs**, which look for the case's domains and for any name the crew's pattern would build, so they also catch its next domain: `sigma.yml` (a Sigma rule for DNS logs), `hunt.kql` (Microsoft Sentinel and Defender for Endpoint) and `hunt.spl` (Splunk).
+- **Indicators for your platform**: `iocs.csv`, `stix.json` (a STIX 2.1 bundle), `misp.json` (a MISP event) and `blocklist.txt` (the live domains only).
+
+Each indicator says how sure it is: the seed and its campaign rank above the domains tied by the template alone. A domain now held by a brand-protection registrar, or registered again maybe by somebody else, is never exported. Addresses go along as context, marked as not for detection, and never into the blocklist or the searches: an address is often shared with innocent sites.
+
+`--format sigma` (or `kql`, `spl`, `csv`, `stix`, `misp`, `blocklist`) prints one of them, and `--days` sets how far back the searches look. The searches have not been run inside Sentinel, Defender or Splunk: check the field names against your own logs before trusting an empty answer. To try it without a real case: `rastro demo --json case.json`.
+
 ## Other commands
 
 | Command | What it does |
@@ -173,6 +192,13 @@ Each piece was tested on real campaigns before it went into the product. The det
 
 - Expansion from one URL through urlscan, for campaigns whose names change but whose pages do not: experiment 02 failed with old seeds; the next try uses fresh ones and at least two shared files.
 - A name model worth shipping: experiments 07 and 07b showed it needs thousands of clean benign names that carry a brand; a week of the watcher collects them, and RDAP sorts them by age.
+- For threat hunters:
+  - Where the stolen data goes. A scanned phishing page shows the hosts it talked to, among them the server, form service or Telegram bot that receives what victims type. urlscan has those for the pages it visited, so the case could name that destination and tie two domains that send to the same one, without visiting anything. First an experiment with a bar set before the run, since experiment 02 found urlscan had seen few listed domains.
+  - Malware command-and-control domains as seeds, from public lists. The steps that need no brand already apply (shared certificates, name servers, rare addresses, the clock); first an experiment to see whether those families show the same signals as phishing ones. Rastro will still never connect to them.
+- For teams:
+  - Alerts from the watcher to a channel of your own (a Slack, Teams or generic webhook), off unless you set it. Abuse reports stay drafts.
+  - An index of cases over the same SQLite store, so a new seed says at once that a colleague already investigated its crew, and a takedown scoreboard that everybody feeds.
+  - Not planned: users, permissions or a web server. Rastro stays a command-line tool.
 
 ## Development
 
