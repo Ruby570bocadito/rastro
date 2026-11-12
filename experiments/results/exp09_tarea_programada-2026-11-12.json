@@ -1,0 +1,404 @@
+{
+  "simulated": [
+    {
+      "kind": "working day",
+      "sessions": 5,
+      "map_before": 0.04,
+      "map_after": 0.04,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "working day",
+      "sessions": 10,
+      "map_before": 0.15,
+      "map_after": 0.15,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "working day",
+      "sessions": 20,
+      "map_before": 0.53,
+      "map_after": 0.53,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "working day",
+      "sessions": 50,
+      "map_before": 1.0,
+      "map_after": 1.0,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "working day",
+      "sessions": 100,
+      "map_before": 1.0,
+      "map_after": 1.0,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 5,
+      "map_before": 0.02,
+      "map_after": 0.02,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 10,
+      "map_before": 0.04,
+      "map_after": 0.04,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 20,
+      "map_before": 0.1,
+      "map_after": 0.1,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 50,
+      "map_before": 0.28,
+      "map_after": 0.28,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "working day, 40 % bots",
+      "sessions": 100,
+      "map_before": 0.94,
+      "map_after": 0.94,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "flat 7-hour shift",
+      "sessions": 5,
+      "map_before": 0.23,
+      "map_after": 0.22,
+      "too_regular": 0.01
+    },
+    {
+      "kind": "flat 7-hour shift",
+      "sessions": 10,
+      "map_before": 1.0,
+      "map_after": 0.99,
+      "too_regular": 0.01
+    },
+    {
+      "kind": "flat 7-hour shift",
+      "sessions": 20,
+      "map_before": 1.0,
+      "map_after": 0.99,
+      "too_regular": 0.01
+    },
+    {
+      "kind": "flat 7-hour shift",
+      "sessions": 50,
+      "map_before": 1.0,
+      "map_after": 1.0,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "flat 7-hour shift",
+      "sessions": 100,
+      "map_before": 1.0,
+      "map_after": 1.0,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "flat 4-hour window",
+      "sessions": 5,
+      "map_before": 0.35,
+      "map_after": 0.35,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "flat 4-hour window",
+      "sessions": 10,
+      "map_before": 1.0,
+      "map_after": 0.84,
+      "too_regular": 0.16
+    },
+    {
+      "kind": "flat 4-hour window",
+      "sessions": 20,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "flat 4-hour window",
+      "sessions": 50,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "flat 4-hour window",
+      "sessions": 100,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at one hour",
+      "sessions": 5,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at one hour",
+      "sessions": 10,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at one hour",
+      "sessions": 20,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at one hour",
+      "sessions": 50,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at one hour",
+      "sessions": 100,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at one hour, \u00b11 h",
+      "sessions": 5,
+      "map_before": 0.83,
+      "map_after": 0.82,
+      "too_regular": 0.01
+    },
+    {
+      "kind": "job at one hour, \u00b11 h",
+      "sessions": 10,
+      "map_before": 1.0,
+      "map_after": 0.57,
+      "too_regular": 0.43
+    },
+    {
+      "kind": "job at one hour, \u00b11 h",
+      "sessions": 20,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at one hour, \u00b11 h",
+      "sessions": 50,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at one hour, \u00b11 h",
+      "sessions": 100,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at two hours",
+      "sessions": 5,
+      "map_before": 0.08,
+      "map_after": 0.0,
+      "too_regular": 0.08
+    },
+    {
+      "kind": "job at two hours",
+      "sessions": 10,
+      "map_before": 0.01,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at two hours",
+      "sessions": 20,
+      "map_before": 0.31,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at two hours",
+      "sessions": 50,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at two hours",
+      "sessions": 100,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job at one hour, 50 % noise",
+      "sessions": 5,
+      "map_before": 0.24,
+      "map_after": 0.19,
+      "too_regular": 0.05
+    },
+    {
+      "kind": "job at one hour, 50 % noise",
+      "sessions": 10,
+      "map_before": 0.22,
+      "map_after": 0.04,
+      "too_regular": 0.41
+    },
+    {
+      "kind": "job at one hour, 50 % noise",
+      "sessions": 20,
+      "map_before": 0.32,
+      "map_after": 0.03,
+      "too_regular": 0.7
+    },
+    {
+      "kind": "job at one hour, 50 % noise",
+      "sessions": 50,
+      "map_before": 0.86,
+      "map_after": 0.0,
+      "too_regular": 0.99
+    },
+    {
+      "kind": "job at one hour, 50 % noise",
+      "sessions": 100,
+      "map_before": 1.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job every 6 hours",
+      "sessions": 5,
+      "map_before": 0.14,
+      "map_after": 0.14,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "job every 6 hours",
+      "sessions": 10,
+      "map_before": 0.02,
+      "map_after": 0.0,
+      "too_regular": 0.09
+    },
+    {
+      "kind": "job every 6 hours",
+      "sessions": 20,
+      "map_before": 0.02,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job every 6 hours",
+      "sessions": 50,
+      "map_before": 0.0,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "job every 6 hours",
+      "sessions": 100,
+      "map_before": 0.05,
+      "map_after": 0.0,
+      "too_regular": 1.0
+    },
+    {
+      "kind": "round the clock",
+      "sessions": 5,
+      "map_before": 0.0,
+      "map_after": 0.0,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "round the clock",
+      "sessions": 10,
+      "map_before": 0.0,
+      "map_after": 0.0,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "round the clock",
+      "sessions": 20,
+      "map_before": 0.0,
+      "map_after": 0.0,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "round the clock",
+      "sessions": 50,
+      "map_before": 0.0,
+      "map_after": 0.0,
+      "too_regular": 0.0
+    },
+    {
+      "kind": "round the clock",
+      "sessions": 100,
+      "map_before": 0.03,
+      "map_after": 0.03,
+      "too_regular": 0.0
+    }
+  ],
+  "families": [
+    {
+      "family": "coinbase",
+      "part": "all",
+      "events": 88,
+      "entropy_bits": 4.01,
+      "busiest_hour_share": 0.15,
+      "regular_p": 1.0
+    },
+    {
+      "family": "coinbase",
+      "part": "burst",
+      "events": 39,
+      "entropy_bits": 3.39,
+      "busiest_hour_share": 0.18,
+      "regular_p": 1.0
+    },
+    {
+      "family": "whatsapp",
+      "part": "all",
+      "events": 19,
+      "entropy_bits": 3.14,
+      "busiest_hour_share": 0.16,
+      "regular_p": 1.0
+    },
+    {
+      "family": "whatsapp",
+      "part": "burst",
+      "events": 12,
+      "entropy_bits": 3.08,
+      "busiest_hour_share": 0.17,
+      "regular_p": 1.0
+    },
+    {
+      "family": "amazon",
+      "part": "all",
+      "events": 51,
+      "entropy_bits": 4.09,
+      "busiest_hour_share": 0.1,
+      "regular_p": 1.0
+    },
+    {
+      "family": "dhl",
+      "part": "all",
+      "events": 27,
+      "entropy_bits": 3.93,
+      "busiest_hour_share": 0.11,
+      "regular_p": 1.0
+    }
+  ]
+}

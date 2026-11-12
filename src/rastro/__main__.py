@@ -59,6 +59,14 @@ def _instant(value: str) -> datetime | None:
         return t.astimezone(UTC) if t.tzinfo else t.replace(tzinfo=UTC)
 
 
+def _human(est) -> str:
+    """The rhythm verdict of an estimate or of a set of clues, for the terminal."""
+    if est.too_regular:
+        return (f"no: too few distinct hours for a working day, as a scheduled job leaves "
+                f"(p = {est.regular_p:.4f})")
+    return f"{'yes' if est.human else 'no'} (p = {est.p_value:.4f})"
+
+
 def _histogram(hours: list[float]) -> None:
     counts = rhythm.hour_counts(hours)
     top = max(counts) or 1
@@ -88,8 +96,7 @@ def cmd_rhythm(args) -> int:
         _histogram([t.hour + t.minute / 60 for t in starts])
         c = calendar_clues.analyse(instants, sims=args.sims)
         band = f"{rhythm.tz_name(c.band[0])} to {rhythm.tz_name(c.band[-1])}"
-        print(f"\n{len(instants)} events in {c.sessions} work sessions · human rhythm: "
-              f"{'yes' if c.p_value < 0.01 else 'no'} (p = {c.p_value:.4f})")
+        print(f"\n{len(instants)} events in {c.sessions} work sessions · human rhythm: {_human(c)}")
         print(f"most probable {rhythm.tz_name(c.offset)} · {c.band_mass:.0%} band {band}")
         print(f"daylight saving: {c.dst} ({_probs(c.dst_probs)})")
         print(f"weekend: {c.weekend} ({_probs(c.weekend_probs)})")
@@ -100,7 +107,7 @@ def cmd_rhythm(args) -> int:
     _histogram(hours)
     est = rhythm.estimate(hours, sims=args.sims)
     band = f"{rhythm.tz_name(est.band[0])} to {rhythm.tz_name(est.band[-1])}"
-    print(f"\n{est.n_events} events · human rhythm: {'yes' if est.p_value < 0.01 else 'no'} (p = {est.p_value:.4f})")
+    print(f"\n{est.n_events} events · human rhythm: {_human(est)}")
     print(f"most probable {rhythm.tz_name(est.offset)} · {est.band_mass:.0%} band {band} · "
           f"bots about {est.bot_share:.0%}")
     print("(give full dates and times to also test daylight saving, the weekend and holidays)")

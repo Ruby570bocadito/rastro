@@ -301,6 +301,12 @@ def narrate(inv: Investigation, lang: str = "en") -> list[tuple[str, str]]:
     elif c and inv.clock_events == 1:
         out.append(("caution", "Solo tengo un acto con hora, y uno solo no dibuja una jornada laboral: no me atrevo "
                                "con el mapa." if es else "One timed action alone cannot draw a working day: no map."))
+    elif c and inv.too_regular:
+        out.append(("caution", f"Sus {inv.clock_events} actos con hora caen en muy pocas horas distintas para ser una "
+                               "jornada laboral: parece una tarea programada, o una banda con un horario muy estrecho. "
+                               "No me atrevo con el mapa." if es else
+                    f"Their {inv.clock_events} timed actions sit in too few hours of the day to be a working day: it "
+                    "looks like a scheduled job, or a crew with a very narrow window. No map."))
     elif c:
         p = f"p {_p(c.p_value)}" if c.p_value is not None else ""
         out.append(("caution", f"Sus {inv.clock_events} actos con hora aún no dibujan una jornada laboral ({p}): "

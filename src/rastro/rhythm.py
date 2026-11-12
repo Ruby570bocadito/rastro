@@ -14,6 +14,12 @@ Many domains registered in one sitting are one piece of evidence, not many.
 `sessions()` collapses actions that follow each other closely before testing,
 so a burst of 60 domains in three days counts as the handful of work sessions
 it really is.
+
+Beating a flat day is not enough to be a working day. A scheduled job that acts
+at the same hour every day beats it too, and would be given a time zone it does
+not have. `regularity_p_value()` asks the opposite question: are the hours
+packed tighter than even a flat six-hour shift would leave them? When they are,
+the answer is "inconclusive", whatever the rhythm test says.
 """
 
 from __future__ import annotations
@@ -31,6 +37,9 @@ BOT_SHARES = tuple(i / 10 for i in range(10))  # 0.0 … 0.9
 SCHEDULE_SHIFTS = {-1: 0.15, 0: 0.5, 1: 0.2, 2: 0.15}
 
 UNIFORM_BITS = math.log2(24)  # entropy of a perfectly flat day
+RHYTHM_P = 0.01     # below it, the hours are not a flat day
+REGULAR_P = 0.01    # below it, the hours are packed tighter than any working day (experiment 09)
+NARROWEST_DAY = 6   # hours of the shortest shift a crew may work and still be read as people
 
 _P = tuple(w / sum(PROFILE) for w in PROFILE)
 
@@ -45,6 +54,16 @@ class Estimate:
     n_events: int
     p_value: float                   # chance that uniform, bot-like activity fits a human day this well
     entropy_bits: float              # 4.58 bits means a perfectly flat day
+    regular_p: float                 # chance that a flat six-hour shift packs its hours this tight
+
+    @property
+    def too_regular(self) -> bool:
+        return self.regular_p < REGULAR_P
+
+    @property
+    def human(self) -> bool:
+        """A working day: not flat, and not packed into a scheduled job's few hours."""
+        return self.p_value < RHYTHM_P and not self.too_regular
 
 
 SESSION_GAP = timedelta(minutes=30)
@@ -163,6 +182,29 @@ def rhythm_p_value(counts, sims: int = 2000, seed: int = 7) -> float:
     return (hits + 1) / (sims + 1)
 
 
+def regularity_p_value(counts, sims: int = 2000, seed: int = 11) -> float:
+    """Monte Carlo test against the narrowest day a crew is allowed: the same number of events spread flat over
+    `NARROWEST_DAY` hours. How often does that day sit in as few hours as these (an entropy as low or lower), or
+    pile as many events on its busiest hour? The smaller of the two shares is returned.
+
+    A job that runs at a fixed hour, or at two, gives a value near zero, and so does one hidden among
+    round-the-clock noise, through its busiest hour. A crew on a seven-hour shift does not. A crew that only
+    works three or four hours does, and the map could not place it either, since it fits a full working day."""
+    n = sum(counts)
+    if n < 2:
+        return 1.0
+    low, peak = entropy_bits(counts) + 1e-9, max(counts)
+    rng = random.Random(seed)
+    fewer = taller = 0
+    for _ in range(sims):
+        sim = [0] * NARROWEST_DAY
+        for _ in range(n):
+            sim[rng.randrange(NARROWEST_DAY)] += 1
+        fewer += entropy_bits(sim) <= low
+        taller += max(sim) >= peak
+    return (min(fewer, taller) + 1) / (sims + 1)
+
+
 def estimate(hours_utc, mass: float = 0.9, sims: int = 2000, schedules: bool = True) -> Estimate:
     counts = hour_counts(hours_utc)
     n = sum(counts)
@@ -182,6 +224,7 @@ def estimate(hours_utc, mass: float = 0.9, sims: int = 2000, schedules: bool = T
         n_events=n,
         p_value=rhythm_p_value(counts, sims),
         entropy_bits=entropy_bits(counts),
+        regular_p=regularity_p_value(counts, sims),
     )
 
 

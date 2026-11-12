@@ -139,3 +139,18 @@ def test_one_timed_action_is_said_in_the_singular():
     assert inv.clock_events == 1
     assert any(t == "One timed action alone cannot draw a working day: no map." for _, t in husmo.narrate(inv, "en"))
     assert any(t.startswith("Solo tengo un acto con hora") for _, t in husmo.narrate(inv, "es"))
+
+
+def test_a_crew_on_a_scheduled_job_gets_no_map():
+    # one domain a day at 03:05 UTC: far from a flat day, and not a working day either
+    start = datetime(2026, 8, 1, 3, 5, tzinfo=UTC)
+    first = {d: start + timedelta(days=k) for k, d in enumerate([SEED, *CREW])}
+    sources = investigate.Sources(lambda d: (first.get(d), frozenset()),
+                                  lambda d: registration(d, first[d] - timedelta(minutes=20)) if d in first else None,
+                                  lambda d: frozenset(), lambda d: frozenset())
+    inv = investigate.investigate(SEED, sources, list_lines=CREW, sims=500, now=datetime(2026, 10, 30, tzinfo=UTC))
+    assert inv.clues.p_value < 0.01                    # the rhythm test alone would have drawn the map
+    assert inv.too_regular and not inv.rhythm_found
+    from rastro import husmo
+    assert any("scheduled job" in text for _, text in husmo.narrate(inv, "en"))
+    assert any("tarea programada" in text for _, text in husmo.narrate(inv, "es"))

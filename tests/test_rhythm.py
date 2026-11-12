@@ -73,3 +73,41 @@ def test_offsets_wrap_onto_the_nominal_range():
     assert rhythm.wrap_offset(13) == -11
     assert rhythm.wrap_offset(-12) == 12
     assert rhythm.tz_name(-5) == "UTC−5"
+
+
+def test_a_job_at_a_fixed_hour_is_not_called_human():
+    # it beats a flat day, so the rhythm test alone would give it a time zone
+    est = rhythm.estimate([3.0] * 40, sims=300)
+    assert est.p_value < 0.01
+    assert est.too_regular and not est.human
+
+
+def test_a_job_at_two_hours_with_jitter_is_not_called_human():
+    rng = random.Random(2)
+    est = rhythm.estimate([rng.choice((3, 15)) + rng.uniform(-0.4, 0.4) for _ in range(60)], sims=300)
+    assert est.too_regular and not est.human
+
+
+def test_a_working_day_is_not_called_a_job():
+    for seed in range(1, 6):
+        est = rhythm.estimate(synth(3, 60, seed=seed), sims=300)
+        assert not est.too_regular
+    assert rhythm.estimate(synth(-5, 300, bot_share=0.4, seed=3), sims=300).human
+
+
+def test_a_seven_hour_shift_is_not_called_a_job():
+    rng = random.Random(8)
+    est = rhythm.estimate([rng.uniform(9, 16) for _ in range(80)], sims=300)
+    assert not est.too_regular
+
+
+def test_a_job_hidden_in_round_the_clock_noise_shows_through_its_busiest_hour():
+    rng = random.Random(6)
+    est = rhythm.estimate([3.0 if rng.random() < 0.5 else rng.uniform(0, 24) for _ in range(80)], sims=300)
+    assert est.too_regular and not est.human
+
+
+def test_a_few_actions_are_never_too_regular():
+    # two sittings at the same hour happen to people too
+    assert rhythm.regularity_p_value(rhythm.hour_counts([9, 9]), sims=300) > 0.01
+    assert rhythm.regularity_p_value(rhythm.hour_counts([9]), sims=300) == 1.0

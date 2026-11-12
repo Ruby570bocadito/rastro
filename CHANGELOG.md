@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixed: a scheduled job no longer gets a time zone. The rhythm test only asked whether the hours beat a flat day, and a job that acts at the same hour every day beats it too: in experiment 09, 100 % of simulated jobs at a fixed hour got a map, from 5 sessions on. A second test now asks whether the hours are packed tighter than a flat six-hour shift would leave them (fewer distinct hours, or a taller busiest hour). When they are, there is no map: Husmo says it looks like a scheduled job or a crew with a very narrow window, and `rastro rhythm` says the same. With it, no simulated job at one or two fixed hours gets a map from 20 sessions on (3 % when half of its actions are round-the-clock noise, none from 50), a working day and a seven-hour shift keep theirs, and the four real families of experiment 01c are untouched (p = 1.0 each).
+- `rhythm.Estimate` and `calendar_clues.Clues` carry `regular_p`, `too_regular` and `human`; the case's JSON carries `clock.regular_p`.
 - `rastro --version` prints Rastro's, Python's and the system's versions, which the bug report template now asks for.
 - Experiment 08: three stricter brand rules, measured on the 13,614 listed names where the plain rule finds a long brand. None kept the 97 % set before the run (the mildest, 94.3 %), so the plain rule stays; its innocents (purchase, pineapple) cost storage only.
 

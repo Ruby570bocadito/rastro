@@ -51,7 +51,7 @@ REGISTRATION_SLACK = timedelta(days=30)
 FRESH = timedelta(days=2)          # a store sighting this soon after registration is the first certificate
 MAX_CO_CERTIFIED = 25              # more names on the seed's certificates means shared hosting, not one owner
 MIN_WORD = 5                       # shortest shared word that relates two names without a brand
-RHYTHM_P = 0.01
+RHYTHM_P = rhythm.RHYTHM_P
 SUSPENDED = ("hold", "pending delete", "redemption")
 REASONS = {
     "unregistered": "not registered now, or its registry has no RDAP",
@@ -238,7 +238,12 @@ class Investigation:
 
     @property
     def rhythm_found(self) -> bool:
-        return bool(self.clues and self.clues.p_value is not None and self.clues.p_value < RHYTHM_P)
+        return bool(self.clues and self.clues.human)
+
+    @property
+    def too_regular(self) -> bool:
+        """The timed actions sit in too few hours for a working day, as a scheduled job's do: no map."""
+        return bool(self.clues and self.clues.too_regular)
 
 
 @dataclass

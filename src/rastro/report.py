@@ -114,7 +114,8 @@ def case_data(inv: Investigation, lang: str = "en", demo: dict | None = None) ->
         "graph": _graph(inv),
         "template": inv.crew_pattern.regex if inv.crew_pattern else None,
         "clock": None if c is None else {
-            "found": inv.rhythm_found, "p": c.p_value, "offset": c.offset, "tz": rhythm.tz_name(c.offset),
+            "found": inv.rhythm_found, "p": c.p_value, "regular_p": c.regular_p, "offset": c.offset,
+            "tz": rhythm.tz_name(c.offset),
             "band": list(c.band), "mass": round(c.band_mass, 3),
             "posterior": {str(k): round(v, 5) for k, v in sorted(c.posterior.items())},
             "hours": [round(h, 3) for h in inv.session_hours], "events": inv.clock_events, "sessions": c.sessions,

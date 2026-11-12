@@ -97,6 +97,16 @@ class Clues:
     weekend_probs: dict[str, float]
     holidays: list[tuple[str, int, float, str]] = field(default_factory=list)   # name, seen, expected, verdict
     posterior: dict[int, float] = field(default_factory=dict)                     # UTC offset -> probability
+    regular_p: float | None = None     # near zero when the hours are too few for a working day (a scheduled job)
+
+    @property
+    def too_regular(self) -> bool:
+        return self.regular_p is not None and self.regular_p < rhythm.REGULAR_P
+
+    @property
+    def human(self) -> bool:
+        """A working day: not flat, and not packed into a scheduled job's few hours."""
+        return self.p_value is not None and self.p_value < rhythm.RHYTHM_P and not self.too_regular
 
 
 def _normalise(logs: dict[str, float]) -> dict[str, float]:
@@ -137,6 +147,7 @@ def analyse(times: list[datetime], sims: int = 20000, mass: float = 0.9) -> Clue
     band, band_mass = rhythm.credible_band(post, mass)
     offset = max(post, key=post.get)
     p_value = rhythm.rhythm_p_value(counts, sims) if sims else None
+    regular_p = rhythm.regularity_p_value(counts, sims) if sims else None
     local_times = [local(t, offset, regime) for t in starts]
     weekends = weekend_probs([t.weekday() for t in local_times])
     weekend = max(weekends, key=weekends.get)
@@ -145,7 +156,7 @@ def analyse(times: list[datetime], sims: int = 20000, mass: float = 0.9) -> Clue
         weekend = "inconclusive"     # e.g. a four-day launch says nothing about weekends
     shown_regime = regime if len(starts) >= DST_MIN_SESSIONS and dst_probs[regime] >= DST_MIN_PROB else "inconclusive"
     return Clues(offset, band, band_mass, p_value, len(starts), shown_regime, dst_probs,
-                 weekend, weekends, holiday_gaps(local_times), post)
+                 weekend, weekends, holiday_gaps(local_times), post, regular_p)
 
 
 def simulate_crew(offset: int, regime: str, weekend: str, n: int, seed: int = 1,

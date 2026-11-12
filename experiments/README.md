@@ -269,3 +269,38 @@ On the later sample, every threshold strict enough to keep false alarms under ab
 | word or shape | 11,838 | 87.0 % |
 
 **Verdict: no stricter rule passes, so the plain rule stays.** Phishing names glue the brand inside other words far more often than innocents do: the edge rule alone would lose names such as checkjpamazonaccount, loginmicrosoftonline or enteramazonup, and it would not even drop purchase or pineapple, whose brand ends the word. The innocents cost storage only, since an alert needs an armed narrow pattern. A rule that tells them apart would have to know words, not shapes.
+
+## 09 · A scheduled job is not a working day
+
+**Question.** The rhythm test asks whether the hours beat a flat day. A job that registers a domain at the same hour every day beats it too. Does it get a map, and can a second test stop it without taking the map from people?
+
+**Method.** `exp09_tarea_programada.py` simulates ten kinds of crew and job, 100 of each at 5, 10, 20, 50 and 100 work sessions, and counts how many get a map with the rhythm test alone and with the regularity test added. The regularity test (`rhythm.regularity_p_value`) compares the hours with the narrowest day a crew is allowed, the same number of events spread flat over six hours: are they in fewer distinct hours (a lower entropy), or is the busiest hour taller? Below p = 0.01 on either, the answer is "inconclusive". Then the same test runs on the hour counts of the four real families, from the committed results of experiment 01c.
+
+**Results, 2026-11-12.** Share that gets a map, before → now.
+
+| Kind | 10 sessions | 20 | 50 | 100 |
+|---|---:|---:|---:|---:|
+| working day | 15 % → 15 % | 53 % → 53 % | 100 % → 100 % | 100 % → 100 % |
+| working day, 40 % bots | 4 % → 4 % | 10 % → 10 % | 28 % → 28 % | 94 % → 94 % |
+| flat 7-hour shift | 100 % → 99 % | 100 % → 99 % | 100 % → 100 % | 100 % → 100 % |
+| flat 4-hour window | 100 % → 84 % | 100 % → 0 % | 100 % → 0 % | 100 % → 0 % |
+| job at one hour | 100 % → 0 % | 100 % → 0 % | 100 % → 0 % | 100 % → 0 % |
+| job at one hour, ±1 h | 100 % → 57 % | 100 % → 0 % | 100 % → 0 % | 100 % → 0 % |
+| job at two hours | 1 % → 0 % | 31 % → 0 % | 100 % → 0 % | 100 % → 0 % |
+| job at one hour, half of it round-the-clock noise | 22 % → 4 % | 32 % → 3 % | 86 % → 0 % | 100 % → 0 % |
+| job every 6 hours | 2 % → 0 % | 2 % → 0 % | 0 % → 0 % | 5 % → 0 % |
+| round the clock | 0 % → 0 % | 0 % → 0 % | 0 % → 0 % | 3 % → 3 % |
+
+- **The hole was real.** A job at one fixed hour got a map every time, even with 5 sessions.
+- **The regularity test closes it from 20 sessions.** No job at one or two hours gets a map from there on, except 3 % of those half hidden in round-the-clock noise, and none of those from 50. It never took the map from a working day, and from a seven-hour shift at most 1 time in 100.
+- **The real families are untouched.** Coinbase, WhatsApp, Amazon and DHL, whole and in their busiest burst, all give p = 1.0: 3.1 to 4.1 bits of entropy and a busiest hour of 10 to 18 %, nowhere near a job.
+
+**Limits.**
+
+- **Under 20 sessions a job with jitter still passes.** At 10 sessions, 57 % of jobs spread over three hours got a map, and at 5 sessions 82 %. Too few events to tell three hours from a short day.
+- **A crew that only works three or four hours loses its map**, with the same words as a job. The map could not place it anyway: it fits a full working day to the hours, so its offset would be wrong.
+- **Six hours is a choice, not a measurement.** No real scheduled campaign was available to test, so the bar comes from simulated jobs and from what the four real families leave room for.
+- **Something else turned up.** A flat seven-hour shift passes the rhythm test with only 10 sessions, every time. The map's own bar may be too easy for narrow days; that is not measured here.
+- Each estimate used 300 simulations and each cell 100 trials, so the shares are good to a few points.
+
+**Earlier experiments.** 01, 01b, 01c and 05 read the rhythm test alone. Their real families pass the new test, so their verdicts stand.
