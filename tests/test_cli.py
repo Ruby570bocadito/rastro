@@ -108,3 +108,10 @@ def test_version_says_what_a_bug_report_asks_for(capsys):
     assert done.value.code == 0
     out = capsys.readouterr().out
     assert out.startswith(f"rastro-osint {__version__}, Python 3.") and out.count(",") == 2
+
+
+def test_rhythm_command_does_not_call_a_scheduled_job_human(tmp_path, capsys):
+    f = tmp_path / "times.txt"
+    f.write_text("\n".join(f"2026-09-{d:02d}T03:05Z" for d in range(1, 31)), encoding="utf-8")
+    assert main(["rhythm", str(f), "--sims", "200"]) == 0
+    assert "human rhythm: no: too few distinct hours" in capsys.readouterr().out
